@@ -1,0 +1,5 @@
+APPROXIMATION USING THE RMS APPROXIMATION
+
+Abstract: when conducting engineering research, the task of approximation often arises – compiling a function based on individual values. These individual values can be obtained from an experiment, from observations of some quantity, or from some calculations (for example, when solving a differential equation by numerical methods, a table of correspondence between the values of the variable and the approximate values of the solution is obtained). Knowledge of the basic methods and formulas for compiling approximating functions is professionally significant for students of a technical university, therefore, in our work we have considered the main ideas of approximation.
+
+Keywords: approximation, smoothing, standard approximation, empirical formula.

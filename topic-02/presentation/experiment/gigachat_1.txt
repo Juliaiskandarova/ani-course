@@ -1,0 +1,40 @@
+Представленный текст — это фрагмент научно-технической или учебной статьи, посвященный математическому методу обработки данных. В документе описывается аппроксимация с помощью среднеквадратического приближения (метод наименьших квадратов). 
+
+Если говорить простыми словами, это способ найти одну общую математическую формулу (функцию), которая лучше всего описывает набор разрозненных точек, полученных в ходе эксперимента, наблюдений или предварительных расчетов. В реальной жизни данные редко ложатся на идеальную прямую или кривую из-за случайных помех и погрешностей измерения. Аппроксимация помогает «увидеть» общую закономерность за этим шумом.
+
+Подробный разбор содержания текста:
+
+Контекст и область применения. Текст начинается с аннотации, указывающей на важность темы для студентов технических вузов. Аппроксимация необходима инженерам и исследователям, когда нужно составить функцию по отдельным значениям. Эти данные могут быть результатом физических экспериментов, метеорологических наблюдений или численного решения сложных дифференциальных уравнений, где на выходе получается таблица значений.
+Два главных подхода. В тексте четко разделяются два способа работы с данными:
+Интерполяция. Это построение функции (многочлена), которая проходит строго через все заданные точки. Для этого используются классические формы, такие как многочлен Лагранжа или Ньютона. Этот метод идеален, когда данные абсолютно точны и их немного, но он плохо справляется с зашумленными данными, так как начинает повторять все случайные ошибки.
+Сглаживание. Это построение функции, которая проходит не через сами точки, а вблизи них, усредняя их положение. Этот метод специально предназначен для подавления случайных помех и погрешностей. Результат такого сглаживания в тексте назван «эмпирической формулой».
+Суть метода наименьших квадратов. Это математический фундамент описываемой аппроксимации. Его логика заключается в поиске такой функции, для которой сумма квадратов отклонений (расстояний по вертикали) от экспериментальных точек до аппроксимирующей кривой будет минимально возможной. Именно за счет возведения отклонений в квадрат метод сильнее штрафует большие выбросы, что делает итоговую линию более устойчивой.
+Оценка точности. Текст вводит два критерия качества полученной формулы:
+Среднее квадратичное отклонение: числовой показатель того, насколько в среднем расчетные значения функции «промахиваются» мимо реальных данных.
+Средняя ошибка аппроксимации: среднее отклонение в процентах. Указывается допустимый предел — менее 10%.
+Математическое обоснование. Упоминается обязательное условие существования минимума функции — равенство нулю ее частных производных по всем неизвестным коэффициентам. Это стандартный прием из математического анализа: чтобы найти самую низкую точку «впадины» (минимум ошибки), нужно найти, где наклон поверхности равен нулю. Это преобразование приводит к решению системы линейных уравнений.
+Визуализация и показатель достоверности ($R^2$). В конце описывается графическое представление — линия тренда на графике. Главным критерием успеха здесь выступает коэффициент детерминации $R^2$. Он показывает, какую долю разброса данных объясняет построенная модель. Значение варьируется от 0 до 1. В тексте приводится инженерный порог: если $R^2 \ge 0,85$, сглаживание считается достоверным, если ниже — модель признается неудачной.
+
+Перевод текста на английский язык:
+
+APPROXIMATION USING THE LEAST SQUARES METHOD
+
+Abstract: In engineering research, the task of approximation often arises — the construction of a function based on discrete values. These discrete values may be obtained from conducted experiments, observations of a certain quantity, or from certain calculations (for example, when solving a differential equation by numerical methods, a table of correspondence between variable values and approximate solution values is obtained). Knowledge of the basic methods and formulas for constructing approximating functions is professionally significant for students of a technical university; therefore, in this work, we have examined the main ideas of approximation.
+
+Keywords: approximation, smoothing, least squares method, empirical formula.
+
+To obtain a unique solution to the approximation problem, it is necessary to: 1) define the general form of the approximating function, including unknown coefficients, 2) find the parameter values based on a given proximity criterion. There are two main approaches to defining proximity — interpolation and smoothing.
+
+Interpolation is constructed using an interpolation polynomial of the n-th degree, which passes directly through all points of the given data set. In this case, the approximating function is represented as an interpolation polynomial in the Lagrange form or an interpolation polynomial in the Newton form.
+
+Smoothing is performed by constructing an approximating function that passes close to the points from the given data array. Thus, the approximating function smooths out all random noise (or errors). The approximating function obtained through smoothing is called an empirical formula.
+
+The method of least squares is a mathematical method based on defining an approximating function constructed in the closest proximity to the points of a given set of experimental data. The proximity of the initial and approximating functions is determined by a numerical measure, namely: the sum of the squares of the deviations of the experimental data from the approximating curve must be the smallest.
+
+The degree of approximation accuracy can be assessed by the value of the mean square deviation. The approximating function is also evaluated by the average approximation error — the average deviation of the calculated values from the actual ones. The acceptable limit is A < 10%.
+
+A mandatory condition for the existence of a function's minimum is the equality to zero of its partial derivatives with respect to the unknown variables. We transform the resulting system of linear equations: we open the brackets and move the free terms to the right side of the expression.
+
+On the graph, we will see the chosen trendline approximating the tabular dependency. One can also see the value of the $R^2$ parameter — the coefficient of determination (reliability) of the approximation. This indicator can range from 0 to 1. The higher it is, the more reliable the approximation. It is generally accepted that if this indicator is 0.85 or higher, the smoothing can be considered reliable; in the opposite case, it cannot.
+
+Я внимательно изучил предоставленный фрагмент. Текст представляет собой классическое академическое описание метода наименьших квадратов, охватывающее как теоретические основы (условие минимума через производные), так и практическую применимость (порог $R^2$, оценка ошибки). Жду ваших указаний для продолжения обсуждения: мы можем разобрать математический вывод системы уравнений, перевести дополнительные разделы, если они есть в полном документе, или обсудить практическое применение этого метода в инженерных расчетах.

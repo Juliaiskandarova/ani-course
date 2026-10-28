@@ -1,0 +1,21 @@
+APPROXIMATION USING THE LEAST SQUARES METHOD
+
+Abstract: When conducting engineering research, the task of approximation often arises – constructing a function from individual values. These individual values may be obtained from an experiment, from observations of some quantity, or from certain calculations (for example, when solving a differential equation by numerical methods, a table of correspondence between the values of the variable and approximate values of the solution is obtained). Knowledge of the basic methods and formulas for constructing approximating functions is professionally significant for students of a technical university, therefore in our work we have examined the main ideas of approximation.
+
+Keywords: approximation, smoothing, least squares approximation, empirical formula.
+
+###
+
+To obtain a unique solution to the approximation problem, it is necessary: 1) to specify the general form of the approximating function, including unknown coefficients, 2) to find the values of the parameters on the basis of a given proximity criterion. There are two main approaches to determining proximity – interpolation and smoothing.
+
+Interpolation is constructed using an interpolation polynomial of the n-th degree, which passes directly through all points of a given data set. In this case, the approximating function is represented in the form of an interpolation polynomial in Lagrange form or an interpolation polynomial in Newton form.
+
+Smoothing is performed by constructing an approximating function that passes close to the points from a given data array. Thus, the approximating function smooths out all random noise (or errors). The approximating function obtained by smoothing is called an empirical formula.
+
+The method of least squares is a mathematical method based on determining an approximating function constructed in the greatest proximity to the points of a given set of experimental data. The proximity of the original and approximating functions is determined by a numerical measure, namely: the sum of squared deviations of the experimental data from the approximating curve must be the smallest.
+
+The degree of accuracy of the approximation can be estimated by the value of the standard deviation. The mean approximation error also provides an estimate of the approximating function – the average deviation of the calculated values from the actual ones. The allowable limit is A < 10%.
+
+A necessary condition for the existence of a minimum of a function is that its partial derivatives with respect to the unknown variables be equal to zero. We transform the resulting linear system of equations: we open the brackets and move the free terms to the right-hand side of the expression.
+
+On the graph we will see the selected trend line approximating the tabular dependence. We can also see the value of the parameter R2 – the coefficient of determination of the approximation. This indicator can vary from 0 to 1. The higher it is, the more reliable the approximation. It is generally considered that when the value of this indicator is 0.85 or higher, the smoothing can be considered reliable; otherwise, it cannot.
