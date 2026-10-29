@@ -1,0 +1,9 @@
+It is undeniable that attempts to develop automated feedback systems that support and enhance language learning
+and assessment have increased in the last few years. The growing demand for using technology in the classroom
+and the promotions provided by automated- written-feedback program developers and designers, drive many
+educational institutions to acquire and use these tools for educational purposes (Chen & Cheng, 2008). It remains
+debatable, however, whether students’ use of these tools leads to improvement in their essay quality or writing
+outcomes. In this paper I investigate the affordances and shortcomings of automated writing evaluation (AWE) on
+students’ writing in ESL/EFL contexts. My discussion shows that AWE can improve the quality of writing and
+learning outcomes if it is integrated with and supported by human feedback. I provide recommendations for further
+research into improving AWE tools to give more effective and constructive feedback. 
