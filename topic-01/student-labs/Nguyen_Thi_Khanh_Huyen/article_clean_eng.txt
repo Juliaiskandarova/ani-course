@@ -1,0 +1,210 @@
+Written corrective feedback is frequently used in language learning classrooms. It involves identifying students’
+errors (Liu et al., 2017), and it can be provided by peers, teachers or machines (Mehrabi-Yazdi, 2018). Feedback
+can be provided on different aspects of writing, including “accuracy, fluency, complexity, mechanics, cohesion,
+coherence, reader/writer interaction and content” (Knoch, 2011, as cited in Liu et al., 2017, p. 504).
+There is evidence that feedback leads to successful revisions of drafts (Ferris & Roberts, 2001), and that it is
+associated with benefits in writing progress for EFL and ESL students (Stevenson & Phakiti, 2014). Research has
+also shown that written corrective feedback can lead to writing development in that it helps learners process, retain
+and uptake correct forms in writing (Ellis, 2008).
+Research suggests different effective feedback types and strategies that can help learners edit their errors and
+improve the quality of their writing. It has been claimed that indirect (or implicit) feedback, which refers to
+identifying students’ errors without providing any support or suggestions to correct them, can be more helpful to
+high proficiency students who do not need a lot of assistance because it helps them think critically about their
+mistakes, which can lead to improvement not only in their accuracy but also in their learning ability (Ferris &
+Roberts, 2001).
+Direct (or explicit) feedback, on the other hand, refers to feedback that “not only calls attention to the error but also
+provides a specific solution to the problem” (Bitchener & Ferris, 2012, p. 148). It has been reported, however, that
+choosing between direct or indirect feedback depends on pedagogical considerations, including the level of the
+students, students’ needs, and the nature of errors (Ranalli, 2018). Similarly, recent studies have shown that
+focused feedback that covers predetermined, specific error types (and are mostly based on learners’ needs) is more
+valuable than unfocused feedback (Ferris et al., 2013) because it targets single error types chosen for learning goals,
+such as English articles (a, an, the) (Ranalli, 2018). Moreover, from a sociocultural perspective, effective
+corrective feedback needs to be dialogic and interactive, in which the reviewer can accommodate the students’
+needs and provide them with continuous support. This can guide the reviewer to the origin of the error, providing
+the students with the assistance they need. In fact, dialogic feedback is said to help students get further
+explanations about their errors, engage in interactive feedback and negotiate meaning with teachers and peers,
+which can promote second language learning (Merhawi, 2018; Woodworth & Barkaoui, 2020). 
+Research suggests that diagnostic feedback is valuable because it focuses more on specific detailed features rather
+than on general skills and abilities and thus can be more useful for students’ improvement (Liu et al., 2017).
+Furthermore, there have been calls in the research to use formative feedback in addition to summative feedback. In
+formative assessments, students can be engaged in a process of drafting, revising and editing their essays, which
+can improve the quality of their writing and can inform instructional practices (Mellati & Khademi, 2018). Many
+contemporary researchers have argued that immediate feedback given to students during their ongoing courses can
+be more effective and constructive because it is used to increase writing production, as compared to delayed
+feedback that is provided at the end of courses and consequently becomes less relevant (Gibbs & Simpson, 2015).
+However, despite the benefits that writing corrective feedback is thought to provide, for many reasons ESL/EFL
+learners may not always benefit from feedback provided by their teachers. First, providing formative feedback can
+be daunting and time-consuming for teachers because it requires frequent revising. As a result, students may end
+up receiving holistic feedback that focuses on “surface-level features” like grammar and spelling but not on
+content (Wang et al., 2020, p. 2). Second, it could be challenging for teachers to give instant frequent feedback
+inside and outside the classroom (Woodworth & Barkaoui, 2020). Research has shown that because of lack of
+training and writing assessment literacy in general, some teachers struggle to use feedback efficiently to improve
+their students’ writing outcomes even if they hold positive beliefs about formative feedback (Crusan et al., 2016).
+AWE tools or systems that have been under development and use since the 1960s (Chen & Cheng, 2008) are
+thought to help overcome these challenges and therefore alleviate teacher workload by giving the students more
+opportunities to receive immediate continuous feedback even outside the classroom (Woodworth & Barkaoui,
+2020). AWE tools are promoted for their capability of providing diagnostic feedback that covers different aspects
+of writing, including semantics, syntax, grammar, word choice and content, in addition to enabling scoring options
+that help teachers grade and evaluate students’ essays with a focus on linguistic elements. These tools allow
+learners to use multiple drafting and writing resources like thesauri (Chen & Cheng, 2008) and are equipped with
+features that allow teachers to create and guide writing tasks (Ranalli et al., 2016). According to Woodworth &
+Barkaoui (2020), the most widely used AWE tools are Criterion, Project Essay Grade, My Access and Piagi, all
+of which provide multiple drafting and instant feedback on different aspects of writing, and help learners and
+teachers keep portfolios of each student’s work.
+In this paper I discuss the effectiveness of AWE tools in improving the quality of writing, and I examine the role of
+classroom teachers in the presence of these tools. Accordingly, the research questions are as follows:
+1) What are the benefits of using automated written feedback in the EFL/ESL context?
+2) What are the shortcomings of using automated written feedback in the EFL/ESL context?
+In general, research on the effectiveness of AWE identifies four benefits. Automated feedback can improve the
+quality of students’ writing, enhance learning, promote learner autonomy and motivation to write, and ease the
+burden on teachers.
+In addition to providing summative feedback, AWE systems can provide writers with formative feedback by
+giving them opportunities for multiple drafting, which can raise students’ awareness of their errors and weaknesses
+hence improve their writing outcomes (Chen & Cheng, 2008). In fact, some of these systems function as writing
+supporting tools as they are supplied with different online writing resources (word banks and thesauri) and editing
+features (grammar and spelling) (Chen & Cheng, 2008). It has also been argued that these systems promote learner
+autonomy by providing student writers with opportunities to practice, write, evaluate and revise even a large
+number of essays in a self-regulated learning environment (Chen & Cheng, 2008). Furthermore, research shows
+that the immediacy of automated feedback can improve the quality of students’ writing (Stevenson & Phakiti,
+2014). Fast responses in addition to the types of comments and scores generated by these machines can increase
+students’ competition and motivation to practice writing (Cheng, 2017). AWE programs are also thought to be
+helpful for teachers who can spend quality time teaching their students about different aspects of writing instead of
+spending most of the time rating students’ essays and giving them feedback (Stevenson & Phakiti, 2014).
+Some empirical studies have been conducted to examine the impact of using AWE feedback on EFL/ESL
+students’ witting. Li et al. (2015) carried out a study to investigate the impact of using the AWE system on writing
+accuracy in two academic ESL writing courses during a 15-week semester in a midwestern university in the United
+States. Data were gathered qualitatively through interviews with instructors and ESL students and quantitatively
+through collecting the number of submissions for each paper recorded by the system and AWE error reports. Four 
+instructors and 70 ESL students participated in the study. The students were required to use the system for the
+revision and submission of the final draft, and they were encouraged to use the AWE outside the classroom. The
+teachers used Criterion, an AWE system that provides corrective feedback (in grammar, usage, mechanics and
+styles), highlights errors, and provides explanations and/or suggestions for corrections.
+The data analysis showed that both the instructors and the students held positive views regarding the impact of
+AWE tools in improving the essay quality, but it also showed that the instructors and the students were not satisfied
+with the quality of feedback that was provided by the system in terms of content and organization. The findings
+also showed that Criterion led to increased revisions and that automated feedback helped the students improve
+their writing accuracy from first to final drafts.
+It is difficult to draw conclusions about the impact of using automated corrective feedback on students’ writing
+from this study. First, the AWE system might not have been the only reason for improving students’ linguistic
+accuracy. In fact, the instructors used different strategies and instructional methods to implement this system in the
+classroom (like asking their students to achieve a minimum automated score before submitting their papers) that
+may have played an important role in improving students’ linguistic accuracy and their ability to highlight and
+correct their errors. Research also suggests that students’ writing improvement can result from the learning and
+teaching process and not necessarily from the implementation of these systems (Warschauer & Ware, 2006).
+Second, students’ dissatisfaction with the quality of feedback on content and organization could have been
+influenced by their teachers’ practices and perspectives; the study reported that some teachers who did not think
+that the AWE system could help improve content and organization of essays provided their students with feedback
+on these aspects and asked them to use AWE only to get feedback in grammar and mechanics.
+Finally, the study did not use a control group to measure and compare any potential improvement in the students’
+writing outcomes. Consequently, further studies that use controlled variables (teachers providing feedback) or
+control groups are required to draw accurate conclusions about the effectiveness of AWE systems in improving
+students’ writing, not only in form but also in content.
+Wang et al. (2020) conducted a study to investigate changes in the quality of students’ use of text evidence from
+the first draft to the revised draft based on feedback messages they received from AWE systems. The study also
+examined students’ perceptions and implementation of the feedback messages they received. Seven teachers from
+7 different schools and 143 (3rd to 8th grade) students participated in the study, which took place in Louisiana (in
+the United States). The assessment required students to “show understanding of text(s) by writing a
+multi-paragraph response” (Wang et al., 2020, p. 5) that used evidence from the text. Also, among other
+dimensions, students’ literary analysis response was scored for use of “clear reasoning supported by relevant
+text-based evidence in the development of the topic” (Wang et al., 2020, p. 5). Data were collected qualitatively by
+analyzing students’ essays across first and second revised drafts. Learners also completed a survey about their
+perceptions on the effectiveness of eRevise upon submitting their revised draft. eRevise was the AWE system used in this study and was designed to rate responses, provide feedback to students on Response-to-Text-Assessment,
+and assess students’ ability to reason about texts in their writing. The students were asked to respond to a prompt
+and support their arguments with ideas. To assess students’ ability to reason about texts in their writing, eRevise
+provided three levels of feedback: completeness (by directing students to use more evidence and provide more
+details for each piece of evidence), explanation (by guiding them to explain their evidence), and connection (by
+directing students to connect their evidence to the overall argument).
+The data analysis revealed that the students held positive views toward using eRevise. The findings also showed
+that most of the students made changes to their essays in that their use of text evidence improved from first to
+revised drafts and that this progress was in line with the feedback they received from eRevise. However, only 18%
+of the students showed substantive progress in essay quality.
+This study confirmed the claims that AWE systems can provide writing assistance for students and that automated
+multiple drafting can improve the quality, organization, and content of the essay. However, it seems premature to
+draw any firm conclusions about the benefits of using automated corrective feedback to improve writing outcomes.
+First, this study showed improvement in the quality of one single essay, and further studies are needed to show that
+automated corrective feedback can be transferred to other writing situations and contexts and thus can lead to
+better writing outcomes on a long-term basis.
+The studies discussed above showed that student writers hold positive views toward using AWE systems. They
+also showed that AWE can improve the accuracy of students’ essays as well as the content and organization of
+students’ writing. However, because of limitations in the two studies, it is difficult to evaluate the extent to which
+the two examined AWE systems contributed to the improvement of essay quality and/or content. Consequently, more rigorous studies that (1) investigate the effectiveness of AWE tools for both content and form, (2) use a
+control group to compare and measure the impact and change in students’ essays, and (3) examine writing
+outcomes on a long-term basis are required to support claims about the effectiveness of these tools. 
+Despite the benefits brought by AWE, there are some claims in the literature about the limitations and challenges
+of implementing automated feedback in writing classes. First, the quality of AWE is called into question because
+these tools lack “human inferencing skills and background knowledge” (Stevenson & Phakiti, 2014, p. 52), and
+thus they cannot read, understand and evaluate meaning (Chen & Cheng, 2008). Furthermore, the fact that students
+write to machines instead of a real audience is said to strip writing from its meaningful communicative function
+because these texts will be treated as codes “devoid of any sociocultural contexts” (Chen & Cheng, 2008).
+Moreover, feedback generated by machines may not be focused (Ranalli, 2018). In fact, it has been argued that
+feedback generated by automated systems like Criterion is unfocused in that it targets multiple types of errors as
+opposed to focused feedback that targets single types of errors for learning purposes. Research suggests that
+unfocused comprehensive feedback may “cognitively overload low proficiency learners” (Ranalli, 2018, p. 657)
+who, even if they can notice the errors identified by the AWE system, may not be able to understand them
+(Merhabi-Yazdi, 2018).
+One of the concerns attributed to feedback provided by AWE systems is the issue of explicitness or the “extent to
+which feedback is direct or indirect” (Ranalli, 2018, p. 654). It has been reported that AWE systems’ use of direct
+or indirect feedback is not based on “pedagogical considerations” like human corrective feedback, but it is based
+on the “technological capacities” of these systems (Ranalli, 2018, p. 655). Another issue is the “inaccuracy of error
+flagging” (Ranalli, 2018, p. 655). In fact, research has shown that accuracy rates of some types of errors provided
+by some AWE systems like Criterion can fall below 50%. Research shows that students tend to respond more
+frequently to accurate rather than inaccurate error flagging (Ranalli, 2018). The other factor influencing the extent
+to which students use and learn from automated feedback is that most AWE tools do not take students’ individual
+differences (like language ability, first language, educational background and prior knowledge of grammar) into
+consideration (Ranalli, 2018). 
+Another limitation of AWE is that some of these systems cannot provide dialogic feedback. In other words, unlike
+human feedback, students cannot get further explanations of their errors from these tools and may not be able to
+find the origin of their error, which can hinder learning and improvement (Merhabi-Yazdi, 2018). Moreover,
+automated corrective feedback in content and subjective areas that is essential in improving students’ writing skills
+(like reasoning, thinking and argumentation) may not be rigorously evaluated because these aspects are “still in
+early phases of development” (Wang et al., 2020). Furthermore, since most AWE systems focus on surface
+linguistic features, they are said to lead to negative washback effects on students’ writing goals. Instead of
+attempting to improve their writing skills in both form and content, students may shift their attention to acquiring
+only those aspects of writing that are evaluated by these systems, such as grammar correctness, and therefore may
+neglect other essential areas, such as content and meaning (Stevenson & Phakiti, 2014).
+Finally, there is evidence that a lack of understanding and implementation of AWE systems by teachers and/or
+students can lead to limited progress in the students’ writing outcomes. Students may not benefit from the revising
+features provided by AWE systems either because they are not motivated to use them or because they lack
+sufficient knowledge and instruction on how to use them (Wang et al., 2020).
+Some researchers have conducted empirical studies to investigate the shortcomings of using AWE tools in
+EFL/ESL classrooms. Chen and Cheng (2008) examined the effectiveness of AWE as a pedagogical tool in three
+college EFL writing classes in Taiwan. My Access! was the AWE tool used throughout a semester to improve
+students’ writing and to ease the burden on teachers. The program provided feedback on formative and summative
+assessment and offered writing support to students. All the teachers adopted a similar “process-writing approach,
+including model essay reading activities followed by language exercises and pre-writing, drafting and revising
+activities” (p. 98). Three instructors and 68 Taiwanese English major EFL students at upper-intermediate levels
+participated in the study. Data were collected through end-of-course questionnaires, group interviews with 16
+students, individual interviews with two instructors, and students’ essays with feedback provided by the tool.
+Data analysis showed that the students did not hold positive views about the program. The findings also revealed
+that teachers’ instructions influenced students’ perceptions of the effectiveness of the AWE system in improving
+their writing, and that student writers appreciated integrating human and automated feedback. The results showed
+that My Access! failed to provide useful feedback in some aspects, like developing ideas and coherence, whereas 
+human feedback was perceived as being meaningful and specific and as taking the social and communicative
+context into consideration.
+The Chen and Cheng (2008) study confirmed many claims in literature about the shortcomings of AWE systems in
+improving only some aspects of writing. It also confirmed the importance of integrating automated and human
+feedback to achieve better writing outcomes. However, it should be noted that the findings of the study were based
+only on students’ perceptions of the effectiveness of the AWE system. Consequently, if students’ first and revised
+essays were compared, results could have been more accurate.
+Ranalli (2018) investigated the influence of feedback accuracy and explicitness and other factors on students’
+ability to use Criterion to correct their errors. The study took place in two ESL writing courses in a midwestern
+university for 16 weeks. Eighty-two students from the high-intermediate level and advanced-low level participated
+in the study. To examine the influence of these factors on students’ ability to use automated feedback, an error
+correction task was designed to observe students’ response type and explicitness and accuracy of the feedback.
+Data analysis showed the importance of feedback explicitness in students’ success in correcting errors. In fact,
+learners reported that responding to specific recommendations and feedback generated by Criterion was more
+helpful and easier than responding to generic feedback mainly because some of the participants lacked
+knowledge of grammatical terminology. The results also revealed that the absence of an accuracy determination
+led to relatively more appropriate and effective corrections.
+One implication of the study is showing the importance of explicitness in automated feedback mainly because
+most of the AWE corpus is based on generic feedback, which explains why in many studies that used AWE
+systems like Criterion, most of the feedback was not used by the participants (Ranalli, 2018). These findings can
+encourage AWE program designers to develop tools that provide either both explicit and generic comprehensive
+feedback or feedback that is specially designed to meet learners’ needs and backgrounds. However, because of
+some limitations in the study, it is difficult to claim that the findings were accurate representations of the
+influence of the discussed factors on students’ interaction with AWE systems. First, the participants did not
+correct their own errors; rather, they corrected their peers’ errors, and this may have influenced the findings
+because there are claims in literature that finding someone else’s errors is easier than finding one’s own errors
+(Ferris, 2012). Second, the participants were awarded gift cards to use Criterion, which might have influenced
+their engagement with the tool. Consequently, further research that investigates students’ engagement with these
+AWE systems is needed. 
