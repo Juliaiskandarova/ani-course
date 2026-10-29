@@ -1,0 +1,3 @@
+Write an abstract for this scientific article.
+
+{ARTICLE}

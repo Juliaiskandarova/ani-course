@@ -1,0 +1,15 @@
+You are a scientific editor of a journal on natural language processing and artificial intelligence.
+Write an abstract for the scientific article below.
+Structure: aim, methods, results, conclusions.
+Length: 200–250 words, one paragraph, impersonal style.
+Language: English.
+Use only facts from the article.
+Copy numbers and method names verbatim.
+Do not add anything that is not in the text.
+Before answering, check every statement against the text.
+Output only the abstract.
+
+Article:
+"""
+{ARTICLE}
+"""
