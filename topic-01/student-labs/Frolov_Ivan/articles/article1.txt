@@ -1,0 +1,757 @@
+A mathematical model for automatic differentiation
+
+in machine learning
+
+Jérôme Bolte˚ Edouard Pauwels
+
+Toulouse School of Economics IRIT, CNRS
+
+Univ. Toulouse Univ. Toulouse
+
+Toulouse, France Toulouse, France
+
+1 Introduction
+
+Optimization algorithms based on backpropagation oracles, and more generally on automatic or algorithmic differentiation (AD) [41, 39], are one of the most widely used training tools for modern learning architectures [14, 32, 15, 18, 20, 3, 16]. They often rely on popular numerical implementations as TensorFlow or PyTorch [1, 36]. However, for nonsmooth, nonconvex losses, AD does not have a stable theory [23, 25, 26, 2, 30, 28, 29, 12], matching the actual practice. We wish to present a simple mathematical framework addressing this issue. Let us progressively explain our approach.
+
+1.1 What is backpropagation?
+
+Algorithmic differentiation acts on programs not on functions: To convey this fact we carry out a small experiment in TensorFlow [1] with the function relu: t ↦ max{0, t}, see Appendix A.2 for implementation details. Algorithmic differentiation is displayed in Figure 1, in particular, we have relu¹(0) = 0. Consider the two functions
+
+relu₃: t ↦ 1
+
+relu₂: t ↦ relu(-t) + t, 2(relu(t) + relu₂(t)).
+
+As mathematical functions on ℝ these are equal to relu. However TensorFlow returns relu¹₂(0) = 1 and relu¹₃(0) = 1/2 (Figure 1). Indeed, AD does not act on functions, but on their representations, i.e., on programs. Different programs implementing the same function may provide different results, beyond numerical precision; we refer to this as the spurious behaviour of AD for nonsmooth functions². Let us explore this phenomenon further. The function zero: t ↦ relu₂(t) - relu(t), outputs constantly 0 but AD gives zero¹(0) = 1. More generally, one can modify the value of the derivative of a given function at prescribed arguments (Figure 1). This may generate artificial critical points; for instance x → x - zero is the identity but its derivative at 0 according to AD is 0.
+
+˚Authors in alphabetical order. ²The validity domain of AD is restricted in theory to smooth functions [23], yet it is common practice to use it for nonsmooth functions.
+
+Figure 1: Top: AD applied to relu and two different implementations of the same function. Bottom: Algorithmic differentiation of a constant function, creation of artificial critical point or arbitrary derivatives at prescribed arguments for the sine function.
+
+This discussion was limited to univariate functions, but these pathologies grow in size and in complexity when occurring in higher dimensions. Besides, as the “compositional depth” of functions increases the phenomenon gets more complex, making the geometry of artificial point difficult to grasp.
+
+Canonical surjection between programs functions: Numerical programs combine basic mathematical functions within an algorithm and return an output. This can be understood in two ways:
+
+• Computer science: it is a sequence of instructions with numerical inputs-outputs,
+
+• Mathematics: the program is a function₃ of its arguments.
+
+It is tempting to identify both, but functions can be represented by different programs. This defines a surjection F mapping a program to a function (in the class of functions “accessible through coding”).
+
+Algorithmic differentiation: As presented above, AD is an operation on programs, A which takes as argument a program and returns a program with the same input variables. This operation can be “pushed” to the space of functions using the canonical surjection F. Remarkably, if we restrict ourselves to programs P which only smoothly combine smooth functions, then we have the following fundamental relation, depicted in Figure 2:
+
+F(A(P)) = ∇F(P). (1)
+
+In other words, algorithmic differentiation of a program which smoothly combines smooth functions, is equivalent, through the canonical surjection, to derivation.
+
+Figure 2: Left: Algorithmic differentiation applied to programs combining smooth functions in a smooth way, the diagram commutes. Right: Algorithmic differentiation in nonsmooth settings, connection with known notion of generalized derivative is much less clear.
+
+³In the usual mathematical sense.
+
+However practitioners use AD and backpropagation beyond smooth programs with nonsmooth elementary functions or program branching for instance. Can we find a proper operational interpretation of this widespread practice?
+
+Algorithmic differentiation cannot be represented through a variational operator At first, it is tempting to simply use AD to induce a differential operator on functions generalizing classical differentiation. This operator, say ∂A, should:
+
+(a) encompass the outputs of algorithmic differentation for all functions
+
+(b) be such that 0 is an element of ∂A(relu) at 0.
+
+Unfortunately such an operator does not exist:
+
+Theorem 1 (Algorithmic differentiation does not induce an operator on functions) There is no nontrivial operator on functions satisfying (a) and (b).
+
+1.2 Contribution and related work
+
+We address this impossibility result and provide a class of functions together with an operational nonsmooth differential calculus which is able to cope with spurious behaviours.
+
+Elementary selections and selection derivatives: We introduce a new class of nonsmooth nonconvex functions, encompassing most objective functions met in machine learning, having appealing stability properties. This allows us to define simple differential objects called selection derivatives. Selection derivatives turn out to have an operational calculus adapted to the analysis of many learning methods, as backpropagation or stochastic first order methods. They thus provide an operational model to capture nonsmooth AD as implemented in current numerical software.
+
+Algorithmic differentiation, algorithms This framework allows to formalize properly the relationships between, functions, algorithmic differentiation and capture the corresponding notion of critical points as met in practice. These characterize the set of attractors (limit points) for stochastic approximation algorithms based on nonsmooth backpropagation [37, 4, 31, 5, 13]. It is important to stress that these attractors, which models sharply the whole scope of AD-induced stationnarity, are different from the traditional notions as Clarke criticality [17, 38, 20]. This is described in Theorems 3 and 4.
+
+Avoidance of traps: As sketched above and in the introduction AD produces artificial critical points, i.e. stationary points which are not Clarke critical. These points have a parasitic nature which could be detrimental to training purposes, were they met in practice. We show that randomly initialized mini-batch stochastic gradient method do not lead to artificial critical points (Theorem 4). This result applies to modern machine learning software libraries based on AD [1, 36], seen as performing operation over the reals, without any modification. Although AD may have unpredictable behavior in nonsmooth contexts, both theoretically and numerically, this result justifies theoretically that the practical impact is somewhat negligible in the context of common machine learning usage.
+
+Related work: Spurious behaviour of AD in nonsmooth context has been investigated in [23, 25, 26, 27, 2, 30, 12]. In particular, [27, 30] considers qualification conditions allowing to construct AD algorithms which compute proper Clarke subgradients [17, 38, 20]. However qualification is extremely hard to check and almost impossible to enforce in practice. Let us also mention [2] which uses the notion of lexicographic derivatives, but, at this day, algorithmic computations are limited to forward mode for the moment which is of little use in machine learning.
+
+[23, 25, 27, 26, 28, 29] use settings closer to ours. Piecewise smooth functions, selection derivatives and their variational properties are extensively described in [40]. Our approach differs because we adopt more stringent definitions and rigidity assumptions, which allows in turn for much stronger properties. For instance, we fully treat backward algorithmic differentiation which is the most useful tool in machine learning.
+
+Altogether, our contribution is an accessible and elementary framework for the conservative fields recently introduced in [12], without explicitly requiring the introduction of semialgebraic geometry and o-minimal structures [21, 19].
+
+Stochastic approximation algorithms [37, 4, 31, 5, 13] are widely used in machine learning contexts [39, 14, 35, 32, 15, 18, 16]. For example [20] describes asymptotics of stochastic subgradient algorithms in nonsmooth, nonconvex settings. In contrast, we do not assume access to subgradients and instead explicitly model the behaviour of AD in optimization contexts. Our convergence results are based on [12], complemented by a new result on “the avoidance of critical traps” in the line of [7] in the context of long run convergence. Notations The ambient space is Euclidean ℝp. For each k, ek is the k-th vector of the canonical basis. We use D: ℝm → ℝq for set valued functions, i.e functions from ℝm to the subsets of ℝq. The convex hull of A ⊂ ℝp is denoted by conv(A). All proofs are postponed to the Appendix.
+
+2 Basic piecewise differentiable functions and selection gradient
+
+We introduce a simple but vast class of functions that model rigorously the machine learning models and losses for applications such as deep learning.
+
+Definition 1 (Elementary (log-exp) functions) Elementary (log-exp) functions are functions on ℝp described by a finite compositional expression involving basic operations, +, -, ×, / as well as affine mappings, exponential and logarithms, inside their domain of definition. We denote by E the set of elementary functions in any dimension p.
+
+Examples include polynomials, logistic loss, boosting loss, Gaussian likelihood. Observe that the corresponding functions are C∞ smooth on their open domains. Note also that if log and exp are not present we obtain the field of rational functions. See Remark 1 in Appendix A.3.
+
+Definition 2 (Elementary index) s: ℝp ↦ {1,..., m} is an elementary (log-exp) index if the set {x ∈ ℝp, s(x) = i} is the solution set of a finite number of inequalities and equalities involving elementary functions on ℝp. The set of such functions is denoted by I (for any input dimensions p).
+
+Examples: The Heaviside function, the index of the largest or k-th largest element in a vector, the sign pattern of a vector in ℝp which is indexed by integers from 1 to 2p.
+
+Definition 3 (Elementary selection) Let f: ℝp ↦ ℝ be continuous. We say that f has an elementary (log-exp) selection (s, f₁,..., fm) if s: ℝp ↦ (1,..., m) is an elementary index in I and for i = 1..., m, fi: ℝp ↦ ℝ are elementary functions in E, such that for all x ∈ ℝp,
+
+f(x) = fs₍x₎(x). (2)
+
+The m + 1-uplet (s, f₁,..., fm) is a representation of f, and f admits an elementary (log-exp) selection. The class of such functions is denoted by Slog exp or simply here S. This extends to functions from ℝp to ℝm by applying a coordinatewise definition with a common elementary index.
+
+Observe that the representation is never unique, both in s and in the sequence f₁,..., fm. The ReLU, hinge loss, maximal entry, k-th largest entry functions are elementary selections. Note also that continuity is part of the definition.
+
+Proposition 1 (Stability of S by ∘, +, ×) The class S of elementary selections is stable by composition, sum and product.
+
+The class S is close to the one of piecewise Ck functions, see e.g [40], but it is also much more disciplined since indices and functions are required to satisfy strong “log-exp” rigidity assumptions.
+
+2.1 Selection derivative
+
+Functions in S can be associated with a flexible notion of generalized derivative based on the selection structure of the underlying function.
+
+Definition 4 (Selection gradient) (i) Let f: ℝp ↦ ℝ, in S with selection (s, f₁,..., fm). We set the selection derivative of f with respect to s to be
+
+∇p sf: x ↦ ∇fs₍x₎(x). (3)
+
+This extends to multivariate outputs by applying the definition coordinatewise, which leads to a notion of a selection Jacobian denoted by Jps. (ii) Given a function f ∈ S, a selection derivative is a derivative of the form (3) for a given representation. In that case a selection derivative of f is merely denoted by ∇p f.
+
+Example: Set for all x ∈ ℝ, f₁(x) = 0, f₂(x) = x and s(x) = 1 for x ≤ 0 and s(x) = 2 for x > 0. This this defines the relu function and its selection derivative at 0 is 0. See more in Appendix A.2.
+
+Remark: (a) ∇p f is different from any known notion of subgradient. Set for all x ∈ ℝ, f₁(x) = 0, f₂(x) = x and s(x) = 1 for x ≠ 0 and s(0) = 2. This defines a elementary selection for the null function however, ∇p sf(0) = 1. This is the zero function of the introduction.
+
+(b) This formalizes what one would obtained by differentiating a code with all decision branches frozen and hence represents the numerical output of AD (see 4). Note that one only needs one branch and do not need to explore all possible outcomes, avoiding combinatorial explosion.
+
+The properties of selection derivatives might seem too liberal at first sight and too disconnected from the original function, but this is not the case as shown below.
+
+Proposition 2 (Integration along segments) Let f: ℝp ↦ ℝ be in S, with elementary selection (s, f₁,..., fm). Then f is locally Lipschitz and for all y, x in ℝp.:
+
+∫ ¹
+
+A E
+
+f(y) - f(x) = y - x, ∇p sf(x + t(y - x)) dt
+
+Proposition 3 (Gradient almost everywhere) Let f: ℝp ↦ ℝ be in S, with elementary selection (s, f₁,..., fm). There exists sets U₁,..., UN with nonempty interior such that ⋃Ni₌₁ cl(Ui) = ℝp and for each i = 1, and for all x in the interior of Ui, ∇p sf(x) = ∇f(x). Furthermore, the Ui are solution sets of equations and inequalities involving functions in E.
+
+Remark: Although less transparent, Proposition 2 is not a consequence of Proposition 3. Both results crucially rely on the rigidity of elementary functions in E (Definition 3), not only on their piecewise smoothness. This a central novelty of our approach.
+
+2.2 A calculus for selection derivatives
+
+One has an unusual differential calculus: although it does not involve the linearity of some (sub)differential operator, the selection derivative of a sum gives a sum of selection derivatives provided that the selection is refined.
+
+Proposition 4 (Chain rule) Let F: ℝp₁ ↦ ℝp₂ such that each of its coordinate fi, i = 1... p₂, is in S and g: ℝp₂ ↦ ℝ, g ∈ S. Consider a selection Jacobian for F, JpF: ℝp₁ ↦ ℝp₂×p₁
+
+·∇p f₁(x)T ∼
+
+...
+
+x ↦ ∗ ⟨⟩ (4)
+
+∘
+
+∇p fq(x)T
+
+Then g ∘ F ∈ S and the function x ↦ JpF (x)T p∇g(F (x)) is a selection derivative for g ∘ F.
+
+Proposition 4 extends readily to the case when the outer function g is multivariate. For example, we have a sum rule ∇p (f + g) = ∇p f + ∇p g for full-domain functions f, g in S. Indeed, if F₁ and F₂ are elementary selections then F₁ ∘ F₂ ∈ S and
+
+JpF₁∘F₂ = (J pF₁ ∘ F₂) × JpF₂. (5)
+
+3 Programs and elementary selections
+
+Numerical programs encode numerical functions by combining elementary functions using a predecessor relation which models program execution. In what follows, m can be seen as an estimate of the memory footprint of a program⁴, while p and q the number of inputs and outputs respectively.
+
+Given positive integers m ≥ p + q, a predecessor relation is a set valued map pr: {1,..., m} → {1,..., m} such that
+
+• For i ∈ {1,..., m} and j ∈ pr(i), j < i. • For i ∈ {p + 1,..., m}, pr(i) is nonempty.
+
+A predecessor relation induces a partial order on the set
+
+Algorithm 1: Program evaluation
+
+of integers from 1 to m and hence can be represented by a directed acyclic graph [34, Theorem 9.4.9]. Given Program data: p, q ≥ 1, (p, q, m) and a predecessor relation pr, a elementary m ≥ p + q, pr a predecessor function sequence G = (gi)mi₌p₊₁ is a set of functions relation, G = (gi)mi₌p₊₁ an adapted such that gi: ℝ|pr₍i₎| ↦ ℝ, and gi ∈ S, for all i = function sequence. p + 1,..., m. A program P is then given by the data
+
+Input: x = (x₁,... xp)
+
+P = (p, q, m, pr, G), while its evaluation is described
+
+1: for k = p + 1, p + 2,... m do
+
+in Algorithm 1. We denote by P the set of programs,
+
+2: xk = gk(xpr₍k₎) where
+
+and Pp,q when input-output dimensions have to be made explicit. xpr₍k₎ = (xi)i∈pr₍k₎. By definition a program encodes a function, but the 3: end for representation is not unique. We express this fact below Return: y:= (xj)mj₌m₋q₊₁. through the canonical surjection F of the introduction. The following proposition illustrates the fact that practitioners implicitly implement selection functions when writing programs.
+
+Proposition 5 (Programs represents elementary selections) Through its input-output correspondence each program P of the form (3) induces a function which is an elementary selection. In other words F(P) ∈ S.
+
+4 Algorithmic differentiation and a variational model
+
+Algorithmic differentiation is based on the idea of propagating infinitesimal variations in a program P through the chain rule, either forward or backward.
+
+Algorithm 2: Algorithmic differentiation computes selection gradients Program data: p ≥ 1, m ≥ p + 1, pr a predecessor relation, G = (gi)mi₌p₊₁ an adapted function sequence. Input: variables (x₁,... xm) computed by Algorithm 1, di = (di[j])|pr⁽i⁾|
+
+= ∇p gi(xpr₍i₎),
+
+j=1
+
+i = p + 1... m
+
+1: Forward mode:
+
+1: Backward mode:
+
+2: Initialize: ∂∂xxk = ek,
+
+2: Initialize: v = em
+
+k = 1,..., p.
+
+3: for t = m,... p + 1 do
+
+3: for k = p + 1,... m do
+
+4: for j ∈ pr(t) do
+
+4:
+
+5: Update coordinate j of v:
+
+∂xk ∂xj
+
+∑
+
+∂x = ∂x dk[j]
+
+v[j]:= v[j] + v[t]dt[j]
+
+j∈pr(k)
+
+6: end for
+
+where x = (x₁,..., xp).
+
+7: end for
+
+5: end for ∂xm Return: (v[1], v[2],..., v[p]). Return: ∂x.
+
+⁴We consider programs which do not overwrite values in memory
+
+Consider Algorithm 1, and assume for simplicity that q = 1. The program can be seen as the implementation of m - p successive transformations on ℝm, of the form
+
+Gk: ℝm ↦ ℝm
+
+x ↦ x + ek(gk(xpr₍k₎) - xk),
+
+for k = p + 1,..., m which belong to S. Algorithm 2 combines gradients dynamically along two modes: forward or backward. Let us describes these two forms. Fix x ∈ ℝm. After applying Algorithm 1, for each k, let dk ∈ ℝm be the selection gradient
+
+∇p gk(xpr₍k₎), appending 0 to non dependant coordinates. A selection Jacobian of Gk (at x) is given by
+
+JpGk = I - ekeTk + ekdT
+
+k
+
+Denote by Jp ∈ ℝm×p, the matrix whose entries are 0, except for diagonal entries which are 1. In Algorithm 2, the forward mode computes eTm JpGm... JpGp₊₁Jp = eT `I - emeTm + emdT... `I - ep₊₁eTp₊₁ + ep₊₁dT Jp
+
+m m p+1
+
+which is a selection Jacobian thanks to the chain rule in (5). On the other hand the backward mode computes
+
+JT `I + dp₊₁eT... `I + dmeT em.
+
+p p+1 m
+
+This quantity turns out to be the same as the one computed by the forward mode thanks to:
+
+Lemma 1 Let p, m ∈ ℕ, 0 < p < m. Assume that for i = p + 1,..., m we have di ∈ ℝm. Then we have Pp `I - ep₊₁epT₊₁ + dp₊₁eT... `I - ememT + dmeT = Pp `I + dp₊₁eT... `I + dmeT
+
+p+1 m p+1 m
+
+(6)
+
+where I ∈ ℝm×m is the identity matrix and Pp ∈ ℝm×m denotes the projection on the first p coordinates.
+
+Denote by A: Pp,₁ → Pp,p the algorithmic-differentiation operator. This establishes the following fundamental fact which is at the root of this work. This result asserts that practitioners implicitly implement selection derivatives when writing numerical programs and calling forward or backward AD on these programs.
+
+Theorem 2 (Algorithmic differentiation outputs a selection gradient) Algorithmic differentiation of a given program, i.e., A(P), outputs a selection derivative of the underlying numerical function. In other words there exists a representation of the numerical function F(P) with elementary index s such that:
+
+F(A(P)) = ∇p sF(P).
+
+5 Algorithmic differentiation at work
+
+5.1 Selection derivatives, conservative fields and Clarke subgradient
+
+The asymptotic study of first-order optimization methods implies limiting processes and necessitates thus the introduction of graph closed operators. Given a representation for f, we may construct such a convex-valued mapping pointwise as follows⁵.
+
+Definition 5 (Representation minimal operator) Let f ∈ S with elementary selection (s, f₁,..., fm). For any x ∈ ℝp, set I(x) = {i ∈ {1,..., m}, f(x) = fi(x)}. The index closure of ∇p sf is given by the set valued map
+
+Dfs: ℝp → ℝp
+
+x → conv ({∇fi(x), i ∈ I(x)}).
+
+where the double arrows express that the map has values in subsets of ℝp, much like subgradients, and conv denotes the convex hull. ⁵Minimality relates to the representation of the function, not the function itself. This is the minimal convex-valued operator, constructed pointwise and guaranteed to be graph-closed.
+
+The role of Dfs is to capture all possible outputs of AD including all possible program branches. Of course, due to combinatorial explosion, this quantity is intractable in practice. Its introduction here is only instrumental, we do not use it in algorithms, we just need to access one of its element, for example using a selection derivatives, obtained from AD. A point x satisfying 0 ∈ Dfs(x) is called a selection critical point. We will often drop the index s and write Df = Dfs.
+
+The two following results highlight crucial properties of Df in terms of optimization, they again rely on the rigidity constraint of elementary functions.
+
+Theorem 3 Let f ∈ S with elementary selection (s, f₁,..., fm) and Df be as in Definition 5. Then Df is conservative for f, that is for all absolutely continuous curves γ: [0, 1] ↦ ℝp, for almost all t ∈ [0, 1], f ∘ γ is differentiable and
+
+d
+
+dtf(γ(t)) = ⟨v, γ9 (t)⟩, ∀v ∈ Df (γ(t)).
+
+The previous result generalizes Proposition 2 by allowing to integrate arbitrary selections along absolutely continuous curves. This connects our work to the general setting of [12], note that Df has a closed graph thanks to Proposition 6 in Appendix A.3. In [40], the author considers the essential index set, for each x ∈ ℝp,
+
+SE(x) = {i ∈ {1,..., m}, x ∈ cl(int({y, f(y) = fi(y)}))} ⊂ S(x).
+
+Considering Definition 5 with SE(x) instead of I(x) leads to the Clarke subgradient, which can also be defined as
+
+∂cf(x) = conv{d ∈ ℝp: ∃xk ∈ ∆f, xk → x, ∇f(xk) → d}
+
+where ∆f is the dense set of differentiability points of f. While I(x) can be computed pointwise (check finitely many equalities), it might be very hard to check membership in SE(x) without restrictive qualification conditions on programs [30].
+
+Illustration with ReLU and sorting: (a) Set for all x ∈ ℝ, f₁(x) = 0, f₂(x) = x, s(x) = 1 for x ≤ 0 and s(x) = 2 for x > 0. This is relu. In this case Df = ∂relu, the convex subgradient.
+
+(b) Let F: ℝp ↦ ℝp to be the sorting function which associates to x a vector Px where P is any permutation such that Px belongs to the set of vectors which values are sorted in descending order coordinatewise. F obviously has an elementary selection and the construction which we have proposed leads to
+
+DF: x ↦ conv {P ∈ ∆, Px = F (x)},
+
+where ∆ denotes the set of permutation matrices of size p × p. Then D is a conservative mapping for F and it actually corresponds to the Clarke Jacobian.
+
+5.2 Convergence of gradient type algorithm and criticality of limit points
+
+Optimization processes in learning are supposed to provide at least a critical point x of the loss, i.e. a point satisfying 0 ∈ ∂cf(x). When using AD one enlarges the definition of criticality into 0 ∈ Df (x) and artificial critical points appear, they satisfy 0 ∉ ∂cf(x) and 0 ∈ Df (x). Artificial critical points could possibly trap the optimization process in strongly non-optimal situations, we thus have to determine if they have an impact on learning phases.
+
+We consider the problem
+
+n
+
+x∈ℝp J(x) = 1
+
+∑
+
+min fi(x) (7)
+
+n
+
+i=1
+
+where fi: ℝp ↦ ℝ, fi ∈ S, i = 1,..., n. We consider the following algorithm, given x₀ ∈ ℝp, a sequence of positive step sizes (γk)k∈ℕ and a sequence of iid indices (Ik)k∈ℕ taken uniformly in the nonempty subsets of {0,..., n},
+
+xk₊₁ = xk - γk ∇p fIk(xk) where fI = 1
+
+∑
+
+fi, I ⊂ {1,..., n}. (8)
+
+|I|
+
+i∈I
+
+Note that as discussed in Section 4 selection derivatives can be computed by AD if fi are given by the data of numerical programs as in (3), and could be far from usual notions of subgradients. Hence this algorithm models explicitly the training of a nonsmooth deep network using existing backpropagation implementations. Note that J ∈ S and that 1/n ∑ni₌₁ ∇p fi is a selection gradient for J as stated in
+
+Proposition 4, denote by ∇p J this quantity and DJ the corresponding set valued field (Definition 5). The following result illustrates that selection critical points are the only attractors for the recursion and that generically such attractors are actually Clarke critical. The first result stands on the theory developed in [5]. The second parallels developments in [7] in the context of long run convergence. The spurious behaviour illustrated in Figure 1 does not affect asymptotics, for typical initialization.
+
+Theorem 4 (Convergence and insignificance of artefacts) Let for all k, γk = cαk where c ∈ (0, 1] and αk = o(1/ log k) and K ⊂ ℝp be open. Assume that for all c ∈ (0, 1] and all x₀ ∈ K the sequence in (8) is bounded almost surely.
+
+• For all x₀ ∈ K, almost surely, J(xk) converges as k tends to infinity and all accumulation points, x¯, of (xk)k∈ℕ are selection critical points: 0 ∈ DJ(x¯).
+
+• For almost all c ∈ (0, 1], almost all x₀ ∈ K, and almost surely, any accumulation point, x¯, of (xk)k∈ℕ is Clarke critical: 0 ∈ ∂cJ(x¯).
+
+6 Conclusion
+
+The current work departs from existing approaches to nonsmooth algorithmic differentiation in a fundamental way. We propose to study the backward mode of AD, as implemented in machine learning, without any modification. Our theoretical results model thus AD “as is”, and our focus is precisely on its unpredictable behavior in a nonsmooth context, addressing an issue which is ubiquitous in machine learning. Our main contribution was to prove that, in a stochastic optimization context, this spurious behavior is essentially harmless from a theoretical point of view, providing justifications for the use of AD outside of its original domain of validity in machine learning.
+
+We achieve our goal by modeling sharply common machine learning functions and their differentiation using selection derivatives, a known concept, which models the way AD differentiates nonsmooth programs. We restrict it to certain classes of elementary functions, opening the possibility to use powerful geometric techniques.
+
+Further questions include convergence rates and complexity issues, hardly tackled at this day, let us mention the attempt of [43]. Our theory is limited to continuous functions and an interesting venue is to extend it to discontinuous functions, in view of treating ranking operations [10] ubiquitous in recommendation systems, or more generally differentiating through an argmax [6].
+
+Broader impact
+
+One of the goals of the paper is to raise awareness about an important issue of in the training of ML methods: the spuriousness of AD. To address adequately this issue, we think it is necessary to include algorithmic differentiation explicitly in the study of optimization algorithms, a point of view which is largely ignored by today’s machine learning community.
+
+Acknowledgments and Disclosure of Funding
+
+The authors acknowledge the support of ANR-3IA Artificial and Natural Intelligence Toulouse Institute, Air Force Office of Scientific Research, Air Force Material Command, USAF, under grant numbers FA9550-19-1-7026, FA9550-18-1-0226, and ANR MasDol. J. Bolte acknowledges the support of ANR Chess, grant ANR-17-EURE-0010 and ANR OMS. The authors would like to thank anonymous referees for careful reading of this work and useful suggestions. The authors would like to thank N. Asher and S. Gerchinovitz for useful discussions. We also warmly thank J. Malick who triggered this research.
+
+This is the appendix for “A mathematical model for automatic differentiation in machine learning”.
+
+A A more comprehensive discussion and auxiliary results
+
+A.1 Related work and contribution
+
+The use of backward mode of algorithmic differentiation (AD) for neural network training expanded in the 80’s, the most cited reference being [39]. However the theory applies to much more optimization problems, see for example [24]. Indeed, numerical libraries implementing the backward mode of AD were already available in the 90’s for FORTRAN code [8, 9] or C/C++ code [22], 30 years before the emergence of python libraries. These early implementation could differentiate virtually any code, but their domain of validity, i.e., the setting for which one could predict what the output would be, was restricted to differentiable functions evaluated on their (open) domain of differentiability.
+
+This was well known to the AD community, see for example [23], and exploring further the domain of validity of AD, beyond mere differentiability, was already a vivid problem.
+
+Let us mention [23] who used notions such as finite selection, “isolated criticalities”, stable domain or regular arcs, and argued that “functions given by evaluation procedures are almost everywhere real analytic or stably undefined” where “undefined” meant that a nonsmooth elementary function is used in the evaluation process. For piecewise smooth functions which nonsmoothness can be described using the absolute value function (abs-normal form), [25] developped a piecewis linearisation formalism and local approximation related to AD, [26] proposed an AD based bundle type method. These developments are based on the notion of piecewise smooth functions [40] which we use in this work. More recently, [28] applied these techniques to single layer neural network training and [29] proposed to avoid the usage of subgradient “oracles” in nonsmooth analysis as they are not available in practice. In a similar vein, let us mention [2] study lexicographic derivatives, a notion of directional derivatives which satisfy a chain rule making them compatible by forward mode AD, and [43] who use directional derivatives in the context of local sampling stochastic approximation algorithms for machine learning.
+
+Constraint qualification is known in nonsmooth analysis to ensure favorable behavior of chain rules of differential calculus for nonsmooth objects (see [38]). These already appeared in the context of piecewise smooth functions of Scholtes with the notion of “essential selections”. Such an approach was used in [30] to propose an AD algorithm for subgradient computation under constrant qualification. Similarly [27] study first and second order optimality, in relation to AD using constraint qualification.
+
+The current work departs from all these approaches in a fundamental way. We propose to study backward mode of AD, as implemented for nonsmooth functions by standard software (e.g. TensorFlow, PyTorch), without any modification, addition of operations or hypotheses. Our theoretical results model AD as implemented in current machine learning libraries. Contrary to previous works, our focus is precisely on the unpredictable behavior of AD in nonsmooth context. Our main contribution is to show that in a stochastic optimization context, this spurious behavior is essentially harmless from a theoretical point of view, providing justifications for the use of AD outside of its original domain of validity in machine learning.
+
+At the time this paper was accepted, we learnt about a paper proposing an analysis close to ours [33]. The authors show that AD applied to programs involving piecewise analytic continuous functions, under analytic partitions, compute gradients almost everywhere. This is the counterpart of Proposition 3, replacing log-exp elementary function in Definitions 1 and 2, by analytic functions.
+
+A.2 Implementation of relu
+
+The implementation of the relu function used in Figure 1 is given by the function tf.nn.relu in Tensorflow software library [1]. This implementation corresponds to the selection function described in Section 2 and the same result may be obtained by an explicit implementation of this branching selection as illustrated in the following figure
+
+One can imagine an equivalent implementation of relu with a slightly different branching involving a strict inequality, that would correspond to an equivalent implementation of the same function, but the computed derivative at 0 is different due to the implementation
+
+A.3 Auxiliary results and remarks
+
+Remark 1 (Elementary piecewise differentiable functions)
+
+(a) The building blocks in the construction of S in Definition 3 could be modified and adapted to other needs. Besides, the results we present in this article would remain true if we added real analytic functions restricted to compact sets.
+
+(b) Note also that in Definition 3, functions are actually real analytic on their (open) domain of definition. Yet their extension might not be analytic, as for instance the function f: x ≠ 0 → exp(-1/x²) extended by f(0) = 0.
+
+(c) The construction of elementary piecewise functions in Definition 3, does not coincide in general with some natural minimal o-minimal, but are contained in a larger such structure. For instance, when the basic bricks are polynomial functions, we obtain the field of rational functions which differs from the set of semi-algebraic functions.
+
+Proposition 6 (Df has a closed graph) As k → ∞, assume that xk → x¯ ∈ ℝp and vk ∈ Df (xk), vk → v¯. Then ¯v ∈ D(x¯).
+
+B Proofs
+
+Proof of Theorem 1: Recall the operator is denoted by ∂A. Fix a function f, by point (a), the operator ∂Af should contain
+
+ℝp → ℝp
+
+x → {A(P)(x): F(P) = f, P ∈ P}
+
+Let us show that the graph of the above is ℝp × ℝp. Assume p = 1 for simplicity. For real numbers r, s, consider the functions fr,s = f + r zero(· - s) which coincide with f but whose form induces programs Pr,s of f. These satisfy F(Pr,s) = f and A(Pr,s)(s) ∋ A(f)(s) + r. Since r is arbitrary, ∂Af(s) = ℝp and since s is arbitrary, we actually have
+
+graph ∂Af = ℝp × ℝp.
+
+Since f is arbitrary, we have shown that ∂A is trivial.
+
+|
+
+Proof of Proposition 2: The proposition is a consequence of Theorem 3 and (11) but it admits a more elementary proof which we detail here. Fix x, y ∈ ℝp. Let us admit the following claim –whose independent proof is given in Section C.
+
+Claim 1 There exists a finite set of numbers 0 = a₀ < a₁ <... < aN = 1, such that for all i ∈ 0,... N - 1, the function t ↦ s(x + t(y - x)) is constant.
+
+Fix i ∈ 0..., N - 1, and j ∈ 1... m such that f = fj on (x + ai(y - x), x + ai₊₁(y - x)). Since fj ∈ Ep, it is C₁ and we have by the fundamental theorem of integral calculus
+
+∫ ai₊¹
+
+f(x + ai₊₁(y - x)) - f(x + ai(y - x)) = ⟨∇fj(x + t(y - x)), y - x⟩ dt
+
+ai
+
+∫ ai₊¹
+
+A E
+
+= ∇p f(x + t(y - x)), y - x dt.
+
+ai
+
+The conclusion follows because
+
+N-1
+
+∑
+
+f(y) - f(x) = f(x + ai₊₁(y - x)) - f(x + ai(y - x))
+
+i=0
+
+N⁻¹ ∫ ai₊¹
+
+∑ A E
+
+= ∇p f(x + t(y - x)), y - x dt
+
+i=0 ai
+
+∫ ¹
+
+A E
+
+= ∇p f(x + t(y - x)), y - x dt.
+
+|
+
+Proof of Proposition 3: Constructs the sets Ui by considering sets Vj = {x ∈ ℝp, s(x) = j}, j = 1... m, the proof of the following claim is postponed to Section C.
+
+Claim 2 The boundary of each Vj has zero measure and cl `∪mi₌jint(Vj) = ℝp.
+
+Hence, we may define U₁,..., UN by keeping only those sets with nonempty interior and take their closure. On each set Ui, f is identical to fk for some k and the result follows. |
+
+Lemma 2 Let t ∈ I be an elementary index on ℝp₂ and F: ℝp₁ ↦ ℝp₂ with each coordinate in E, then t ∘ F is an elementary index on ℝp¹.
+
+Proof: Fix an arbitrary integer i in the image of t, by Definition 2, there exists elementary functions h₁,..., hJ, J ∈ ℕ on ℝp₂ such that t(y) = i if and only if y ∈ Ki:= {z ∈ ℝp₂, hj(z) ∼j 0, j = 1,... J} where ∼j is an equality or inequality sign depending on j. Then t(F (x)) = i if and only if F (x) ∈ Ki which is equivalent to say that x ∈ K˜i:= {x ∈ ℝp₁, hj(F (x)) ∼j 0, j = 1,... J}. By Definition 1, hj ∘ F is an elementary function for j = 1,..., J and i was an arbitrary integer, this shows that we have an elementary index. | Proof of Proposition 1: Let F: ℝp₁ ↦ ℝp₂ such that each of its coordinate fi, i = 1... p₂, is in S and g: ℝp₂ ↦ ℝ, g ∈ S. We establish that g ∘ F is an elementary selection, the other cases are similar. We may consider all possible intersections of constant index domains across all coordinates of F in {1,..., p₂}. We obtain (s, F₁,..., Fm), an elementary selection for F (each Fi: ℝp₁ ↦ ℝp₂ has coordinates in E). Consider g ∈ S with elementary selection (t, g₁,..., gl). The composition g ∘ F may be written as
+
+g(F (x)) = gt₍F ₍x₎₎(F (x)) = gt₍Fs₍x₎₍x₎₎(Fs₍x₎(x)).
+
+For each i = 1..., m and j = 1,..., l, consider the set
+
+Uij = {x ∈ ℝp, s(x) = i, t(Fi(x)) = j}.
+
+Fix (i, j) in {1,..., m} × {1,..., l}, by Lemma 2, t ∘ Fi is an elementary index on ℝp¹. Hence Uij is the solution set of finitely many equalities and inequalities involving functions in E. We associate to the bi-index (i, j) the corresponding set Uij and the function gj(Fi(x)) ∈ E. Note that we assumed that the composition is well defined. Identifying each pair (i, j) with a number in {1,..., nm}, we obtain an elementary selection for g ∘ F and hence g ∘ F ∈ S. |
+
+Proof of Proposition 4: The derivation formula follows from the proof argument of Proposition 1, for each pair (i, j), the function gj ∘ Fi is the composition of two C₁ functions and its gradient is given by JFi × ∇gj ∘ Fi on Uij. By construction of Uij and definition of the selection derivative, this corresponds to (5) on Uij and the result follows. | Proof of Lemma 1: We actually prove a slightly stronger result, namely for each i ∈ {p+1,..., m-1}
+
+Pi `I - ei₊₁eTi₊₁ + di₊₁eT... `I - emeTm + dmeT = Pi `I + di₊₁eT... `I + dmeT
+
+i+1 m i+1 m
+
+(9)
+
+We argue by exhaustion from i = m - 1 downward to i = p, which is the result of interest. If i = m - 1, we indeed have
+
+Pm₋₁ `I - emeTm + dmeT = Pm₋₁ `I + dmeT
+
+m m
+
+since Pm₋₁emeTm = 0. Now assume that (9) holds true for an index i within {p + 1,..., m - 1}, then we have Pi₋₁ `I - eieTi + dieT... `I - emeTm + dmeT
+
+i m
+
+Pi₋₁ `I - eieTi + dieT `I - ei₊₁eTi₊₁ + di₊₁eT... `I - emeTm + dmeT =
+
+i i+1 m
+
+Pi₋₁ `I - eieTi + dieT Pi `I - ei₊₁eTi₊₁ + di₊₁eT... `I - emeTm + dmeT =
+
+i i+1 m
+
+Pi₋₁ `I + dieT Pi `I + di₊₁eT... `I + dmeT =
+
+i i+1 m
+
+Pi₋₁ `I + dieT `I + di₊₁eT... `I + dmeT, =
+
+i i+1 m
+
+where step 1 is expanding the product, step 2 is because Pi₋₁Pi = Pi₋₁ and eTi Pi = eTi, step 3 combines the fact that Pi₋₁ei = 0 and (9) which we assumed to be true, the last step uses again the fact that Pi₋₁Pi = Pi₋₁ and eTi Pi = eTi. Hence the result holds by exhaustion.
+
+|
+
+Proof of Proposition 6: Consider the sequence sk = S(xk), by taking a subsequence we may assume that sk is constant, say equal to {1,..., r}. Hence for all k, vk ∈ conv ({∇fi(xk), i = 1,... r}) and f(xk) = fi(xk), i = 1,..., r. Passing to the limit, we have f(x¯) = fi(x¯), i = 1,..., r and hence {1,..., r} ∈ S(x). Furthermore, ¯v ∈ conv ({∇fi(x¯), i = 1,... r}) ⊂ Df (x¯). |
+
+C o-minimal structures, definability and conservative fields
+
+C.1 (ℝ, exp)-definability
+
+We recall here the results of geometry that we use in the present work. Some references on this topic are [19, 21].
+
+An o-minimal structure on (ℝ, +, ·) is a collection of sets O = (Op)p∈ℕ where each Op is itself a family of subsets of ℝp, such that for each p ∈ ℕ:
+
+(i) Op is stable by complementation, finite union, finite intersection and contains ℝp.
+
+(ii) if A belongs to Op, then both A × ℝ and ℝ × A belong to Op₊₁; (iii) if π: ℝp₊₁ → ℝp is the canonical projection onto ℝp then, for any A ∈ Op₊₁, the set π(A) belongs to Op; (iv) Op contains the family of real algebraic subsets of ℝp, that is, every set of the form
+
+{x ∈ ℝp | g(x) = 0}
+
+where g: ℝp → ℝ is a polynomial function;
+
+(v) the elements of O₁ are exactly the finite unions of intervals.
+
+A subset of ℝp which belongs to an o-minimal structure O is said to be definable in O. A function is definable in O whenever its graph is definable in O). A set valued mapping (or a function) is said to be definable in O whenever its graph is definable in O. The terminology tame refers to definability in an o-minimal structure without specifying which structure.
+
+The simplest o-minimal structure is given by the class of real semialgebraic objects. Recall that a set A ⊂ ℝp is called semialgebraic if it is a finite union of sets of the form
+
+k
+
+{x ∈ ℝp | gi(x) < 0, hi(x) = 0}
+
+i=1
+
+where the functions gi, hi: ℝp → ℝ are real polynomial functions and k ≥ 1. The key tool to show that these sets form an o-minimal structure is Tarski-Seidenberg principle which ensures that (iii) holds true.
+
+According to [42], there is an o-minimal structure which contains all semialgebraic sets and the graph of the exponential function, we fix this o-minimal structure and call it O. As a consequence, all functions which can be described by a finite compositional expression involving polynomials, quotients, exponential and logarithms are definable in O. In particular any function f ∈ S is definable in O, which opens the use of powerful geometric tools [19, 21] for functions in S. From now on, we call an object definable if it is definable in O.
+
+As detailed in [19] the following holds true
+
+Proposition 7 (Quantifier elimination) Any first order formula (quantification on variables only) involving definable functions and definable sets describes a definable set.
+
+This allows to prove Claim 1
+
+Proof of Claim 1: The function t ↦ s(x + t(y - x)) is definable and has values in {1,..., m}. For each j ∈ {1,..., m}, the set Sj = {t ∈ [0, 1], s(x + t(y - x)) = j} is definable, and by (v), it is a finite union of intervals. For each j consider only the endpoints of those intervals with nonempty interior, this provides the desired partition. |
+
+C.2 Properties of definable sets
+
+The tangent space at a point x of a manifold M is denoted by TxM. Given a submanifold₆ M of a finite dimensional Riemannian manifold, it is endowed by the Riemanninan structure inherited from the ambient space. Given f: ℝp → ℝ and M ⊂ ℝp a differentiable submanifold on which f is differentiable, we denote by gradM f its Riemannian gradient or even, when no confusion is possible, grad f. A Cr stratification of a (sub)manifold M (of ℝp) is a partition S = (M₁,..., Mm) of M into Cr manifolds having the property that cl Mi ∩ Mj ≠ ∅ implies that Mj is entirely contained in the boundary of Mi whenever i ≠ j. Assume that a function f: M → ℝ is given and that M is stratified into manifolds on which f is differentiable. For x in M, we denote by Mx the strata containing x and we simply write grad f(x) for the gradient of f with respect to Mx.
+
+Stratifications can have many properties, we refer to [21] and references therein for an account on this question and in particular for more on the idea of a Whitney stratification that we will use repeatedly. We pertain here to one basic definition: a Cr-stratification S = (Mi)i∈I of a manifold M has the Whitney-(a) property, if for each x ∈ cl Mi ∩ Mj (with i ≠ j) and for each sequence (xk)k∈ℕ ⊂ Mi we have:
+
+klim→∞ xk = x,
+
+/
+
+.
+
+⇒ TxMj ⊂ T
+
+klim→∞ TxkMi = T
+
+/
+
+-
+
+where the second limit is to be understood in the Grassmanian, i.e., “directional”, sense. In the sequel we shall use the term Whitney stratification to refer to a C¹-stratification with the Whitney-(a) property. The following can be found for example in [21].
+
+Theorem 5 (Whitney stratification) Let A₁,..., Ak be definable subsets of ℝp, then there exists a definable Whitney stratification (Mi)i∈I compatible with A₁,..., Ak, i.e. such that for each i ∈ I, there is t ∈ {1,... k}, such that Mi ⊂ At.
+
+This allows for example to prove Claim 2 Proof of Claim 2: The sets V₁,..., Vm form a definable partition of ℝp. Consider a Whitney stratification of ℝp, (Mi)i∈I compatible with the closure of V₁,..., Vm. The boundary of each Vi is a finite union of strata of dimension strictly smaller than p and hence has measure zero. The remaining strata (open of maximal dimension) have to be dense in ℝp since we started with a partition.
+
+|
+
+⁶We only consider embedded submanifolds
+
+C.3 Variational stratification and projection formulas
+
+Definition 6 (Variational stratification) Let f: ℝp → ℝ, be locally Lipschitz continuous, let D: ℝp → ℝp be a set valued map and let r ≥ 1. We say that the couple (f, D) has a Cr variational stratification if there exists a Cr Whitney stratification S = (Mi)i∈I of ℝp, such that f is Cr on each stratum and for all x ∈ ℝp,
+
+ProjTMx₍x₎D(x) = {grad f(x)}, (10)
+
+where grad f(x) is the gradient of f restricted to the active strata Mx containing x.
+
+The equations (10) are called projection formulas and are motivated by Corollary 9 in [11] which states that Clarke subgradients of definable functions have projection formulas.
+
+Let us recall the definition of conservative set-valued mappings from [12] and one of its characterization.
+
+Definition 7 (Conservative set-valued mappings) Let f be a Lipschitz continuous function. A set valued vector field D is called conservative if for any absolutely continuous path γ: [0, 1] ↦ ℝ, we have
+
+∫ ¹ ∫ ¹
+
+f(γ(1)) - f(γ(0)) = v∈Dmin₍γ₍t₎₎ ⟨v, γ9 (t)⟩ dt = v∈maxD₍γ₍t₎₎ ⟨v, γ9 (t)⟩ dt. (11)
+
+0 0
+
+Equivalently D is conservative for f, if for all absolutely continuous curves γ: [0, 1] ↦ ℝp, for almost all t ∈ [0, 1], f ∘ γ is differentiable and
+
+d
+
+dtf(γ(t)) = ⟨v, γ9 (t)⟩, ∀v ∈ D(γ(t)).
+
+The following combines other results from [12], where one implication is essentially due to [20] based on [11].
+
+Theorem 6 (Characterization of conservativity) Let D: ℝp → ℝp be a definable, nonempty compact valued, graph closed set valued field and f: ℝp ↦ ℝ be a definable locally Lipschitz function. Then the following are equivalent
+
+• D is conservative for f.
+
+• For any r ≥ 1, (f, D) admit a Cr variational stratification.
+
+This result allows to prove the following Proof of Theorem 3: We prove that there is a C₁ projection formula (see Theorem 6). For each I ⊂ {1,..., m}, set VI = {x ∈ ℝp, S(x) = I}. On each set VI, f(x) = fi(x) for all i ∈ I. These sets are definable, hence, there is a definable Whitney stratification of ℝp which is compatible with them (Theorem 5). For any C₁ manifold M in the stratification there is an index set I ⊂ {1,..., m} such that for all i ∈ I and all x ∈ M, f(x) = fi(x) and S(x) = I. Since each fi, i ∈ I is C₁ and they agree on M, they represent the same function when restricted to M. Hence they have the same differential on M and since they are all globally C₁ this agrees with the projection of their gradient on the tangent space of M. Hence the projection of Df (x) to the tangent space to M at x is single valued and corresponds to the derivative of f restricted to M. This is sufficient to conclude as this is precisely the variational stratification required by Theorem 6. |
+
+D Convergence to selection critical points
+
+Proof of Theorem 4, first part: We use here the results on conservative fields developed in [12]. To prove the theorem it suffices to establish that:
+
+• DJ is a conservative field for J
+
+• the number of DJ critical values are finite.
+
+The first point is Theorem 6 while the second one is the consequence of the latter and the definability of the couple f, Df, see Proposition 8 (ii). To conclude it suffices to apply the convergence results in [12, Theorem 9]. |
+
+Proof of Theorem 4, second part: This result is a consequence of the more general Theorem 7 established in Section E. Let F be the finite set given in Theorem 7, the set
+
+{c ∈ (0, 1], ∃k ∈ ℕ, cγk ∈ F },
+
+is countable, and hence has zero measure. So for almost all c ∈ (0, 1], {cγk}k∈ℕ does not intersect F. Using Theorem 7, there is a zero measure set N such that any initialization outside N provides almost surely a subgradient sequence. By hypothesis, for almost every x₀ ∈ K∖N, the sequence is bounded almost surely and the result follows from Theorem 7. |
+
+E Artificial critical points
+
+Being given a Lipschitz continuous function on ℝp and a conservative field D, one has two types of D-critical points:
+
+• Clarke critical points: ∂cf(x) ∋ 0, we denote the set of these points by critcf
+
+• Artificial critical points ∂cf(x) ∌ 0 and D(x) ∋ 0, we denote this set by critaf
+
+Critical values are defined accordingly as images of critical points.
+
+Proposition 8 (Artificial critical points) Assume f: ℝp → ℝ and D: ℝp → ℝp are definable in a common o-minimal structure. The connected components Ci of critaf, which are in finite number, satisfy
+
+(i) dim Ci < p
+
+(ii) f(Ci) is a singleton, and as a consequence the D critical values of f are in finite number,
+
+(iii) critaf does not contain local minimum (nor local maximum)
+
+Proof: By definability of critaf, the number of connected components is finite.
+
+If Ci had full dimension it would contain a non trivial ball on which f should be constant by the integral property. This would in turn imply that the points in the ball would also be local minimum and thus Clarke critical, which is impossible.
+
+To see that the critical values are in finite number it suffices to evoke the fact that Clarke critical values are finite [11] and use that artificial critical values are in finite number. By definability the connected components are arcwise-connected with piecewise C₁ paths. Using the integral property this shows f is constant on Ci.
+
+(iii) is obvious since local minimum or maximum are Clarke critical. |
+
+As explained in the introduction, artificial critical points are “computing artefacts”, whence their names. For algorithmic differentiation the “gradient” provided by a program is zero while the point might even be a smooth non critical point. We consider the setting of the mini-batch algorithm of the last section.
+
+Theorem 7 Assume that each f₁,..., fn belongs to S. There exists a finite subset of steps F ⊂ (0, +∞) and a zero measure meager subset N of ℝp, such that for any positive sequence γk = o(1/ log k) avoiding values in F, and any almost surely bounded sequence with initial condition in ℝp∖N, we have
+
+• J(xk) converges towards a Clarke critical value almost surely,
+
+• the cluster points of xk are Clarke critical point almost surely.
+
+Proof: The proof is twofold. We first prove that the set of initial conditions leading to an artificial critical point or more generally to a non differentiability point within a finite time is “small”. We then use this fact to conclude.
+
+Claim 3 Let g: ℝp → ℝ be a definable differentiable function. Set, for λ > 0,
+
+Φλ = λId - ∇g,
+
+where Id denotes the identity. There exists a finite set F in (0, +∞) such that,
+
+∀λ ∈ (0, +∞)∖F, ∀Z ⊂ ℝp definable, dim Z < p ⇒ dim Φ₋₁
+
+λ (Z) < p. (12)
+
+Proof of the claim. Denote by L the set of points where g is twice differentiable so that L is dense and definable. Denote by λ₁,..., λp: L → ℝ a representation of the eigenvalues of ∇²g. Refine L to be contained in the common domain of differentiability for each λi, L remains open and dense. By the definable Sard’s theorem the critical values of each function λi is finite, so that the set of all these values which we denote by F is itself finite.
+
+Take a positive real λ ∉ F and consider the set
+
+Kλ:= {x ∈ L: Φλ¹ (x) = λId - ∇²g(x) is not invertible}.
+
+d
+
+∏
+
+By diagonalization, we see that the determinant of Φ¹λ(x) is (λ - λi(x)) for any x, thence
+
+i=1
+
+m
+
+⋃
+
+Kλ ⊂ {x ∈ L, λi(x) = λ}.
+
+i=1
+
+Since λ is a regular value for each λi the previous set is a finite union of manifolds of dimension p-1, see e.g., [19]. This implies that the set ℝp∖Kλ = {x ∈ L: Φ¹λ(x) is invertible } is dense. Using the above, we deduce that there exists finitely many open connected subsets U₁,..., Ur ⊂ L of ℝp∖Kλ such that U₁ ∪... ∪ Ur is dense in L and thus in ℝp. Take now Z ⊂ ℝp definable with dim Z < p. Assume towards a contradiction that there exists a nonempty open ball B in Φ⁻λ ¹(Z). In that case B must have a nonempty intersection with some Ui₀. The set Φλ(B ∩ Ui₀) is open because Φλ is a diffeomorphism on Ui on its image. Since on the other hand we have Φλ(B ∩ Ui₀) ⊂ Z, we have a contradiction and the claim is proved. |
+
+For each I ⊂ {1,..., n}, we denote by fI,₁,..., fI,mI the bricks attached to fI where mI ≥ 1. Denote by Sing the set of points on which at least one fI is non differentiable and C the set of points for which ∇p fI ≠ ∇fI for at least one I. By Proposition 3 and definability, Sing and C are finite unions of manifolds of dimension at most p - 1. Set ΦkI,j = Id - γk∇fI,j, with I ⊂ {1,..., m}, j ∈ {1,..., mI} and Id denotes the identity. Applying Claim 3, we can find a finite set F for which γk ∉ F implies that each ΦkI,j has the property (12). Indeed, for each I ⊂ {1,..., m}, j ∈ {1,..., mI}, there is FI,j ⊂ ℝ finite such that fI,j has property (12). Since the subsets I are in finite number and each mI is finite, the set F = ⋃ ⋃j∈{₁,...,mI} FI,j, is also finite. For each k ∈ ℕ, I ⊂ {1,..., m}, j ∈ {1,..., mI}. I⊂{1,...,m} Remark that if γk ∉ F then ΦkI,j has property (12).
+
+For k ≤ k₀ fixed, let us consider the finite set of definable mappings defined by
+
+{ k
+
++
+
+∏ Φj
+
+Ψk₀:= Ij,ij: k ≤ k₀, Ij ⊂ {1,..., n}, ij ∈ {1,..., mIj }.
+
+j=1
+
+We now assume that γk ∉ F, ∀k ≥ 0, so that each mapping in Ψk₀ has the property (12) and
+
+Nk₀:= {x ∈ ℝp: ∃k ≤ k₀, ∃Φ ∈ Ψk(x) ∈ C ∪ Sing}
+
+These are initial conditions in U leading to an artificial critical or a non-differentiability point within U before time k₀.
+
+We can also write
+
+⋃ Φ₋₁ (C ∪ Sing).
+
+Nk₀ ⊂
+
+Φ∈Ψk₀
+
+From stratification arguments we know that Sing has a dimension lower than p - 1. On the other hand, C has dimension strictly lower than p by Proposition 3. Claim 3 applies and yields dim Φ₋₁ (C ∪ Sing) < p for all Φ ∈ Φk₀. As a consequence Nk₀ is closed with nonempty interior and so does N:= ∪k∈ℕNk by Baire’s theorem. Similarly N has zero measure as a countable union of zero measure sets.
+
+This proves that any sequence with initial condition out of N must remain in the zone of differentiability of J as well as all fI. In particular if I is taken uniformly at random among possible subsets, for all x ∉ N, we have 𝔼I[∇p fI(x)] = ∇p J(x) = ∇J(x) = ∂cJ(x), so that these specific sequences can also be seen as stochastic subgradient sequences for J. To be more specific, the sequence xk can be seen as one of the sequence generated by the algorithm
+
+yk₊₁ ∈ yk - γk∂cJ(yk) + ϵk
+
+where ϵk is a random noise with zero mean. Using general results [20, 5], we know that yk sequences, when bounded almost surely, have limit points which are Clarke critical. |
