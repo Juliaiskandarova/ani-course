@@ -1,0 +1,11 @@
+Numerical solution of the system of Navier-Stokes equations  
+in the case of a compressible medium using neural networks 
+Abstract. The use of the Physics Informed Neural Networks (PINN) method for the numerical solution of a nonstationary 
+nonlinear system of partial differential equations describing the process of motion of a one-dimensional heat-conducting gas 
+is considered. The approach is based on the fact that a neural network approximates the solution of a system of differential 
+equations, while taking into account the physics of the simulated process. The neural network is trained by minimizing  
+a quadratic functional built on the difference between the predicted values and residuals of differential equations, boundary 
+and initial conditions. Different types of approximation of the original equations are discussed in the case when the operator 
+is continuous or discrete in time. An analysis of the presented methods is carried out. Their advantages and disadvantages are 
+indicated. 
+Keywords: Navier-Stokes equations; simulation of gas dynamics processes; neural networks.

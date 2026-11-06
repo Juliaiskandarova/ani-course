@@ -1,0 +1,33 @@
+Numerical Solution of the Navier–Stokes Equations
+in the Case of a Compressible Medium Using Neural Networks
+Abstract. The issues of using the Physics Informed Neural Networks (PINN) method for the
+numerical solution of a nonstationary nonlinear system of partial differential equations
+describing the motion process of a one-dimensional heat-conducting gas are considered. The approach used is based on the fact that
+the neural network approximates the solution of the system of differential equations, while taking into account the physics of the modeled
+process. The training of the neural network is based on the minimization of a quadratic functional constructed
+on the residual of differential equations, boundary and initial conditions. Various types
+of approximation of the original equations are discussed for the case when the time operator is continuous or discrete. An analysis
+of the simulation results has been performed.
+Keywords: Navier–Stokes equations; neural networks; simulation of gas dynamics processes.
+Numerical solution of the Navier–Stokes equations is relevant due to its wide practical
+application. Of particular interest is the numerical solution of such problems in application
+to compressible mediums due to their mathematical complexity.
+The behavior of solutions to the Navier–Stokes equations "in the large" with respect to time for a compressible medium has been
+exhaustively studied only in the one-dimensional case.
+In the work, a method for solving partial differential equations using neural networks is described for the first time. The authors proposed an approach based on the principle
+of approximating an unknown function by a neural network by minimizing a quadratic functional
+including the equation residual, initial and boundary conditions. Subsequently, the method became
+widespread under the name Physics Informed Neural Networks (PINN) and has been actively used
+in recent years to solve various problems of hydrodynamics. In the work, a method
+of time discretization using high-order Runge–Kutta methods is considered, which allows
+reducing the requirements for computational power during calculation without losing the accuracy of the solution.
+In the works, the solution of the Navier–Stokes equations is considered. In, the solution
+of the problem of reconstructing unknown parameters and the pressure field from known values of the medium velocity is presented.
+In, the solution of the Reynolds equations in the two-dimensional stationary case at
+Reynolds numbers in the range of 102–2·105 is investigated. In the works, a comparison of the solutions of differential equations obtained by approximation with experimental data is carried out.
+In this work, the approach developed in is used to solve the Navier–Stokes equations in the case of a compressible medium. The application of PINN is investigated both in the case of a continuous-time model of the process and for a model with time discretization. Note that the Navier–Stokes equations in the case of a compressible and in the case of an incompressible medium differ from the point of view of the classification
+of differential equations, and therefore the same solution ways and methods cannot be applied to them. Another feature of this work is the study of the possibility of solving
+the system of equations for an inhomogeneous medium characterized by large Reynolds and
+Péclet numbers, Re ≈ 107, Pe ≈ 107, which correspond to the real physical characteristics of gas
+motion. It is shown that the use of time discretization allows reducing the requirements for computational
+resources.
