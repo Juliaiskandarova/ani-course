@@ -1,0 +1,19 @@
+Part A
+
+Machine Learning Methods for Identifying Fire Hotspots
+
+Abstract. This article presents an analysis of the machine learning algorithms random forest, logistic regression, and convolutional neural network. A review of scientific and scientific-technical literature on the research topic is provided, and the key advantages and limitations of the considered algorithms are analysed. Special attention is paid to the application of the algorithms in image classification tasks, data collection, and the preparation of satellite images for training. The article contains a practical implementation and a comparative analysis of the algorithms’ effectiveness under various conditions. The purpose of the article is to provide an understanding of the mathematical foundations of the algorithms and the practical aspects of applying machine learning algorithms to detect wildfires in satellite images.
+
+Keywords: logistic regression, random forest, convolutional neural network, satellite images, wildfire, spectral bands, confusion matrix, ROC-AUC metric.
+
+Part B
+
+Random Forest
+
+To compare with the algorithm already considered, the ensemble random forest algorithm was selected. Models based on this algorithm did not exhibit overfitting even when using a combination of all spectral bands of the images; the ROC metric was 0.8572. However, the model using the combination of bands 2–7 achieved higher accuracy, ROC = 0.8603. Model parameters: 200 decision trees, standard class weight balancing. For the first model: maximum decision tree depth of 15, minimum samples per leaf of 2, minimum samples per split of 5. For the second: maximum decision tree depth of 20, minimum samples per leaf of 5, minimum samples per split of 2.
+
+Confusion matrices for models trained on all seven spectral bands and on six spectral bands excluding the coastal aerosol band are shown in Fig. 3 and 4, respectively.
+
+In the confusion matrices (Fig. 3 and 4), it can be observed how ineffective the models are at predicting class 1 (fire images). Two-thirds of such images are misclassified as class 0 (no fire); such a prediction outcome is not acceptable for the task of detecting fire hotspots for rapid suppression. The random forest model trained on all spectral bands provides more accurate predictions for class 1, but also more erroneous predictions for class 0. Standard methods for handling imbalanced class distribution are not suitable for the random forest algorithm.
+
+Following testing on the test images, the models did not detect any fire hotspots in any of the images. Training on all available spectral bands did not remedy the situation; the same techniques for mitigating imbalanced class distribution used for the logistic regression algorithm proved less effective. In light of the obtained results, further consideration of the random forest method is not advisable.

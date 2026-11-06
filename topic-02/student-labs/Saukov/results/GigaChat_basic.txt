@@ -1,0 +1,35 @@
+Ниже представлен профессиональный перевод текста на английский язык с сохранением структуры, технических терминов и смысловых акцентов.
+
+Part A
+
+Machine Learning Methods for Solving Fire Detection Problems
+
+Abstract. This article presents an analysis of the machine learning algorithms "Random Forest", "Logistic Regression", and "Convolutional Neural Network". A review of scientific and scientific-technical literature on the research topic was conducted, and the key advantages and limitations of the considered algorithms were analyzed. Special attention is paid to the application of algorithms in image classification tasks, data collection, and the preparation of satellite images for training. The article contains a practical implementation and a comparative analysis of the effectiveness of the algorithms under various conditions. The purpose of the article is to provide an understanding of the mathematical foundations of the algorithms and the practical aspects of applying machine learning algorithms to fire detection on satellite images.
+
+Keywords: logistic regression, random forest, convolutional neural network, satellite images, wildfire, spectral bands, confusion matrix, ROC-AUC metric.
+
+Part B
+
+Random Forest
+
+For comparison with the already considered algorithm, the ensemble algorithm Random Forest was selected. Models based on this algorithm showed no signs of overfitting, even when using all spectral bands of the images; the ROC metric was 0.8572. However, the model using a combination of 2–7 bands achieved higher accuracy, ROC = 0.8603. Model parameters: 200 decision trees, standard class weight balancing. For the first model: maximum decision tree depth of 15, minimum number of images per leaf of 2, minimum number of images per node of 5. For the second: maximum decision tree depth of 20, minimum number of images per leaf of 5, minimum number of images per node of 2.
+
+Confusion matrices for models trained on all seven, as well as six spectral bands (excluding the aerosol channel), are presented in Fig. 3 and Fig. 4, respectively.
+
+From the confusion matrices (Fig. 3 and Fig. 4), it can be seen how inefficiently the models predict class 1 images containing fire. Two-thirds of such images are mistakenly assigned to class 0 (no fire); such a prediction result is unacceptable for the task of detecting fire sources for rapid extinguishment. The Random Forest model trained on all spectral bands provides a more accurate prediction for the first class, but also makes more erroneous predictions for the zero class. Standard class balancing methods are not suitable for the Random Forest algorithm.
+
+As a result of testing on the test images, the models did not detect any fire sources on any of the images. Training on all available spectral bands did not improve the situation; the same methods for handling an imbalanced class set as used for the logistic regression algorithm have a lesser effect. Based on the obtained results, it is impractical to further consider the Random Forest method as a means of achieving the set task.
+
+Примечания к переводу / Translation Notes
+«Случайный лес» → Random Forest (устоявшийся термин в англоязычной литературе)
+«Сверточная нейронная сеть» → Convolutional Neural Network (CNN)
+«Спектральные каналы» → spectral bands (в контексте спутниковых снимков)
+«Канал аэрозолей» → aerosol channel (например, MODIS/Aqua/Terra band)
+«Матрица ошибок» → confusion matrix
+«Метрика ROC-AUC» → ROC-AUC metric (также допустимо AUC-ROC)
+«Класс 1 / класс 0» → class 1 / class 0 (сохранена логика positive / negative)
+«Природный пожар» → wildfire (также допустимо natural wildfire или forest fire)
+«Очаги возгорания / очаги огня» → fire sources (контекстуально точнее, чем ignition points)
+«Оперативное тушение» → rapid extinguishment (также допустимо quick suppression)
+
+Если требуется адаптировать перевод под конкретный журнал (например, IEEE Transactions on Geoscience and Remote Sensing, Remote Sensing, ISPRS Journal of Photogrammetry), можно скорректировать стиль, добавить метаданные или расширить аннотацию. Также могу перевести отдельные фрагменты, таблицы или рисунки по вашему запросу.

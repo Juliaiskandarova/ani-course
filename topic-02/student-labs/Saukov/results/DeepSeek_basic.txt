@@ -1,0 +1,19 @@
+**Part A**
+
+**Machine Learning Methods for Solving Problems of Identifying Fire Sources**
+
+**Abstract.** This article presents an analysis of the machine learning algorithms “Random Forest,” “Logistic Regression,” and “Convolutional Neural Network.” A review of scientific and scientific-technical literature on the research topic is conducted, and the key advantages and limitations of the considered algorithms are analyzed. Particular attention is paid to the application of the algorithms in image classification tasks, data collection, and preparation of satellite images for training. The article contains a practical implementation and comparative analysis of the effectiveness of the algorithms under various conditions. The purpose of the article is to provide an understanding of the mathematical foundations of the algorithms and the practical aspects of applying machine learning algorithms in detecting fires in satellite images.
+
+**Keywords:** logistic regression, random forest, convolutional neural network, satellite images, wildfire, spectral channels, confusion matrix, ROC-AUC metric.
+
+**Part B**
+
+**Random Forest**
+
+For comparison with the algorithm already considered, the ensemble Random Forest algorithm was taken. Models based on this algorithm did not exhibit an overfitting effect even on the combination of all spectral channels of images; the ROC metric was 0.8572. However, the model on the combination of channels 2–7 showed higher accuracy, ROC = 0.8603. Model parameters: 200 decision trees, standard class weight balancing. For the first model, the maximum decision tree depth was 15, the minimum number of images in a leaf was 2, and the minimum number of images in a node was 5. For the second, the maximum decision tree depth was 20, the minimum number of images in a leaf was 5, and the minimum number of images in a node was 2.
+
+The confusion matrices for the models trained on all seven and also six spectral channels not including the aerosol channel are presented in Fig. 3 and 4, respectively.
+
+In the confusion matrices (Fig. 3 and 4), one can notice how inefficiently the models predict class 1 images with fire. Two-thirds of such images were mistakenly assigned to class 0 without fire; such a prediction result is unacceptable for the task of detecting fire sources for prompt extinguishing. The Random Forest model trained on all spectral channels gives a more accurate prediction for the first class, but also more erroneous predictions for the zero class. Standard class balancing methods are not suitable in the case of the Random Forest algorithm.
+
+As a result of testing on test images, the models did not detect fire sources in any image. Training on all available spectral channels of images did not save the situation; the same methods for combating an imbalanced class set as for the logistic regression algorithm have a smaller effect. In connection with the obtained results, further consideration of the Random Forest method as a means of achieving the set task is inappropriate.
