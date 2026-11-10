@@ -1,0 +1,321 @@
+Project student_testing {
+  database_type: 'PostgreSQL'
+}
+
+// PK, UNIQUE, FK и CHECK ниже задают ограничения базы данных.
+// Правила с пометкой «Транзакция» обеспечиваются приложением или триггерами.
+// Если запись доступна в обход приложения, эти правила должны защищать триггеры
+// либо права доступа, разрешающие запись только через проверяемые операции.
+
+Enum test_variant_mode {
+  common
+  individual
+}
+
+Enum answer_outcome {
+  correct
+  partial
+  incorrect
+}
+
+Table specialties {
+  id bigint [pk, increment]
+  code varchar(32) [not null, unique]
+  name varchar(255) [not null]
+}
+
+Table subjects {
+  id bigint [pk, increment]
+  name varchar(255) [not null]
+  deleted_at timestamptz
+}
+
+Table specialty_subjects {
+  specialty_id bigint [not null]
+  subject_id bigint [not null]
+
+  indexes {
+    (specialty_id, subject_id) [pk]
+  }
+}
+
+// Тема принадлежит одному предмету. Предмет может входить в несколько
+// специальностей, а вопрос может относиться к темам разных предметов.
+
+Table topics {
+  id bigint [pk, increment]
+  subject_id bigint [not null]
+  name varchar(255) [not null]
+  deleted_at timestamptz
+}
+
+Table questions {
+  id bigint [pk, increment]
+  deleted_at timestamptz
+}
+
+Table topic_questions {
+  topic_id bigint [not null]
+  question_id bigint [not null]
+
+  indexes {
+    (topic_id, question_id) [pk]
+  }
+}
+
+// Допущение. Вопрос допускает выбор одного или нескольких вариантов ответа.
+// Транзакция. Для выдачи у каждой используемой редакции должен быть хотя бы
+// один правильный вариант ответа. После первой выдачи этой редакции запрещены
+// её изменение и удаление, а также добавление, изменение и удаление её ответов.
+// Для изменения текста, ответов или ключа создаётся новая редакция.
+// Удаление предметов, тем и вопросов из справочника логическое. Новые выдачи
+// исключают удалённые записи. Архив сохраняет ссылки и выданное содержание.
+// Названия справочников в отчётах отображаются в их текущей редакции.
+
+Table question_revisions {
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  revision_number int [not null]
+  question_text text [not null]
+
+  indexes {
+    (question_id, revision_number) [unique]
+    (question_id, id) [unique]
+  }
+}
+
+Table question_options {
+  question_revision_id bigint [not null]
+  option_number int [not null]
+  option_text text [not null]
+  is_correct boolean [not null]
+
+  indexes {
+    (question_revision_id, option_number) [pk]
+  }
+}
+
+Table student_groups {
+  id bigint [pk, increment]
+  specialty_id bigint [not null]
+  code varchar(32) [not null, unique]
+}
+
+Table students {
+  id bigint [pk, increment]
+  group_id bigint [not null]
+  student_number varchar(32) [not null, unique]
+  full_name varchar(255) [not null]
+}
+
+// Допущение. Один тест — одна выдача для одной группы с общим сроком сдачи.
+// NULL в issued_at означает черновик. archived_at отмечает закрытие приёма
+// и перенос теста в архив. Результаты остаются в тех же таблицах.
+//
+// Транзакция выдачи. До установки issued_at проверить одновременно:
+// 1. Список назначений в test_attempts совпадает с текущим списком студентов
+//    группы tests.group_id. После выдачи этот список фиксируется.
+// 2. У теста есть хотя бы одна тема. Для каждой темы её действующий предмет
+//    входит через specialty_subjects в специальность группы. Тема действует.
+// 3. Каждый вариант содержит вопросы. Каждый вопрос действует и связан через
+//    topic_questions хотя бы с одной из проверенных тем данного теста.
+// 4. Выполнены правила режима вариантов и правила шкалы оценивания ниже.
+//
+// Выдачу и конкурирующие изменения состава группы, справочника, редакций
+// и черновика нужно согласовать блокировками либо сериализуемыми транзакциями
+// с повтором при конфликте. Проверки и установка issued_at выполняются атомарно.
+//
+// Транзакция. После выдачи неизменны группа, срок, начальный балл, режим,
+// issued_at, темы, варианты, их состав и порядок, шкала и назначения студентов.
+// Запрет действует на вставку, изменение, перенос и удаление связанных строк.
+// Выданный тест не удаляется. Архивация запрещает последующую сдачу.
+// Историческая группа берётся из tests.group_id. Перевод студента меняет
+// students.group_id и не затрагивает ранее выданные тесты.
+
+Table tests {
+  id bigint [pk, increment]
+  group_id bigint [not null]
+  title varchar(255) [not null]
+  variant_mode test_variant_mode [not null]
+  issued_at timestamptz
+  due_at timestamptz [not null]
+  initial_points decimal(8,1) [not null]
+  archived_at timestamptz
+
+  indexes {
+    (group_id, issued_at)
+  }
+
+  checks {
+    `initial_points BETWEEN 0 AND 9999999.9` [name: 'tests_initial_points_range']
+    `issued_at IS NULL OR due_at > issued_at` [name: 'tests_due_after_issue']
+    `archived_at IS NULL OR (issued_at IS NOT NULL AND archived_at >= issued_at)` [name: 'tests_archive_after_issue']
+  }
+}
+
+Table test_topics {
+  test_id bigint [not null]
+  topic_id bigint [not null]
+
+  indexes {
+    (test_id, topic_id) [pk]
+  }
+}
+
+// Транзакция выдачи. В режиме common у теста ровно один вариант, назначенный
+// всем студентам. В режиме individual каждый вариант назначается ровно одному
+// студенту. Для проверки уникальности сравниваются отсортированные списки
+// question_id из test_variant_questions. Совпадающие списки отклоняются
+// независимо от позиций и редакций. Отдельное поле для списка не хранится.
+
+Table test_variants {
+  test_id bigint [not null]
+  variant_number int [not null]
+
+  indexes {
+    (test_id, variant_number) [pk]
+  }
+}
+
+// UNIQUE по question_id исключает две редакции одного исходного вопроса
+// в одном варианте. Составной FK подтверждает принадлежность выбранной
+// редакции этому вопросу. Первичный ключ по редакции сохраняет привязку
+// ответа к конкретной редакции, которую увидел студент.
+
+Table test_variant_questions {
+  test_id bigint [not null]
+  variant_number int [not null]
+  question_id bigint [not null]
+  question_revision_id bigint [not null]
+  position int [not null]
+
+  indexes {
+    (test_id, variant_number, question_revision_id) [pk]
+    (test_id, variant_number, question_id) [unique]
+    (test_id, variant_number, position) [unique]
+  }
+}
+
+// Допущение. Для каждого теста задаются пороги оценок 2, 3, 4 и 5.
+// Транзакция выдачи. Проверить наличие всех четырёх порогов и их строгое
+// возрастание от оценки 2 к оценке 5. CHECK проверяет только одну строку.
+
+Table test_grade_thresholds {
+  test_id bigint [not null]
+  grade smallint [not null]
+  minimum_points decimal(8,1) [not null]
+
+  indexes {
+    (test_id, grade) [pk]
+    (test_id, minimum_points) [unique]
+  }
+
+  checks {
+    `grade BETWEEN 2 AND 5` [name: 'test_grade_thresholds_grade_range']
+    `minimum_points BETWEEN 0 AND 9999999.9` [name: 'test_grade_thresholds_points_range']
+    `(grade = 2 AND minimum_points = 0) OR (grade > 2 AND minimum_points > 0)` [name: 'test_grade_thresholds_base_grade']
+  }
+}
+
+// Допущение. У студента одна попытка на тест. До сдачи дата, балл и оценка пусты.
+// Транзакция сдачи. Для выданного теста с открытым приёмом зафиксировать
+// фактическое время сдачи, которое должно быть не раньше issued_at.
+// Для каждого вопроса назначенного варианта сохранить один проверенный ответ.
+// Точное совпадение с ключом даёт correct. Непустое строгое подмножество
+// правильных ответов даёт partial. Пропуск или выбор хотя бы одного ошибочного
+// варианта даёт incorrect.
+//
+// Из initial_points вычитается 1 за каждый incorrect и 0.5 за каждый partial.
+// Если submitted_at > due_at, из итога вычитается ещё 0.5 один раз за всю
+// попытку. Итог ограничивается снизу нулём. Оценка соответствует наибольшему
+// достигнутому порогу. Срок и дата сдачи позволяют восстановить факт просрочки
+// без отдельного поля штрафа.
+//
+// В одной транзакции сохранить исходы по вопросам, submitted_at, final_points
+// и grade. Повторная сдача той же попытки возвращает сохранённый результат,
+// а изменение ответов, исходов и итогов после сдачи запрещено. Сдача и
+// архивация синхронизируются, чтобы закрытие приёма не пересекалось со сдачей.
+// CHECK проверяет диапазоны и заполненность строки. Сравнение дат с tests,
+// полнота исходов и расчёт итогов проверяются в транзакции.
+//
+// Отчёт по тесту включает все его назначения, в том числе несданные.
+// Отчёт за период использует submitted_at и группу из tests, включая архив.
+// В список двоечников входят студенты хотя бы с одной оценкой 2 за период.
+
+Table test_attempts {
+  test_id bigint [not null]
+  student_id bigint [not null]
+  variant_number int [not null]
+  submitted_at timestamptz
+  final_points decimal(8,1)
+  grade smallint
+
+  indexes {
+    (test_id, student_id) [pk]
+    (test_id, student_id, variant_number) [unique]
+    submitted_at
+  }
+
+  checks {
+    `final_points BETWEEN 0 AND 9999999.9` [name: 'test_attempts_points_range']
+    `grade BETWEEN 2 AND 5` [name: 'test_attempts_grade_range']
+    `(submitted_at IS NULL AND final_points IS NULL AND grade IS NULL) OR (submitted_at IS NOT NULL AND final_points IS NOT NULL AND grade IS NOT NULL)` [name: 'test_attempts_submission_consistency']
+  }
+}
+
+// Номер варианта нужен двум составным FK. Вместе они подтверждают, что
+// ответ относится к назначенному студенту варианту и что вопрос входит в него.
+// Для пропущенного вопроса при сдаче сохраняется исход incorrect без выбора
+// вариантов ответа. До сдачи outcome может быть пустым.
+//
+// Сложность — доля partial и incorrect среди всех предъявлений вопроса
+// в сданных тестах. Редакции объединяются по question_revisions.question_id.
+
+Table test_answers {
+  test_id bigint [not null]
+  student_id bigint [not null]
+  variant_number int [not null]
+  question_revision_id bigint [not null]
+  outcome answer_outcome
+
+  indexes {
+    (test_id, student_id, question_revision_id) [pk]
+  }
+}
+
+Table test_answer_options {
+  test_id bigint [not null]
+  student_id bigint [not null]
+  question_revision_id bigint [not null]
+  option_number int [not null]
+
+  indexes {
+    (test_id, student_id, question_revision_id, option_number) [pk]
+  }
+}
+
+Ref: specialty_subjects.specialty_id > specialties.id
+Ref: specialty_subjects.subject_id > subjects.id
+Ref: topics.subject_id > subjects.id
+Ref: topic_questions.topic_id > topics.id
+Ref: topic_questions.question_id > questions.id
+Ref: question_revisions.question_id > questions.id
+Ref: question_options.question_revision_id > question_revisions.id
+Ref: student_groups.specialty_id > specialties.id
+Ref: students.group_id > student_groups.id
+
+Ref: tests.group_id > student_groups.id
+Ref: test_topics.test_id > tests.id
+Ref: test_topics.topic_id > topics.id
+Ref: test_variants.test_id > tests.id
+Ref: test_variant_questions.(test_id, variant_number) > test_variants.(test_id, variant_number)
+Ref: test_variant_questions.(question_id, question_revision_id) > question_revisions.(question_id, id)
+Ref: test_grade_thresholds.test_id > tests.id
+
+Ref: test_attempts.student_id > students.id
+Ref: test_attempts.(test_id, variant_number) > test_variants.(test_id, variant_number)
+Ref: test_attempts.(test_id, grade) > test_grade_thresholds.(test_id, grade)
+Ref: test_answers.(test_id, student_id, variant_number) > test_attempts.(test_id, student_id, variant_number)
+Ref: test_answers.(test_id, variant_number, question_revision_id) > test_variant_questions.(test_id, variant_number, question_revision_id)
+Ref: test_answer_options.(test_id, student_id, question_revision_id) > test_answers.(test_id, student_id, question_revision_id)
+Ref: test_answer_options.(question_revision_id, option_number) > question_options.(question_revision_id, option_number)
