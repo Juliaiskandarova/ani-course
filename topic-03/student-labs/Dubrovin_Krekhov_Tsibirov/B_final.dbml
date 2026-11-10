@@ -1,0 +1,76 @@
+Table service {
+  id bigint [pk]
+  name varchar [not null]
+}
+Table hall {
+  id bigint [pk]
+  capacity int [not null]
+  name varchar [not null]
+}
+Table quantum {
+  id bigint [pk]
+  starts_at time [not null]
+  ends_at time [not null]
+}
+Table hall_service {
+  hall_id bigint [not null, ref: > hall.id]
+  service_id bigint [not null, ref: > service.id]
+  indexes { (hall_id, service_id) [pk] }
+}
+Table tariff {
+  id bigint [pk]
+  service_id bigint [not null, ref: > service.id]
+  quantum_id bigint [not null, ref: > quantum.id]
+  product_kind varchar [not null]
+  valid_from date [not null]
+  amount_minor bigint [not null]
+  indexes { (service_id, quantum_id, product_kind, valid_from) [unique] }
+}
+Table hall_slot {
+  id bigint [pk]
+  capacity_limit int [not null]
+  reserved_count int [not null]
+  hall_id bigint [not null, ref: > hall.id]
+  quantum_id bigint [not null, ref: > quantum.id]
+  local_day date [not null]
+  indexes {
+    (hall_id, quantum_id, local_day) [unique]
+    (id, hall_id) [unique]
+  }
+}
+Table offering {
+  id bigint [pk]
+  slot_id bigint [not null, ref: > hall_slot.id]
+  service_id bigint [not null, ref: > service.id]
+  indexes { (slot_id, service_id) [unique] }
+}
+Table client {
+  id bigint [pk]
+  name varchar [not null]
+}
+Table purchase {
+  id bigint [pk]
+  client_id bigint [not null, ref: > client.id]
+  tariff_id bigint [not null, ref: > tariff.id]
+  sold_at timestamp [not null]
+  cancelled_at timestamp
+  total_minor bigint [not null]
+}
+Table entitlement {
+  id bigint [pk]
+  purchase_id bigint [not null, ref: > purchase.id]
+  offering_id bigint [not null, ref: > offering.id]
+  allocated_minor bigint [not null]
+  released_at timestamp
+  checked_in_at timestamp
+  checked_out_at timestamp
+  indexes { (purchase_id, offering_id) [unique] }
+}
+Table money_event {
+  id bigint [pk]
+  purchase_id bigint [not null, ref: > purchase.id]
+  provider_key varchar [not null, unique]
+  posted_at timestamp [not null]
+  kind varchar [not null]
+  amount_minor bigint [not null]
+}

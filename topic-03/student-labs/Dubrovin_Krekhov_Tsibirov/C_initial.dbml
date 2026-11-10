@@ -1,0 +1,30 @@
+Table hall {
+  id int [pk]
+  capacity int [not null]
+}
+Table service {
+  id int [pk]
+  name varchar [not null]
+}
+Table tariff {
+  id int [pk]
+  service_id int [not null, ref: > service.id]
+  quantum time [not null]
+  price decimal [not null]
+}
+Table subscription {
+  id int [pk]
+  client_id int [not null]
+  hall_id int [not null, ref: > hall.id]
+  tariff_id int [not null, ref: > tariff.id]
+  visit_limit int [not null]
+  valid_until date [not null]
+}
+Table visit {
+  id int [pk]
+  hall_id int [not null, ref: > hall.id]
+  tariff_id int [not null, ref: > tariff.id]
+  subscription_id int [ref: > subscription.id]
+  visit_day date [not null]
+  cancelled boolean [not null]
+}
