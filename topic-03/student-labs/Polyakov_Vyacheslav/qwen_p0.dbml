@@ -1,0 +1,124 @@
+// ============================================================================
+// ДОПУЩЕНИЯ И ПОЯСНЕНИЯ К СХЕМЕ:
+// 1. "Постановка" (Production) моделируется как абстрактный прокат спектакля 
+//    в конкретном театре с периодом показа (start_date, end_date).
+// 2. "Представление" (Performance) — это конкретный сеанс (дата и время) 
+//    в рамках Постановки. Билеты продаются именно на конкретное Представление.
+// 3. Добавлена сущность "Зал" (TheaterHall), так как в театре может быть 
+//    несколько залов, и общее количество мест по категориям привязано к залу.
+// 4. Для поддержки перерасчета при частичном возврате (если осталось < 10 билетов), 
+//    в OrderItem хранятся original_quantity и returned_quantity, а также 
+//    примененная ставка скидки (discount_rate). Это позволяет приложению 
+//    вычислить потерю скидки для оставшихся билетов и удержать эту сумму 
+//    из возврата (refund_amount) за возвращаемые билеты.
+// 5. Возврат "накануне спектакля" с удержанием 50% реализуется на уровне 
+//    приложения путем сравнения Ticket.returned_at и Performance.show_time. 
+//    Схема предоставляет для этого все необходимые поля.
+// 6. Суммирование скидок (до 20%) отражается в поле discount_rate (например, 0.20).
+// ============================================================================
+
+Table City {
+  id int [pk, increment]
+  name varchar [not null] // Название города
+}
+
+Table Theater {
+  id int [pk, increment]
+  city_id int [not null]
+  name varchar [not null] // Название театра
+  address varchar
+}
+
+Table TheaterHall {
+  id int [pk, increment]
+  theater_id int [not null]
+  name varchar [not null] // Название зала (например, "Большой зал")
+}
+
+Table SeatingCategory {
+  id int [pk, increment]
+  theater_hall_id int [not null]
+  name varchar [not null] // Название категории (например, "Партер", "Балкон")
+  seat_count int [not null] // Общее количество мест этой категории в зале
+}
+
+Table Play {
+  id int [pk, increment]
+  title varchar [not null] // Название спектакля
+  description text
+  duration_minutes int
+}
+
+Table Production {
+  id int [pk, increment]
+  theater_id int [not null]
+  play_id int [not null]
+  start_date date [not null] // Начало периода постановки
+  end_date date [not null] // Конец периода постановки
+}
+
+Table Performance {
+  id int [pk, increment]
+  production_id int [not null]
+  theater_hall_id int [not null] // Зал, в котором проходит конкретный сеанс
+  show_time timestamp [not null] // Дата и время начала представления
+}
+
+Table ProductionPrice {
+  id int [pk, increment]
+  production_id int [not null]
+  seating_category_id int [not null]
+  price decimal(10, 2) [not null] // Цена билета на данную постановку для данной категории
+}
+
+Table "Order" {
+  id int [pk, increment]
+  customer_name varchar [not null]
+  customer_phone varchar [not null]
+  created_at timestamp [not null, default: `now()`]
+  total_amount decimal(10, 2) [not null] // Итоговая сумма заказа с учетом всех скидок
+  status varchar [not null] // 'active', 'partially_returned', 'fully_returned'
+}
+
+Table OrderItem {
+  id int [pk, increment]
+  order_id int [not null]
+  performance_id int [not null]
+  seating_category_id int [not null]
+  original_quantity int [not null] // Исходное количество билетов в позиции (для проверки порога "10 билетов")
+  returned_quantity int [not null, default: 0] // Количество уже возвращенных билетов в этой позиции
+  base_price_per_ticket decimal(10, 2) [not null] // Цена за билет без скидок
+  discount_rate decimal(4, 2) [not null, default: 0.0] // Суммарная ставка примененной скидки (например, 0.10 или 0.20)
+  total_price decimal(10, 2) [not null] // Итоговая стоимость позиции
+}
+
+Table Ticket {
+  id int [pk, increment]
+  order_item_id int [not null]
+  status varchar [not null, default: 'sold'] // 'sold' или 'returned'
+  refund_amount decimal(10, 2) // Фактическая сумма возврата по этому билету (с учетом удержаний и перерасчетов)
+  returned_at timestamp // Дата и время оформления возврата
+}
+
+// ============================================================================
+// СВЯЗИ (RELATIONSHIPS)
+// ============================================================================
+
+Ref: Theater.city_id > City.id
+Ref: TheaterHall.theater_id > Theater.id
+Ref: SeatingCategory.theater_hall_id > TheaterHall.id
+
+Ref: Production.theater_id > Theater.id
+Ref: Production.play_id > Play.id
+
+Ref: Performance.production_id > Production.id
+Ref: Performance.theater_hall_id > TheaterHall.id
+
+Ref: ProductionPrice.production_id > Production.id
+Ref: ProductionPrice.seating_category_id > SeatingCategory.id
+
+Ref: OrderItem.order_id > "Order".id
+Ref: OrderItem.performance_id > Performance.id
+Ref: OrderItem.seating_category_id > SeatingCategory.id
+
+Ref: Ticket.order_item_id > OrderItem.id
