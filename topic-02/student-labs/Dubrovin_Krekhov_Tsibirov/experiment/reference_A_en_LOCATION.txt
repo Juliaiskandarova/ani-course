@@ -1,0 +1,5 @@
+АВТОРСКИЙ ЭТАЛОН: Есаулов В. А., оригинальный раздел Original article на странице
+https://cyberleninka.ru/article/n/metod-svertochnogo-gradientnogo-spuska
+DOI: https://doi.org/10.17213/1560-3644-2025-3-33-39
+Для проверки метрик скопируйте Title + Abstract + Keywords из английской части статьи в reference_A_en.txt.
+Полный текст здесь не дублируется; для расчётов при подготовке отчёта использована опубликованная английская версия.
