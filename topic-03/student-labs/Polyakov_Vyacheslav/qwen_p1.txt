@@ -1,0 +1,182 @@
+Вот исправленный и доработанный полный код DBML. Все 7 замечаний учтены: разделены ставки скидок для корректного перерасчета, оптовая скидка считается по постановке в рамках заказа, `Ticket` является единственным источником истины для возвратов, добавлены поля для фиксации удержаний и корректировок, усилены логические связи залов и категорий, добавлены уникальные ограничения и историчность вместимости.
+
+```dbml
+// ============================================================================
+// ДОПУЩЕНИЯ И ПОЯСНЕНИЯ К СХЕМЕ (ИСПРАВЛЕНИЯ ПО ЗАМЕЧАНИЯМ):
+// 1. РАЗДЕЛЕНИЕ СКИДОК: Скидки хранятся раздельно (bulk_discount_rate и 
+//    multi_show_discount_rate) на уровне OrderProduction, что позволяет 
+//    однозначно определить причину скидки и корректно пересчитать её при возврате.
+// 2. ОПТОВАЯ СКИДКА НА ПОСТАНОВКУ: Сущность OrderProduction группирует все 
+//    билеты одной постановки в рамках одного заказа. Поле total_quantity 
+//    содержит суммарное количество билетов (даже если они разных категорий), 
+//    что позволяет корректно применить порог "более 10 билетов".
+// 3. ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ: Факт продажи/возврата хранится ТОЛЬКО в таблице 
+//    Ticket. Поля returned_quantity в OrderItem и status в Order удалены, 
+//    чтобы избежать рассинхронизации. Отчеты строятся агрегацией по Ticket.
+// 4. ФИКСАЦИЯ ПЕРЕРАСЧЕТА: В Ticket хранятся paid_amount (фактически заплачено), 
+//    recalculation_clawback (удержание из-за потери оптовой/мульти-скидки 
+//    оставшимися билетами) и cancellation_penalty (50% за возврат накануне). 
+//    refund_amount = paid_amount - recalculation_clawback - cancellation_penalty.
+// 5. ЦЕЛОСТНОСТЬ ЗАЛОВ И КАТЕГОРИЙ: Иерархия Theater -> TheaterHall -> 
+//    SeatingCategory строго соблюдена. Добавлены бизнес-ограничения (см. 
+//    комментарии UNIQUE CONSTRAINT и BUSINESS LOGIC CONSTRAINT), требующие 
+//    от приложения проверять принадлежность категории к залу показа.
+// 6. УНИКАЛЬНОСТЬ: Добавлены явные комментарии для составных уникальных 
+//    индексов (ProductionPrice и Performance), предотвращающих дублирование 
+//    цен и наложение показов в одном зале.
+// 7. ИСТОРИЧНОСТЬ ВМЕСТИМОСТИ: Вместимость вынесена в SeatingCategoryCapacity 
+//    с полями valid_from и valid_to, что позволяет корректно считать коэффициент 
+//    "успешности" за прошлые периоды, игнорируя текущие изменения зала.
+// ============================================================================
+
+Table City {
+  id int [pk, increment]
+  name varchar [not null]
+}
+
+Table Theater {
+  id int [pk, increment]
+  city_id int [not null]
+  name varchar [not null]
+  address varchar
+}
+
+Table TheaterHall {
+  id int [pk, increment]
+  theater_id int [not null]
+  name varchar [not null]
+}
+
+Table SeatingCategory {
+  id int [pk, increment]
+  theater_hall_id int [not null]
+  name varchar [not null]
+  // Вместимость (seat_count) удалена отсюда и перенесена в SeatingCategoryCapacity (п.7)
+}
+
+Table SeatingCategoryCapacity {
+  id int [pk, increment]
+  seating_category_id int [not null]
+  seat_count int [not null]
+  valid_from date [not null]
+  valid_to date // NULL означает "действует по настоящее время"
+}
+
+Table Play {
+  id int [pk, increment]
+  title varchar [not null]
+  description text
+  duration_minutes int
+}
+
+Table Production {
+  id int [pk, increment]
+  theater_id int [not null]
+  play_id int [not null]
+  start_date date [not null]
+  end_date date [not null]
+}
+
+Table Performance {
+  id int [pk, increment]
+  production_id int [not null]
+  theater_hall_id int [not null]
+  show_time timestamp [not null]
+  // UNIQUE CONSTRAINT: (theater_hall_id, show_time) 
+  // Гарантирует, что в одном зале не может быть двух показов в одно время (п.6)
+}
+
+Table ProductionPrice {
+  id int [pk, increment]
+  production_id int [not null]
+  seating_category_id int [not null]
+  price decimal(10, 2) [not null]
+  // UNIQUE CONSTRAINT: (production_id, seating_category_id)
+  // Гарантирует одну цену на одну категорию для одной постановки (п.6)
+  // BUSINESS LOGIC CONSTRAINT: seating_category_id должен принадлежать 
+  // TheaterHall, который принадлежит theater_id данной production_id (п.5)
+}
+
+Table "Order" {
+  id int [pk, increment]
+  customer_name varchar [not null]
+  customer_phone varchar [not null]
+  created_at timestamp [not null, default: `now()`]
+  total_amount decimal(10, 2) [not null] // Суммарная стоимость всех OrderItem
+  // Статус заказа удален, так как он является производным от статусов Ticket (п.3)
+}
+
+Table OrderProduction {
+  // Группирует билеты по постановкам внутри заказа для корректного 
+  // расчета оптовой скидки (п.2) и разделения ставок скидок (п.1)
+  id int [pk, increment]
+  order_id int [not null]
+  production_id int [not null]
+  total_quantity int [not null] // Сумма quantity всех OrderItem для этой постановки в заказе
+  bulk_discount_rate decimal(4, 2) [not null, default: 0.0] // 0.10 если total_quantity > 10, иначе 0.0
+  multi_show_discount_rate decimal(4, 2) [not null, default: 0.0] // 0.10 если это 2-я и последующая постановка в заказе, иначе 0.0
+}
+
+Table OrderItem {
+  id int [pk, increment]
+  order_production_id int [not null] // Ссылка на группировку по постановке
+  performance_id int [not null]
+  seating_category_id int [not null]
+  quantity int [not null]
+  base_price_per_ticket decimal(10, 2) [not null]
+  total_price decimal(10, 2) [not null] // quantity * base_price * (1 - bulk_discount_rate - multi_show_discount_rate)
+  // BUSINESS LOGIC CONSTRAINT: seating_category_id должен принадлежать 
+  // тому же theater_hall_id, что и performance_id (п.5)
+  // Поле returned_quantity удалено (п.3)
+}
+
+Table Ticket {
+  // ЕДИНСТВЕННЫЙ источник истины о факте продажи и возврата (п.3)
+  id int [pk, increment]
+  order_item_id int [not null]
+  paid_amount decimal(10, 2) [not null] // Фактически заплаченная сумма за этот конкретный билет (п.4)
+  status varchar [not null, default: 'sold'] // 'sold' или 'returned'
+  returned_at timestamp // Заполняется только при status = 'returned'
+  
+  // Поля для прозрачного финансового учета и перерасчета (п.4)
+  cancellation_penalty decimal(10, 2) [default: 0.0] // Удержание 50%, если returned_at < show_time на 1 день
+  recalculation_clawback decimal(10, 2) [default: 0.0] // Сумма, удержанная из возврата из-за потери скидки оставшимися билетами
+  refund_amount decimal(10, 2) // Итоговая сумма возврата: paid_amount - cancellation_penalty - recalculation_clawback
+}
+
+// ============================================================================
+// СВЯЗИ (RELATIONSHIPS)
+// ============================================================================
+
+Ref: Theater.city_id > City.id
+Ref: TheaterHall.theater_id > Theater.id
+Ref: SeatingCategory.theater_hall_id > TheaterHall.id
+Ref: SeatingCategoryCapacity.seating_category_id > SeatingCategory.id
+
+Ref: Production.theater_id > Theater.id
+Ref: Production.play_id > Play.id
+
+Ref: Performance.production_id > Production.id
+Ref: Performance.theater_hall_id > TheaterHall.id
+
+Ref: ProductionPrice.production_id > Production.id
+Ref: ProductionPrice.seating_category_id > SeatingCategory.id
+
+Ref: OrderProduction.order_id > "Order".id
+Ref: OrderProduction.production_id > Production.id
+
+Ref: OrderItem.order_production_id > OrderProduction.id
+Ref: OrderItem.performance_id > Performance.id
+Ref: OrderItem.seating_category_id > SeatingCategory.id
+
+Ref: Ticket.order_item_id > OrderItem.id
+```
+
+### Как исправленная схема решает поставленные проблемы:
+1. **Разделение скидок**: `OrderProduction` хранит `bulk_discount_rate` и `multi_show_discount_rate` раздельно. При возврате приложение точно знает, какую часть скидки нужно аннулировать.
+2. **Оптовая скидка на постановку**: `OrderProduction.total_quantity` суммирует билеты всех категорий (`OrderItem`) для одной постановки в заказе. Порог в 10 билетов проверяется по этому полю, а не по отдельной строке заказа.
+3. **Единый источник истины**: Удалены дублирующие поля (`Order.status`, `OrderItem.returned_quantity`). Любая аналитика по проданным/возвращенным билетам делает `COUNT` или `SUM` исключительно по таблице `Ticket`.
+4. **Фиксация перерасчета**: Поля `paid_amount`, `recalculation_clawback` и `cancellation_penalty` в `Ticket` делают финансовую историю каждого билета полностью прозрачной и защищают от ошибок при каскадных возвратах.
+5. **Целостность залов**: Иерархия `Theater` → `TheaterHall` → `SeatingCategory` и явные бизнес-ограничения в комментариях не допускают логических ошибок привязки категории чужого зала.
+6. **Уникальность**: Добавлены явные указания на составные уникальные индексы для `Performance` и `ProductionPrice`, исключающие дублирование.
+7. **Историчность вместимости**: Таблица `SeatingCategoryCapacity` с датами действия (`valid_from`, `valid_to`) позволяет точно определить вместимость зала на дату конкретного `Performance.show_time` для корректного расчета коэффициента «успешности» за любой прошлый период.

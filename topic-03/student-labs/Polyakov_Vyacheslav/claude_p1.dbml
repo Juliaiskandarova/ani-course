@@ -1,0 +1,150 @@
+// Театральная касса — исправленная схема (P1)
+//
+// ДОПУЩЕНИЯ:
+// 1. «Спектакль» (plays) — произведение, «постановка» (productions) — спектакль в театре
+//    с периодом показа, «показ» (performances) — конкретные дата, время и зал.
+// 2. Билет продаётся на показ и категорию мест; номера мест не хранятся.
+//    Свободные места = вместимость категории на дату показа − невозвращённые билеты.
+// 3. Скидки считаются внутри одной покупки: 10% на билеты второй и следующих постановок,
+//    10% на все билеты постановки, если на неё куплено больше 10 билетов. Скидки суммируются.
+// 4. Возврат возможен не позднее дня накануне показа; накануне удерживается 50% заплаченного.
+// 5. Если после частичного возврата на постановку осталось меньше 10 билетов, оптовая скидка
+//    с оставшихся билетов отменяется: для каждого из них пишется корректировка в price_adjustments,
+//    сумма корректировок удерживается из выплаты по возврату, который их вызвал.
+// 6. Билет считается возвращённым, если для него есть запись в ticket_returns.
+// 7. Поля theater_id в seat_categories, production_prices, performances и hall_id в tickets
+//    повторяют связь, но нужны для составных внешних ключей: они гарантируют, что категория
+//    мест, зал и постановка относятся к одному театру, а категория билета — к залу показа.
+
+Table cities {
+  id int [pk, increment]
+  name varchar [not null]
+}
+
+Table theaters {
+  id int [pk, increment]
+  city_id int [not null, ref: > cities.id]
+  name varchar [not null, note: 'Названия театров могут совпадать']
+  address varchar
+}
+
+Table halls {
+  id int [pk, increment]
+  theater_id int [not null, ref: > theaters.id]
+  name varchar [not null, note: 'Основная сцена, камерная сцена...']
+
+  indexes {
+    (theater_id, name) [unique]
+    (id, theater_id) [unique, note: 'Для составных внешних ключей']
+  }
+}
+
+Table seat_categories {
+  id int [pk, increment]
+  hall_id int [not null]
+  theater_id int [not null]
+  name varchar [not null, note: 'Партер, амфитеатр, балкон...']
+
+  indexes {
+    (hall_id, name) [unique]
+    (id, hall_id) [unique]
+    (id, theater_id) [unique]
+  }
+}
+
+Table seat_category_capacities {
+  id int [pk, increment]
+  seat_category_id int [not null, ref: > seat_categories.id]
+  valid_from date [not null, note: 'Дата, с которой действует вместимость']
+  seat_count int [not null]
+
+  indexes {
+    (seat_category_id, valid_from) [unique]
+  }
+}
+
+Table plays {
+  id int [pk, increment]
+  title varchar [not null]
+  author varchar
+}
+
+Table productions {
+  id int [pk, increment]
+  theater_id int [not null, ref: > theaters.id]
+  play_id int [not null, ref: > plays.id]
+  start_date date [not null, note: 'Начало периода постановки']
+  end_date date [not null, note: 'Окончание периода постановки']
+
+  indexes {
+    (id, theater_id) [unique]
+  }
+}
+
+Table production_prices {
+  id int [pk, increment]
+  production_id int [not null]
+  seat_category_id int [not null]
+  theater_id int [not null]
+  price decimal(10,2) [not null]
+
+  indexes {
+    (production_id, seat_category_id) [unique]
+  }
+}
+
+Table performances {
+  id int [pk, increment]
+  production_id int [not null]
+  hall_id int [not null]
+  theater_id int [not null]
+  starts_at timestamp [not null]
+
+  indexes {
+    (hall_id, starts_at) [unique, note: 'Один показ в зале в одно время']
+    (id, hall_id) [unique]
+  }
+}
+
+Table purchases {
+  id int [pk, increment]
+  purchased_at timestamp [not null]
+  buyer_name varchar
+  buyer_phone varchar
+}
+
+Table tickets {
+  id int [pk, increment]
+  purchase_id int [not null, ref: > purchases.id]
+  performance_id int [not null]
+  seat_category_id int [not null]
+  hall_id int [not null]
+  base_price decimal(10,2) [not null, note: 'Цена по прайсу на момент покупки']
+  multi_production_discount_pct decimal(5,2) [not null, default: 0, note: '10, если билет на вторую и следующую постановку покупки']
+  bulk_discount_pct decimal(5,2) [not null, default: 0, note: '10, если в покупке больше 10 билетов на эту постановку']
+  paid_amount decimal(10,2) [not null, note: 'Заплачено при покупке']
+}
+
+Table ticket_returns {
+  id int [pk, increment]
+  ticket_id int [not null, unique, ref: - tickets.id]
+  returned_at timestamp [not null]
+  retained_amount decimal(10,2) [not null, default: 0, note: 'Удержание 50% при возврате накануне показа']
+  refund_amount decimal(10,2) [not null, note: 'Выплачено покупателю: заплачено − удержание − корректировки, вызванные этим возвратом']
+}
+
+Table price_adjustments {
+  id int [pk, increment]
+  ticket_id int [not null, ref: > tickets.id, note: 'Оставшийся билет, цена которого изменилась']
+  caused_by_return_id int [not null, ref: > ticket_returns.id]
+  amount decimal(10,2) [not null, note: 'Доплата за отмену оптовой скидки (удерживается из возврата)']
+  created_at timestamp [not null]
+}
+
+Ref: seat_categories.(hall_id, theater_id) > halls.(id, theater_id)
+Ref: production_prices.(production_id, theater_id) > productions.(id, theater_id)
+Ref: production_prices.(seat_category_id, theater_id) > seat_categories.(id, theater_id)
+Ref: performances.(production_id, theater_id) > productions.(id, theater_id)
+Ref: performances.(hall_id, theater_id) > halls.(id, theater_id)
+Ref: tickets.(performance_id, hall_id) > performances.(id, hall_id)
+Ref: tickets.(seat_category_id, hall_id) > seat_categories.(id, hall_id)
