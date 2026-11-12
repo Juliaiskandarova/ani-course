@@ -1,0 +1,247 @@
+// Станция скорой помощи (PostgreSQL).
+// CHECK ниже — ограничения одной строки. Блок «Триггеры» CHECK-ом не является
+// и обычным внешним ключом не закрывается.
+//
+// Термины:
+// employees           — сотрудники
+// sick_leaves         — больничные
+// vehicles            — машины
+// crews               — постоянные бригады
+// crew_shifts         — смены графика
+// crew_shift_members  — состав смены
+// calls               — вызовы
+// call_assignments    — назначение бригады и отработка вызова
+//
+// Допущения предметной области:
+// 1. Станция одна.
+// 2. ФИО, адрес и симптомы хранятся на вызове. Отдельного исхода «отменён» нет.
+// 3. Приём — одна строка employees. Повторный найм — новая строка.
+// 4. Конечные даты dismissed_on, ended_on, written_off_on, disbanded_on —
+//    первый день, когда объект уже недоступен. NULL — срок ещё открыт.
+//    Объект действует в дату D, если начало <= D и (конец is null или D < конец).
+//    Поэтому CHECK требует конец > начало, а не >=.
+// 5. Роль сотрудника постоянна. Медсестра/медбрат в смене не обязательны.
+// 6. Вызов можно сохранить без назначения. Назначение — не больше одного на вызов
+//    (call_id — первичный ключ call_assignments). Оператор один-к-одному
+//    не делает назначение обязательным: внешний ключ стоит на стороне назначения.
+// 7. Бригада и машина выезда записаны и в смене, и в назначении.
+//    Это один и тот же факт: составные FK запрещают расхождение.
+//    Простой FK crew_id -> crews.id только проверяет, что бригада есть;
+//    он не проверяет, что смена принадлежит этой бригаде.
+//    То же для машины. Совпадение со сменой дают только составные FK.
+//    Отдельного FK только на shift_id нет: shift_id входит в оба составных ключа.
+//    Уникальность (id, crew_id) и (id, vehicle_id) у смены нужна как цель
+//    этих FK. Первичный ключ id и так один; вторая уникальность не добавляет
+//    другого бизнес-правила.
+// 8. Окно выезда [started_at, busy_until). Конец в окно не входит.
+//    База — 20 минут. extra_minutes = 20 только при transported_to_hospital,
+//    тогда окно 40 минут. Пока outcome is null, это ещё не отработка:
+//    extra_minutes = 0, outcome_at is null, окно 20 минут.
+//    Досрочно бригаду не освобождают.
+// 9. Рейтинг бригад (в задании критерий не задан, здесь он фиксирован):
+//    успех = treatment_provided или transported_to_hospital;
+//    неуспех = deceased;
+//    знаменатель = назначения этой бригады с заполненным outcome;
+//    доля успеха = успехи / знаменатель, доля неуспеха = неуспехи / знаменатель;
+//    самые успешные — большая доля успеха, самые неуспешные — большая доля неуспеха
+//    (это противоположные концы одной доли);
+//    при равной доле выше бригада с большим знаменателем;
+//    период — calls.received_at, не outcome_at;
+//    бригада берётся из call_assignments.crew_id
+//    (он совпадает со сменой благодаря составному FK).
+//    Назначения без outcome в рейтинг не входят.
+// 10. Статистика за год группируется по году calls.received_at.
+//     Исход — call_assignments.outcome, бригада — crew_id, тип машины — vehicle_id.
+//     Вызов без строки назначения учитывается как принятый и без исхода.
+//     «На выезде сейчас»: started_at <= момент < busy_until.
+//     Дежурство по графику сюда не входит. Флаг «на выезде» не хранится.
+// 11. Увольнение, закрытие больничного, списание и расформирование
+//     заполняют конечную дату. Строки не удаляют: прошлый выезд должен
+//     по-прежнему находить сотрудника, машину, бригаду и смену.
+// 12. В перечислении два типа машин. Машин каждого типа может быть много.
+//     Госномер уникален.
+//
+// Триггеры и бизнес-логика (не CHECK и не обычный FK):
+// T1. calls.received_at <= call_assignments.started_at.
+//     Столбцы в разных таблицах, CHECK одной строки это не выражает.
+// T2. Смена покрывает старт выезда: starts_at <= started_at < ends_at.
+//     busy_until может быть позже ends_at (госпитализация дольше смены).
+// T3. Полуинтервалы [started_at, busy_until) одной бригады не пересекаются.
+//     То же для одной машины. После окна бригада может взять новый вызов.
+// T4. Смены одной бригады не пересекаются. Смены одной машины не пересекаются.
+//     Больничные одного сотрудника не пересекаются.
+//     Уникальный (employee_id, started_on) запрещает лишь повтор той же даты начала.
+// T5. Сотрудник не стоит в двух пересекающихся сменах.
+// T6. В смене есть хотя бы один водитель и хотя бы один фельдшер
+//     (роль берётся из employees.role). Медсестра/медбрат — по необходимости.
+// T7. На каждый момент смены [starts_at, ends_at) сотрудник уже принят,
+//     ещё не уволен и не болеет; бригада не расформирована;
+//     машина уже введена и ещё не списана. Правило дат — как в допущении 4.
+// T8. Пока outcome is null, назначение можно исправить
+//     (другая смена, другая бригада и машина этой смены, другой started_at):
+//     CHECK и составные FK остаются в силе.
+//     После заполнения outcome запрещено менять shift_id, crew_id, vehicle_id,
+//     started_at, extra_minutes, busy_until, outcome, outcome_at.
+//     Такой запрет перехода «было / стало» CHECK-ом строки не выражается.
+// T9. После появления назначения не меняются crew_shifts.crew_id, vehicle_id,
+//     starts_at, ends_at и строки crew_shift_members этой смены.
+//     Составной FK с update: restrict и так не даёт сменить бригаду или машину
+//     смены, пока пара ещё указана в назначении; триггер закрывает остальное
+//     (интервал смены, состав, обход через отложенную проверку).
+// T10. После вставки не меняются calls.received_at, patient_full_name,
+//      address, symptoms: год статистики и карточка вызова не переписываются.
+// T11. DELETE по сотрудникам, больничным, машинам, бригадам, сменам, составу,
+//      вызовам и назначениям запрещён. FK delete: restrict не пускает удаление
+//      только пока есть ссылки; триггер запрещает удаление и пустой строки.
+//      Списание и увольнение — это конечная дата, не DELETE.
+
+Project ambulance_station {
+  database_type: 'PostgreSQL'
+  Note: 'CHECK длины выезда использует интервал PostgreSQL.'
+}
+
+Enum employee_role {
+  paramedic [note: 'фельдшер']
+  nurse [note: 'медсестра или медбрат']
+  driver [note: 'водитель']
+}
+
+Enum vehicle_type {
+  resuscitation [note: 'реанимация']
+  regular [note: 'обычная']
+}
+
+Enum call_outcome {
+  treatment_provided [note: 'оказано лечение; успех']
+  deceased [note: 'пациент умер; неуспех']
+  transported_to_hospital [note: 'везем в больницу; успех; extra_minutes = 20']
+}
+
+Table employees {
+  id int [pk, increment]
+  full_name varchar(200) [not null, note: 'ФИО сотрудника']
+  role employee_role [not null]
+  hired_on date [not null, note: 'первый день работы']
+  dismissed_on date [note: 'первый день после увольнения; NULL — не уволен']
+
+  checks {
+    `dismissed_on is null or dismissed_on > hired_on` [name: 'chk_dismissed_after_hire']
+  }
+
+  Note: 'Приём — вставка. Увольнение — dismissed_on, без удаления строки.'
+}
+
+Table sick_leaves {
+  id int [pk, increment]
+  employee_id int [not null]
+  started_on date [not null, note: 'первый день болезни']
+  ended_on date [note: 'первый здоровый день; NULL — больничный открыт']
+
+  indexes {
+    (employee_id, started_on) [unique, name: 'one_leave_per_start']
+  }
+
+  checks {
+    `ended_on is null or ended_on > started_on` [name: 'chk_sick_leave_positive']
+  }
+
+  Note: 'Отметка о болезни — вставка. Выздоровление — ended_on. Пересечение больничных — триггер T4.'
+}
+
+Table vehicles {
+  id int [pk, increment]
+  plate_number varchar(16) [not null, unique, note: 'государственный номер']
+  vehicle_type vehicle_type [not null]
+  commissioned_on date [not null, note: 'день ввода в парк']
+  written_off_on date [note: 'первый день после списания; NULL — машина в строю']
+
+  checks {
+    `written_off_on is null or written_off_on > commissioned_on` [name: 'chk_written_off_after_commission']
+  }
+
+  Note: 'Новая машина — вставка. Списание — written_off_on. Строка остаётся для прошлых выездов.'
+}
+
+Table crews {
+  id int [pk, increment]
+  name varchar(100) [not null, unique, note: 'например, Бригада 1']
+  active_from date [not null]
+  disbanded_on date [note: 'первый день после расформирования; NULL — бригада действует']
+
+  checks {
+    `disbanded_on is null or disbanded_on > active_from` [name: 'chk_disbanded_after_start']
+  }
+
+  Note: 'Постоянная бригада. Рейтинг считается по call_assignments.crew_id и после расформирования.'
+}
+
+Table crew_shifts {
+  id int [pk, increment]
+  crew_id int [not null]
+  vehicle_id int [not null]
+  starts_at timestamp [not null]
+  ends_at timestamp [not null, note: 'конец не входит в смену: starts_at <= t < ends_at']
+
+  indexes {
+    (id, crew_id) [unique, name: 'shift_crew_key']
+    (id, vehicle_id) [unique, name: 'shift_vehicle_key']
+  }
+
+  checks {
+    `ends_at > starts_at` [name: 'chk_shift_ends_after_start']
+  }
+
+  Note: 'График: бригада, одна машина смены и интервал. (id, crew_id) и (id, vehicle_id) — цели составных FK назначения.'
+}
+
+Table crew_shift_members {
+  shift_id int [not null]
+  employee_id int [not null]
+
+  indexes {
+    (shift_id, employee_id) [pk]
+  }
+
+  Note: 'Состав смены. Водитель и фельдшер обязательны триггером T6, не ключом.'
+}
+
+Table calls {
+  id int [pk, increment]
+  received_at timestamp [not null, note: 'момент приёма; по нему год статистики и период рейтинга']
+  patient_full_name varchar(200) [not null, note: 'ФИО пациента']
+  address text [not null]
+  symptoms text [not null, note: 'симптомы при приёме']
+
+  Note: 'Оформление вызова. Бригада здесь не хранится. Назначения может ещё не быть.'
+}
+
+Table call_assignments {
+  call_id int [pk, note: 'один вызов — одно назначение']
+  shift_id int [not null, note: 'смена графика; вместе с crew_id и vehicle_id входит в составные FK']
+  crew_id int [not null, note: 'бригада выезда; обязана быть бригадой shift_id']
+  vehicle_id int [not null, note: 'машина выезда; обязана быть машиной shift_id']
+  started_at timestamp [not null, note: 'начало окна; не раньше received_at обеспечивает триггер T1']
+  extra_minutes int [not null, default: 0, note: '0 или 20; 20 только при госпитализации', check: `extra_minutes in (0, 20)`]
+  busy_until timestamp [not null, note: 'started_at + 20 минут + extra_minutes; момент не входит в окно']
+  outcome call_outcome [note: 'NULL — бригада ещё без отработки, в том числе пока на выезде']
+  outcome_at timestamp [note: 'обязателен вместе с outcome и не раньше started_at']
+
+  checks {
+    `case when outcome is null then extra_minutes = 0 when outcome::text = 'transported_to_hospital' then extra_minutes = 20 when outcome::text in ('treatment_provided', 'deceased') then extra_minutes = 0 else false end` [name: 'chk_extra_matches_outcome']
+    `(outcome is null and outcome_at is null) or (outcome is not null and outcome_at is not null and outcome_at >= started_at)` [name: 'chk_outcome_and_time']
+    `busy_until = started_at + (20 + extra_minutes) * interval '1 minute'` [name: 'chk_busy_until_length']
+  }
+
+  Note: 'Назначение и отработка. CASE в chk_extra_matches_outcome возвращает истину или ложь: обычное сравнение с NULL дало бы UNKNOWN, а CHECK такое значение пропускает. chk_busy_until_length — действующий CHECK PostgreSQL, не пояснение в комментарии.'
+}
+
+Ref: sick_leaves.employee_id > employees.id [delete: restrict, update: restrict]
+Ref: crew_shifts.crew_id > crews.id [delete: restrict, update: restrict]
+Ref: crew_shifts.vehicle_id > vehicles.id [delete: restrict, update: restrict]
+Ref: crew_shift_members.shift_id > crew_shifts.id [delete: restrict, update: restrict]
+Ref: crew_shift_members.employee_id > employees.id [delete: restrict, update: restrict]
+Ref: calls.id - call_assignments.call_id [delete: restrict, update: restrict]
+Ref: call_assignments.crew_id > crews.id [delete: restrict, update: restrict]
+Ref: call_assignments.vehicle_id > vehicles.id [delete: restrict, update: restrict]
+Ref assignment_shift_crew: call_assignments.(shift_id, crew_id) > crew_shifts.(id, crew_id) [delete: restrict, update: restrict]
+Ref assignment_shift_vehicle: call_assignments.(shift_id, vehicle_id) > crew_shifts.(id, vehicle_id) [delete: restrict, update: restrict]

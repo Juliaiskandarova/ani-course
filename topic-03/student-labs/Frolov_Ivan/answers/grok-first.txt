@@ -1,0 +1,169 @@
+Допущения: одна станция; ФИО, адрес и симптомы хранятся на вызове. Сотрудник нанимается один раз; увольнение, списание машины и расформирование бригады проставляют дату окончания и сохраняют строку. Болезнь закрывается при выздоровлении. Конечная дата — первый день, когда объект уже недоступен (пока она пустая, объект действует). Бригада постоянная, график — её смены с машиной и составом: водитель и фельдшер обязательны, медсестра или медбрат — по необходимости. Окно выезда — 20 минут от назначения; госпитализация добавляет ещё 20 минут к этому же вызову. Бригада на выезде, пока текущее время внутри окна. Успех — «оказано лечение» или «везем в больницу», неуспех — «умер». Годовая статистика считается по времени приёма вызова.
+
+// Станция скорой помощи
+//
+// Термины:
+// employees           — сотрудники (фельдшеры, медсёстры/медбратья, водители)
+// sick_leaves         — больничные
+// vehicles            — парк машин
+// crews               — дежурные бригады
+// crew_shifts         — график: смены бригад
+// crew_shift_members  — состав смены
+// calls               — принятые вызовы
+// call_assignments    — назначение бригады и отработка вызова
+//
+// Допущения:
+// 1. Станция одна, справочник станций не нужен.
+// 2. Пациент хранится полями вызова (ФИО, адрес, симптомы текстом).
+//    Отдельного исхода «вызов отменён» в условии нет: у вызова есть приём,
+//    необязательное назначение и один итоговый исход.
+// 3. Приём сотрудника — одна строка employees. Повторный найм — новая строка.
+//    Увольнение заполняет dismissed_on, строка не удаляется.
+// 4. Отметка о болезни — строка sick_leaves. Выздоровление заполняет ended_on.
+//    Больничные одного сотрудника по датам не пересекаются (правило приложения).
+// 5. Конечные даты dismissed_on, ended_on, written_off_on, disbanded_on —
+//    первый день, когда объект уже недоступен. NULL значит, что срок ещё открыт.
+//    Объект действует в дату D, если начало <= D и (конец is null или D < конец).
+// 6. Роль сотрудника постоянна. В смену не ставится тот, кто в дни смены
+//    ещё не принят, уже уволен или болеет. В составе обязательны водитель
+//    и фельдшер; медсестра/медбрат добавляется по необходимости.
+//    Сотрудник не входит в две пересекающиеся смены.
+//    Смены одной бригады и одной машины тоже не пересекаются.
+//    Эти проверки выполняет приложение: интервалы ключом БД не закрыть.
+// 7. Бригаду можно расформировать. История её вызовов сохраняется,
+//    по ней считается успешность, даже если состав смен менялся.
+// 8. Вызов оформляется без бригады. Назначение — отдельная строка,
+//    не больше одной на вызов. Смена в назначении принадлежит той же бригаде
+//    (crew_shifts.crew_id = call_assignments.crew_id) и покрывает started_at.
+// 9. 20 минут считаются от started_at. Досрочно бригаду не освобождают.
+//    При назначении extra_minutes = 0, busy_until = started_at + 20 минут.
+//    Исход transported_to_hospital: extra_minutes = 20,
+//    busy_until = started_at + 40 минут.
+//    Исходы treatment_provided и deceased длительность не меняют.
+//    started_at не раньше calls.received_at.
+//    busy_until всегда равен started_at + 20 минут + extra_minutes.
+//    Окна [started_at, busy_until) одной бригады не пересекаются,
+//    то же для одной машины: после окна бригада может взять новый вызов.
+//    Окно может закончиться позже crew_shifts.ends_at.
+// 10. Успешный исход: treatment_provided или transported_to_hospital.
+//     Неуспешный исход: deceased.
+//     Рейтинг бригады — число и доля этих исходов среди строк,
+//     где outcome заполнен. Назначения без отработки в рейтинг не входят.
+//     За какой срок считать рейтинг, условие не задаёт;
+//     отбор периода делается по calls.received_at.
+// 11. «Бригады на выезде сейчас» — это started_at <= момент < busy_until.
+//     Дежурство по графику сюда не входит. Отдельный флаг «на выезде»
+//     не хранится.
+// 12. Статистика за год группируется по году calls.received_at.
+//     Исход, бригада и тип машины берутся из назначения и vehicles.
+//     Вызов без назначения учитывается как принятый и не имеет исхода.
+// 13. В перечислении два типа машин: реанимация и обычная.
+//     Машин каждого типа может быть сколько угодно.
+//     Госномер уникален. Машина вызова записывается в назначении
+//     и может отличаться от машины, заранее указанной в смене.
+//     Тип машины состав бригады не диктует.
+
+Enum employee_role {
+  paramedic [note: 'фельдшер']
+  nurse [note: 'медсестра или медбрат']
+  driver [note: 'водитель']
+}
+
+Enum vehicle_type {
+  resuscitation [note: 'реанимация']
+  regular [note: 'обычная']
+}
+
+Enum call_outcome {
+  treatment_provided [note: 'оказано лечение; успешный исход']
+  deceased [note: 'пациент умер; неуспешный исход']
+  transported_to_hospital [note: 'везем в больницу; успешный исход и ещё 20 минут']
+}
+
+Table employees {
+  id int [pk, increment]
+  full_name varchar(200) [not null, note: 'ФИО сотрудника']
+  role employee_role [not null]
+  hired_on date [not null, note: 'первый день работы']
+  dismissed_on date [note: 'первый день после увольнения; NULL — работает']
+
+  Note: 'Приём — вставка. Увольнение — dismissed_on. Болезнь хранится в sick_leaves.'
+}
+
+Table sick_leaves {
+  id int [pk, increment]
+  employee_id int [not null, ref: > employees.id]
+  started_on date [not null, note: 'первый день болезни']
+  ended_on date [note: 'первый здоровый день; NULL — больничный открыт']
+
+  indexes {
+    (employee_id, started_on) [unique, name: 'one_leave_per_start']
+  }
+
+  Note: 'Отметка о болезни. Выздоровление — заполнение ended_on.'
+}
+
+Table vehicles {
+  id int [pk, increment]
+  plate_number varchar(16) [not null, unique, note: 'государственный номер']
+  vehicle_type vehicle_type [not null]
+  commissioned_on date [not null, note: 'день ввода в парк']
+  written_off_on date [note: 'первый день после списания; NULL — машина в строю']
+
+  Note: 'Новая машина — вставка. Списание — written_off_on, история выездов сохраняется.'
+}
+
+Table crews {
+  id int [pk, increment]
+  name varchar(100) [not null, unique, note: 'например, Бригада 1']
+  active_from date [not null]
+  disbanded_on date [note: 'первый день после расформирования; NULL — бригада действует']
+
+  Note: 'Постоянная бригада. Успешность считается по её call_assignments.'
+}
+
+Table crew_shifts {
+  id int [pk, increment]
+  crew_id int [not null, ref: > crews.id]
+  vehicle_id int [not null, ref: > vehicles.id]
+  starts_at timestamp [not null]
+  ends_at timestamp [not null, note: 'строго позже starts_at']
+
+  Note: 'График работы бригад: когда бригада на дежурстве и на какой машине.'
+}
+
+Table crew_shift_members {
+  shift_id int [not null, ref: > crew_shifts.id]
+  employee_id int [not null, ref: > employees.id]
+
+  indexes {
+    (shift_id, employee_id) [pk]
+  }
+
+  Note: 'Состав смены. Роль сотрудника — employees.role.'
+}
+
+Table calls {
+  id int [pk, increment]
+  received_at timestamp [not null, note: 'момент приёма; год этой метки — год статистики']
+  patient_full_name varchar(200) [not null, note: 'ФИО пациента']
+  address text [not null]
+  symptoms text [not null, note: 'симптомы в формулировке при приёме']
+
+  Note: 'Оформление вызова. Бригада в эту таблицу не записывается.'
+}
+
+Table call_assignments {
+  id int [pk, increment]
+  call_id int [not null, unique, ref: - calls.id]
+  crew_id int [not null, ref: > crews.id]
+  shift_id int [not null, ref: > crew_shifts.id]
+  vehicle_id int [not null, ref: > vehicles.id]
+  started_at timestamp [not null, note: 'начало окна обслуживания, не раньше received_at']
+  extra_minutes int [not null, default: 0, note: 'только 0 или 20']
+  busy_until timestamp [not null, note: 'started_at + 20 минут + extra_minutes; этот момент в окно не входит']
+  outcome call_outcome [note: 'NULL, пока отработка не оформлена']
+  outcome_at timestamp [note: 'когда оформили отработку']
+
+  Note: 'Назначение и отработка. На выезде, пока started_at <= сейчас < busy_until.'
+}
