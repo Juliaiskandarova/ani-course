@@ -1,0 +1,248 @@
+// =====================================================
+// Станция технического обслуживания (СТО) — реляционная схема
+// Вставить целиком на https://dbdiagram.io/
+// =====================================================
+//
+// ДОПУЩЕНИЯ:
+// 1. Цена работы в справочнике — текущая. В строках заказа цена фиксируется
+//    на момент выполнения (price_at_order), чтобы смена прайса не меняла
+//    старые заказы и годовой отчёт.
+// 2. Цена запчасти аналогично фиксируется в строке заказа. Закупочная цена
+//    (purchase_price / cost_at_order) нужна, чтобы в годовом отчёте считать
+//    не только выручку, но и прибыль.
+// 3. Б/у запчасть — это отдельная позиция склада со своим количеством и ценой,
+//    а не отдельная таблица. Тип (новая / б/у) задан полем condition.
+// 4. Совместимость запчасти с моделями — связь M:N (part_compatibility).
+//    Универсальные детали (масло, свечи и т.п.) помечаются is_universal = true
+//    и в part_compatibility не заносятся.
+// 5. Периодичность работы задаётся двумя необязательными полями: period_months
+//    и/или period_km. Напоминание нужно, когда наступило любое из условий.
+//    Последнее выполнение берётся из order_works + orders по паре
+//    (авто, работа): дата и показания спидометра.
+// 6. Снятие с учёта — «мягкое»: строки не удаляются, чтобы сохранить историю
+//    заказов и финансовую отчётность. Снятие клиента = клиент is_active=false,
+//    все его текущие владения закрываются (date_to), все его автомобили
+//    is_active=false. Это делает приложение (транзакция), схема хранит поля.
+// 7. Передача автомобиля другому клиенту: текущая запись car_ownerships
+//    закрывается (date_to), создаётся новая (date_to = NULL). У автомобиля
+//    не более одной открытой записи владения (контролируется приложением/
+//    уникальным частичным индексом в СУБД: UNIQUE(car_id) WHERE date_to IS NULL).
+// 8. Новый клиент / автомобиль при оформлении заказа — просто INSERT в clients
+//    и cars перед созданием заказа; отдельных структур не требуется.
+// 9. orders.client_id — клиент, оформивший заказ (на момент заказа он владелец
+//    авто). Хранится явно, чтобы история не менялась после продажи авто.
+// 10. orders.total_amount — денормализованная сумма, вычисляется автоматически
+//     (сумма строк order_works и order_parts). Хранится для скорости отчётов.
+// 11. Письма-напоминания печатаются по адресу клиента; факт формирования
+//     и печати сохраняется в reminder_letters, чтобы не слать письмо повторно.
+// 12. Одна и та же работа применима к любой модели (прайс не зависит от модели).
+
+Enum part_condition {
+  new   [note: 'новая']
+  used  [note: 'б/у']
+}
+
+Enum order_status {
+  draft      [note: 'черновик']
+  in_progress [note: 'в работе']
+  completed  [note: 'выполнен']
+  cancelled  [note: 'отменён']
+}
+
+Enum reminder_status {
+  created    [note: 'сформировано']
+  printed    [note: 'напечатано']
+  fulfilled  [note: 'работа выполнена']
+  cancelled  [note: 'отменено (снят с учёта и т.п.)']
+}
+
+// ---------- Справочник моделей автомобилей ----------
+Table car_models {
+  id          int [pk, increment]
+  brand       varchar(60)  [not null, note: 'марка']
+  name        varchar(80)  [not null, note: 'модель']
+  generation  varchar(60)  [note: 'поколение / кузов']
+  year_from   smallint     [note: 'начало выпуска']
+  year_to     smallint     [note: 'конец выпуска, NULL если выпускается']
+
+  indexes {
+    (brand, name, generation) [unique]
+  }
+}
+
+// ---------- Склад: запчасти и расходные материалы ----------
+Table parts {
+  id             int [pk, increment]
+  article        varchar(50)   [unique, note: 'артикул / код']
+  name           varchar(150)  [not null]
+  condition      part_condition [not null, note: 'новая или б/у']
+  is_consumable  boolean       [not null, default: false, note: 'расходный материал']
+  is_universal   boolean       [not null, default: false, note: 'подходит ко всем моделям']
+  unit           varchar(20)   [not null, default: 'шт', note: 'шт, л, кг...']
+  price          decimal(12,2) [not null, note: 'текущая цена продажи']
+  purchase_price decimal(12,2) [note: 'закупочная цена, для расчёта прибыли']
+  stock_qty      decimal(12,3) [not null, default: 0, note: 'остаток на складе']
+
+  indexes {
+    name
+    condition
+  }
+}
+
+// Совместимость запчасти и модели (M:N)
+Table part_compatibility {
+  part_id       int [not null]
+  car_model_id  int [not null]
+
+  indexes {
+    (part_id, car_model_id) [pk]
+  }
+}
+
+// ---------- Справочник работ ----------
+Table service_types {
+  id             int [pk, increment]
+  name           varchar(150)  [not null, unique]
+  price          decimal(12,2) [not null, note: 'текущая стоимость работы']
+  is_periodic    boolean       [not null, default: false]
+  period_months  smallint      [note: 'период в месяцах (для периодических)']
+  period_km      int           [note: 'период в км пробега (для периодических)']
+  is_active      boolean       [not null, default: true, note: 'выполняется ли сейчас']
+}
+
+// ---------- Клиенты ----------
+Table clients {
+  id                int [pk, increment]
+  full_name         varchar(150) [not null]
+  phone             varchar(30)
+  email             varchar(100)
+  postal_address    varchar(255) [note: 'адрес для печатных писем']
+  registered_at     date         [not null, default: `now()`]
+  is_active         boolean      [not null, default: true, note: 'false = снят с учёта']
+  deregistered_at   date         [note: 'дата снятия с учёта']
+  deregistration_reason varchar(255)
+
+  indexes {
+    full_name
+    phone
+  }
+}
+
+// ---------- Автомобили ----------
+Table cars {
+  id               int [pk, increment]
+  car_model_id     int          [not null]
+  vin              varchar(17)  [unique]
+  license_plate    varchar(20)  [unique]
+  manufacture_year smallint
+  color            varchar(40)
+  registered_at    date         [not null, default: `now()`]
+  is_active        boolean      [not null, default: true, note: 'false = снят с учёта']
+  deregistered_at  date
+  deregistration_reason varchar(255)
+}
+
+// ---------- История владения (клиент <-> автомобиль) ----------
+Table car_ownerships {
+  id         int [pk, increment]
+  car_id     int  [not null]
+  client_id  int  [not null]
+  date_from  date [not null, note: 'начало владения']
+  date_to    date [note: 'NULL = текущий владелец']
+
+  indexes {
+    car_id
+    client_id
+    (car_id, date_to)
+  }
+}
+
+// ---------- Заказы ----------
+Table orders {
+  id            int [pk, increment]
+  order_number  varchar(30)   [not null, unique]
+  car_id        int           [not null]
+  client_id     int           [not null, note: 'клиент, оформивший заказ']
+  order_date    date          [not null]
+  odometer_km   int           [not null, note: 'показания спидометра на момент выполнения']
+  status        order_status  [not null, default: 'draft']
+  total_amount  decimal(14,2) [not null, default: 0, note: 'авто-расчёт: работы + запчасти']
+  created_at    timestamp     [not null, default: `now()`]
+
+  indexes {
+    order_date
+    (car_id, order_date)
+    client_id
+  }
+}
+
+// Работы в заказе
+Table order_works {
+  id               int [pk, increment]
+  order_id         int           [not null]
+  service_type_id  int           [not null]
+  quantity         decimal(8,2)  [not null, default: 1]
+  price_at_order   decimal(12,2) [not null, note: 'цена работы на момент заказа']
+
+  indexes {
+    order_id
+    service_type_id
+  }
+}
+
+// Запчасти и материалы в заказе
+Table order_parts {
+  id              int [pk, increment]
+  order_id        int           [not null]
+  part_id         int           [not null]
+  quantity        decimal(12,3) [not null, default: 1]
+  price_at_order  decimal(12,2) [not null, note: 'цена продажи на момент заказа']
+  cost_at_order   decimal(12,2) [note: 'закупочная цена на момент заказа']
+
+  indexes {
+    order_id
+    part_id
+  }
+}
+
+// ---------- Письма-напоминания о периодических работах ----------
+Table reminder_letters {
+  id               int [pk, increment]
+  car_id           int  [not null]
+  client_id        int  [not null, note: 'адресат (текущий владелец)']
+  service_type_id  int  [not null]
+  last_order_id    int  [note: 'последний заказ с этой работой (NULL, если не выполнялась)']
+  due_date         date [note: 'расчётная дата по period_months']
+  due_odometer_km  int  [note: 'расчётный пробег по period_km']
+  generated_at     timestamp [not null, default: `now()`]
+  printed_at       timestamp
+  status           reminder_status [not null, default: 'created']
+
+  indexes {
+    (car_id, service_type_id, status)
+    client_id
+  }
+}
+
+// ---------- Связи ----------
+Ref: part_compatibility.part_id > parts.id [delete: cascade]
+Ref: part_compatibility.car_model_id > car_models.id [delete: cascade]
+
+Ref: cars.car_model_id > car_models.id
+
+Ref: car_ownerships.car_id > cars.id
+Ref: car_ownerships.client_id > clients.id
+
+Ref: orders.car_id > cars.id
+Ref: orders.client_id > clients.id
+
+Ref: order_works.order_id > orders.id [delete: cascade]
+Ref: order_works.service_type_id > service_types.id
+
+Ref: order_parts.order_id > orders.id [delete: cascade]
+Ref: order_parts.part_id > parts.id
+
+Ref: reminder_letters.car_id > cars.id
+Ref: reminder_letters.client_id > clients.id
+Ref: reminder_letters.service_type_id > service_types.id
+Ref: reminder_letters.last_order_id > orders.id
