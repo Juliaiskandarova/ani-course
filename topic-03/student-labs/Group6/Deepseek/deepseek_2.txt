@@ -1,0 +1,204 @@
+// ============================================================
+// Схема БД библиотеки (абонемент) — исправленная версия
+// Все допущения помечены комментариями "Допущение:".
+// ============================================================
+
+// ---------- Справочники ----------
+
+Table genres {
+  id   integer [pk, increment]
+  name varchar [not null, unique]
+}
+
+Table authors {
+  id        integer [pk, increment]
+  full_name varchar [not null]
+  // Допущение: для поиска по автору достаточно ФИО.
+  indexes {
+    full_name
+  }
+}
+
+// ---------- Издания ----------
+
+Table editions {
+  id           integer       [pk, increment]
+  title        varchar       [not null]
+  genre_id     integer       [not null]
+  price        numeric(12,2) [not null]  // база для штрафа (x3) и возмещения (1:1)
+  publisher    varchar
+  publish_year integer
+  isbn         varchar
+  // Допущение: названия книг могут совпадать, уникален только id издания.
+  indexes {
+    title
+    genre_id
+  }
+}
+
+Table edition_authors {
+  edition_id integer [not null]
+  author_id  integer [not null]
+  indexes {
+    (edition_id, author_id) [pk]
+    author_id               // ИСПРАВЛЕНО (п.5): индекс для отчёта по авторам
+  }
+  // M:N: у одного издания может быть несколько авторов.
+}
+
+// ---------- Экземпляры ----------
+
+Table copies {
+  id               integer [pk, increment]
+  edition_id       integer [not null]
+  inventory_number varchar [not null, unique]
+  status           varchar [not null] // available | on_loan | lost | written_off
+  acquired_at      date    [not null] // ИСПРАВЛЕНО (п.2): было nullable
+  indexes {
+    edition_id
+    status
+  }
+}
+
+// ---------- Пользователи ----------
+
+Table users {
+  id              integer [pk, increment]
+  full_name       varchar [not null]
+  phone           varchar
+  email           varchar
+  address         text
+  registered_at   date    [not null]
+  status          varchar [not null] // active | blocked | deregistered
+  deregistered_at date
+  // Допущение: "активность" вычисляется по loan-записям.
+}
+
+// ---------- Выдачи и продления ----------
+
+Table loans {
+  id          integer [pk, increment]
+  copy_id     integer [not null]
+  user_id     integer [not null]
+  loan_date   date    [not null]
+  due_date    date    [not null]
+  return_date date
+  status      varchar [not null] // active | returned | lost
+  // overdue = (return_date IS NULL AND due_date < today)
+  indexes {
+    user_id
+    copy_id
+    loan_date
+    (user_id, status)
+  }
+}
+
+Table loan_renewals {
+  id           integer [pk, increment]
+  loan_id      integer [not null]
+  renewed_at   date    [not null]
+  new_due_date date    [not null]
+  // История продлений; "не более 3" — count(*) по loan_id.
+  indexes {
+    loan_id   // ИСПРАВЛЕНО (п.1): индекс по FK для подсчёта продлений
+  }
+}
+
+// ---------- Штрафы ----------
+
+Table fines {
+  id         integer       [pk, increment]
+  user_id    integer       [not null]
+  loan_id    integer       [not null]   // ИСПРАВЛЕНО: было integer (nullable)
+  copy_id    integer       [not null]   // ИСПРАВЛЕНО: было integer (nullable)
+  amount     numeric(12,2) [not null]
+  reason     varchar       [not null]   // overdue_over_1_year | other
+  created_at date          [not null]
+  is_paid    boolean       [not null]
+  paid_at    date
+  indexes {
+    user_id                               // ИСПРАВЛЕНО (п.1): индексы по FK
+    loan_id
+    copy_id
+  }
+  // Для просрочки > 1 года: amount = 3 * editions.price, is_paid = true сразу.
+}
+
+// ---------- Возмещение утерянных книг ----------
+
+Table compensations {
+  id               integer       [pk, increment]
+  user_id          integer       [not null]
+  copy_id          integer       [not null]
+  loan_id          integer       [not null]   // ИСПРАВЛЕНО: было integer (nullable)
+  amount           numeric(12,2) [not null]   // 1:1 — равно editions.price
+  application_date date          [not null]
+  status           varchar       [not null]   // pending | approved | rejected | completed
+  notes            text
+  indexes {
+    user_id                               // ИСПРАВЛЕНО (п.1): индексы по FK
+    copy_id
+    loan_id
+  }
+}
+
+// ---------- Списание ----------
+
+Table write_offs {
+  id             integer [pk, increment]
+  copy_id        integer [not null]
+  reason         varchar [not null] // lost | unreturned | other
+  write_off_date date    [not null]
+  notes          text
+  indexes {
+    copy_id   // ИСПРАВЛЕНО (п.1): индекс по FK
+  }
+}
+
+// ---------- Пополнение фондов ----------
+
+Table acquisitions {
+  id          integer       [pk, increment]
+  edition_id  integer       [not null]
+  quantity    integer       [not null]
+  unit_price  numeric(12,2) [not null]
+  supplier    varchar
+  acquired_at date          [not null]
+  indexes {
+    edition_id   // ИСПРАВЛЕНО (п.1): индекс по FK
+  }
+}
+
+// ---------- Журнал ругательных писем ----------
+
+Table penalty_letters {
+  id           integer [pk, increment]
+  user_id      integer [not null]
+  loan_id      integer [not null]
+  generated_at date    [not null]
+  text         text    [not null]
+  indexes {
+    user_id   // ИСПРАВЛЕНО (п.1): индексы по FK
+    loan_id
+  }
+}
+
+// ---------- Связи ----------
+
+Ref: editions.genre_id          > genres.id
+Ref: edition_authors.edition_id > editions.id
+Ref: edition_authors.author_id  > authors.id
+Ref: copies.edition_id          > editions.id
+Ref: loans.copy_id              > copies.id
+Ref: loans.user_id              > users.id
+Ref: loan_renewals.loan_id      > loans.id
+Ref: fines.user_id              > users.id
+Ref: fines.loan_id              > loans.id
+Ref: fines.copy_id              > copies.id
+Ref: compensations.user_id      > users.id
+Ref: compensations.copy_id      > copies.id
+Ref: compensations.loan_id      > loans.id
+Ref: write_offs.copy_id         > copies.id
+Ref: acquisitions.edition_id    > editions.id
+Ref: penalty_letters.user_id    > users.id
+Ref: penalty_letters.loan_id    > loans.id
