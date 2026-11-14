@@ -1,0 +1,595 @@
+Project library_db {
+  database_type: 'PostgreSQL'
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+Enum member_status {
+  active
+  expelled
+}
+
+Enum copy_status {
+  available
+  on_loan
+  lost
+  written_off
+}
+
+Enum loan_status {
+  issued
+  returned
+  lost
+}
+
+Enum loan_settlement_type {
+  returned
+  replacement
+  fine
+}
+
+Enum acquisition_type {
+  purchase
+  donation
+  replacement
+  opening_balance
+  other
+}
+
+Enum activity_type {
+  registration
+  visit
+  loan_issue
+  loan_return
+  loan_renewal
+  loss_report
+  replacement_received
+  other
+}
+
+Enum compensation_status {
+  pending
+  fulfilled
+}
+
+Enum writeoff_reason {
+  lost
+  not_returned
+  damaged
+  obsolete
+  other
+}
+
+// =====================================================
+// GENRES
+// =====================================================
+
+Table genre {
+  genre_id bigint [pk, increment]
+  name varchar(120) [not null, unique]
+  description text
+}
+
+// =====================================================
+// AUTHORS
+// =====================================================
+
+Table author {
+  author_id bigint [pk, increment]
+  full_name varchar(300) [not null]
+  sort_name varchar(300)
+  birth_year smallint
+  death_year smallint
+  notes text
+
+  indexes {
+    (full_name)
+  }
+}
+
+// =====================================================
+// BOOKS
+// =====================================================
+
+// Book represents a bibliographic work.
+// Different books may have identical titles.
+// One book may have several editions.
+
+Table book {
+  book_id bigint [pk, increment]
+  title varchar(500) [not null]
+  subtitle varchar(500)
+  genre_id bigint [not null]
+  description text
+  created_at timestamp [not null]
+
+  indexes {
+    (title)
+    (genre_id)
+  }
+}
+
+// Many-to-many relationship between books and authors.
+
+Table book_author {
+  book_id bigint [not null]
+  author_id bigint [not null]
+  author_order smallint [not null]
+
+  indexes {
+    (book_id, author_id) [pk]
+    (author_id, book_id)
+    (book_id, author_order) [unique]
+  }
+}
+
+// =====================================================
+// BOOK EDITIONS
+// =====================================================
+
+// Different editions of the same book may have
+// different ISBNs, publishers, publication years and prices.
+// catalog_price is used to calculate fines.
+
+Table book_edition {
+  edition_id bigint [pk, increment]
+  book_id bigint [not null]
+  isbn varchar(20) [unique]
+  publisher varchar(255)
+  publication_year smallint
+  edition_label varchar(100)
+  language_code varchar(10)
+  catalog_price numeric(12,2) [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (book_id)
+  }
+}
+
+// =====================================================
+// ACQUISITIONS / LIBRARY FUND
+// =====================================================
+
+// One acquisition document may contain multiple editions.
+
+Table acquisition {
+  acquisition_id bigint [pk, increment]
+  acquired_at timestamp [not null]
+  acquisition_type acquisition_type [not null]
+  document_number varchar(100)
+  source_name varchar(255)
+  notes text
+}
+
+// Individual lines of an acquisition document.
+// quantity represents the number of acquired copies.
+// unit_price is the accounting price of one copy.
+
+Table acquisition_item {
+  acquisition_item_id bigint [pk, increment]
+  acquisition_id bigint [not null]
+  edition_id bigint [not null]
+  quantity integer [not null]
+  unit_price numeric(12,2) [not null]
+  notes text
+
+  indexes {
+    (acquisition_id)
+    (edition_id)
+  }
+}
+
+// =====================================================
+// PHYSICAL BOOK COPIES
+// =====================================================
+
+// Every physical copy is represented by a separate record.
+// The number of copies of an edition is calculated
+// from the associated book_copy records.
+
+Table book_copy {
+  copy_id bigint [pk, increment]
+  acquisition_item_id bigint [not null]
+  inventory_number varchar(50) [not null, unique]
+  barcode varchar(100) [unique]
+  status copy_status [not null]
+  notes text
+
+  indexes {
+    (acquisition_item_id, status)
+  }
+}
+
+// =====================================================
+// LIBRARY MEMBERS
+// =====================================================
+
+Table library_member {
+  member_id bigint [pk, increment]
+  card_number varchar(50) [not null, unique]
+
+  last_name varchar(150) [not null]
+  first_name varchar(150) [not null]
+  middle_name varchar(150)
+
+  birth_date date
+
+  email varchar(254)
+  phone varchar(30)
+  postal_address text
+
+  registered_at timestamp [not null]
+  status member_status [not null]
+  expelled_at timestamp
+
+  notes text
+
+  indexes {
+    (last_name, first_name)
+    (status)
+  }
+}
+
+// =====================================================
+// LOANS
+// =====================================================
+
+// One record represents one book copy issued to one member.
+// due_at stores the current return deadline.
+// settled_at and settlement_type describe the fulfillment
+// of the member's obligation.
+
+Table loan {
+  loan_id bigint [pk, increment]
+
+  member_id bigint [not null]
+  copy_id bigint [not null]
+
+  issued_at timestamp [not null]
+  due_at timestamp [not null]
+
+  returned_at timestamp
+  lost_at timestamp
+
+  status loan_status [not null]
+
+  settled_at timestamp
+  settlement_type loan_settlement_type
+
+  notes text
+
+  indexes {
+    (member_id, status, due_at)
+    (member_id, settled_at)
+    (copy_id, status)
+    (issued_at)
+    (returned_at)
+  }
+}
+
+// =====================================================
+// LOAN RENEWALS
+// =====================================================
+
+// Stores the history of loan extensions.
+// renewal_number identifies the extension sequence (1-3).
+
+Table loan_renewal {
+  renewal_id bigint [pk, increment]
+  loan_id bigint [not null]
+
+  renewal_number smallint [not null]
+
+  renewed_at timestamp [not null]
+  previous_due_at timestamp [not null]
+  new_due_at timestamp [not null]
+
+  notes text
+
+  indexes {
+    (loan_id, renewal_number) [unique]
+    (renewed_at)
+  }
+}
+
+// =====================================================
+// OVERDUE NOTICES
+// =====================================================
+
+// Stores generated letters and recipient information
+// as it existed at the time of generation.
+// One notice is generated per overdue loan.
+
+Table overdue_notice {
+  notice_id bigint [pk, increment]
+  loan_id bigint [not null, unique]
+
+  generated_at timestamp [not null]
+
+  recipient_name_snapshot varchar(300)
+  recipient_address_snapshot text
+  recipient_email_snapshot varchar(254)
+
+  body_text text [not null]
+
+  sent_at timestamp
+}
+
+// =====================================================
+// FINES AND RECEIPTS
+// =====================================================
+
+// A fine is automatically considered paid.
+// The fine amount equals three times the edition price
+// at the moment of assessment.
+
+Table fine_receipt {
+  fine_id bigint [pk, increment]
+
+  loan_id bigint [not null, unique]
+
+  receipt_number varchar(50) [not null, unique]
+
+  edition_price_at_assessment numeric(12,2) [not null]
+  amount numeric(12,2) [not null]
+
+  assessed_at timestamp [not null]
+  paid_at timestamp [not null]
+
+  receipt_text text
+}
+
+// =====================================================
+// LOST BOOK COMPENSATION
+// =====================================================
+
+// A member may submit an application to replace a lost book
+// with another physical copy of the same edition.
+// replacement_copy_id references the newly acquired copy.
+
+Table loss_compensation {
+  compensation_id bigint [pk, increment]
+
+  loan_id bigint [not null, unique]
+
+  statement_number varchar(100) [unique]
+  applied_at timestamp [not null]
+
+  status compensation_status [not null]
+
+  replacement_copy_id bigint [unique]
+  fulfilled_at timestamp
+
+  notes text
+}
+
+// =====================================================
+// INVENTORY WRITE-OFFS
+// =====================================================
+
+// Records formal removal of lost, unreturned or damaged copies.
+// loan_id is nullable for copies that were not issued to members.
+
+Table inventory_writeoff {
+  writeoff_id bigint [pk, increment]
+
+  copy_id bigint [not null, unique]
+  loan_id bigint [unique]
+
+  written_off_at timestamp [not null]
+  reason writeoff_reason [not null]
+
+  act_number varchar(100) [not null, unique]
+  notes text
+}
+
+// =====================================================
+// MEMBER ACTIVITY
+// =====================================================
+
+// Records member activity for inactivity-based expulsion.
+// Activity includes visits and library operations.
+// related_loan_id is optional.
+
+Table member_activity {
+  activity_id bigint [pk, increment]
+
+  member_id bigint [not null]
+  activity_type activity_type [not null]
+
+  occurred_at timestamp [not null]
+
+  related_loan_id bigint
+
+  details text
+
+  indexes {
+    (member_id, occurred_at)
+    (activity_type, occurred_at)
+  }
+}
+
+// =====================================================
+// MEMBER STATUS HISTORY
+// =====================================================
+
+// Preserves membership status changes, including expulsion.
+
+Table member_status_history {
+  status_history_id bigint [pk, increment]
+
+  member_id bigint [not null]
+
+  previous_status member_status
+  new_status member_status [not null]
+
+  changed_at timestamp [not null]
+  reason text
+
+  indexes {
+    (member_id, changed_at)
+  }
+}
+
+// =====================================================
+// RELATIONSHIPS
+// =====================================================
+
+// Genres
+
+Ref: book.genre_id > genre.genre_id
+
+// Authors
+
+Ref: book_author.book_id > book.book_id
+Ref: book_author.author_id > author.author_id
+
+// Books and editions
+
+Ref: book_edition.book_id > book.book_id
+
+// Acquisitions
+
+Ref: acquisition_item.acquisition_id > acquisition.acquisition_id
+Ref: acquisition_item.edition_id > book_edition.edition_id
+
+// Physical copies
+
+Ref: book_copy.acquisition_item_id > acquisition_item.acquisition_item_id
+
+// Loans
+
+Ref: loan.member_id > library_member.member_id
+Ref: loan.copy_id > book_copy.copy_id
+
+// Renewals
+
+Ref: loan_renewal.loan_id > loan.loan_id
+
+// Overdue notices
+
+Ref: overdue_notice.loan_id > loan.loan_id
+
+// Fines
+
+Ref: fine_receipt.loan_id > loan.loan_id
+
+// Lost book compensation
+
+Ref: loss_compensation.loan_id > loan.loan_id
+Ref: loss_compensation.replacement_copy_id > book_copy.copy_id
+
+// Inventory write-offs
+
+Ref: inventory_writeoff.copy_id > book_copy.copy_id
+Ref: inventory_writeoff.loan_id > loan.loan_id
+
+// Member activity
+
+Ref: member_activity.member_id > library_member.member_id
+Ref: member_activity.related_loan_id > loan.loan_id
+
+// Member status history
+
+Ref: member_status_history.member_id > library_member.member_id
+
+
+// =====================================================
+// DESIGN ASSUMPTIONS AND BUSINESS RULES
+// =====================================================
+
+// 1. A book represents a bibliographic work.
+//    A book_edition represents a specific published edition.
+//    Different books may have identical titles.
+
+// 2. Each physical copy has its own book_copy record.
+//    To register an initial library collection, an acquisition
+//    of type opening_balance is created.
+//
+//    The number of book_copy records associated with an
+//    acquisition_item must equal acquisition_item.quantity.
+
+// 3. The current number of copies of an edition is derived
+//    from book_copy records through acquisition_item.
+//    Copy statuses distinguish available, borrowed, lost
+//    and formally written-off copies.
+
+// 4. All monetary values use one common currency.
+//    acquisition_item.unit_price is the accounting price
+//    of one acquired copy.
+//    book_edition.catalog_price is the reference price
+//    used for calculating fines.
+
+// 5. A loan is considered outstanding while settled_at
+//    is NULL.
+//    Returning a book, receiving its replacement or paying
+//    a fine settles the corresponding loan obligation.
+//
+//    settlement_type identifies the settlement method.
+
+// 6. A fine is generated when the overdue period exceeds
+//    one year.
+//    Its amount must equal:
+//    3 * edition price at the assessment date.
+//
+//    The fine is considered paid immediately.
+//    The corresponding loan and physical copy are marked lost.
+
+// 7. A replacement application is accepted only when
+//    the overdue period does not exceed one year.
+//    The replacement must belong to the same edition
+//    as the lost copy.
+//
+//    When the replacement is received:
+//    - loss_compensation.status becomes fulfilled;
+//    - replacement_copy_id is populated;
+//    - loan.settled_at is populated;
+//    - loan.settlement_type becomes replacement.
+
+// 8. An overdue notice can be generated when the overdue
+//    period exceeds one month.
+//    The generated text is stored in body_text.
+//    Recipient snapshots preserve the original letter data.
+
+// 9. Member activity is determined from member_activity.
+//    The last activity date is MAX(occurred_at).
+//    If no activity records exist, registered_at is used.
+//
+//    Expulsion requires:
+//    - no outstanding loan obligations;
+//    - more than one year without activity.
+
+// 10. Annual report definitions:
+//     - Popular books: number of loan issues grouped by book.
+//     - Popular authors: number of loan issues grouped by author.
+//       A co-authored book contributes one issue to each author.
+//     - Books read per member: number of successfully returned
+//       loans grouped by member and return year.
+//     - Genre preferences: number of loan issues grouped
+//       by genre and issue year.
+//     - Financial report: acquisition quantity multiplied by
+//       unit_price, grouped by acquisition year, plus paid fines
+//       grouped by paid_at year.
+
+// 11. The following business constraints require transactional
+//     validation or database triggers because they cannot be
+//     expressed directly through the DBML diagram:
+//
+//     - A member cannot have more than three simultaneously
+//       issued books.
+//     - A member cannot receive a new book if they have
+//       overdue loans.
+//     - Only available copies can be issued.
+//     - One physical copy cannot have multiple active loans.
+//     - A loan cannot be renewed more than three times.
+//     - Renewal history must correspond to the current due_at.
+//     - Fine and replacement compensation must not be applied
+//       simultaneously to the same loan.
+//     - A replacement copy must belong to the same edition
+//       as the original lost copy.
+//     - The copy status and corresponding loan status must
+//       remain consistent.
+//     - An expelled member must have no outstanding obligations.
