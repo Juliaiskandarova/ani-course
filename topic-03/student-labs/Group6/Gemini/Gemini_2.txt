@@ -1,0 +1,339 @@
+dbml
+// ============================================================================
+// ДОПУЩЕНИЯ И ПРИНЯТЫЕ ПРОЕКТНЫЕ РЕШЕНИЯ (СУБД: PostgreSQL)
+// ============================================================================
+//
+// 1. РАЗДЕЛЕНИЕ ИЗДАНИЙ И ЭКЗЕМПЛЯРОВ:
+//    - editions хранит библиографическое описание и актуальную базовую цену.
+//      Названия книг могут совпадать, различаются по editions.id (и опционально isbn).
+//    - У каждого издания ровно один обязательный жанр (editions.genre_id NOT NULL)
+//      и один или несколько авторов (связь многие-ко-многим через edition_authors).
+//    - book_copies хранит каждый физический экземпляр фонда, его индивидуальную
+//      закупочную стоимость (purchase_price), дату поступления (через fund_acquisitions)
+//      и жизненный цикл (available -> borrowed -> available / lost -> written_off).
+//    - Общее и доступное количество экземпляров издания вычисляется динамически
+//      агрегацией по таблице book_copies.
+//
+// 2. СРОКИ, КАЛЕНДАРНЫЕ ИНТЕРВАЛЫ И ПРОСРОЧКИ:
+//    - Принято допущение об использовании календарного месяца (INTERVAL '1 month')
+//      и календарного года (INTERVAL '1 year') от плановой даты возврата (loans.due_date).
+//    - Просрочка возникает, когда current_date > loans.due_date (для статуса active).
+//    - Строгие границы расчёта санкций на дату проверки (check_date):
+//      * Нет просрочки: check_date <= due_date.
+//      * Просрочка до 1 месяца включительно: due_date < check_date <= due_date + INTERVAL '1 month'.
+//      * Просрочка БОЛЬШЕ 1 месяца (генерация ругательного письма):
+//        check_date > due_date + INTERVAL '1 month' (наступает на следующий день
+//        после истечения календарного месяца просрочки).
+//      * Отсутствие просрочки или просрочка НЕ БОЛЕЕ 1 года (возмещение 1:1 по заявлению):
+//        check_date <= due_date + INTERVAL '1 year' (включая день, когда просрочка
+//        составляет ровно 1 календарный год).
+//      * Просрочка БОЛЬШЕ 1 года (штрафная квитанция 3:1):
+//        check_date > due_date + INTERVAL '1 year' (наступает на следующий день
+//        после истечения календарного года просрочки).
+//
+// 3. АКТИВНОСТЬ ЧИТАТЕЛЯ И ОТЧИСЛЕНИЕ:
+//    - Начальное значение users.last_activity_at при регистрации равно моменту
+//      регистрации (registered_at).
+//    - События, обновляющие users.last_activity_at:
+//      * выдача книги на руки (создание записи в loans);
+//      * возврат книги читателем (обновление loans.returned_at);
+//      * продление срока пользования книгой (создание записи в loan_extensions);
+//      * обращение читателя с заявлением и оплата возмещения стоимости утерянной
+//        книги 1:1 (создание записи в fines_and_compensations с типом compensation_1x).
+//    - Автоматическая генерация ругательного письма (overdue_warnings) и автоматическое
+//      оформление штрафной квитанции 3:1 (overdue_fine_3x) НЕ считаются активностью
+//      читателя и НЕ обновляют users.last_activity_at.
+//    - Отчисление (перевод users.status в 'expelled' с заполнением expelled_at)
+//      разрешается только при одновременном выполнении двух условий:
+//      1) у читателя нет активных выдач/долгов (отсутствуют записи в loans со статусом 'active');
+//      2) прошло более 1 календарного года с последней активности
+//         (current_timestamp > users.last_activity_at + INTERVAL '1 year').
+//
+// 4. ФИНАНСЫ И КВИТАНЦИИ:
+//    - Денежные величины (base_price, purchase_price, amount) хранятся в decimal(10, 2).
+//    - Читатель в fines_and_compensations определяется однозначно через loan_id -> loans.user_id
+//      (дублирующий user_id исключён, что гарантирует невозможность привязать квитанцию
+//      не к тому читателю).
+//    - По одной выдаче может быть оформлена максимум одна квитанция (UNIQUE loan_id).
+//    - Сумма квитанции (amount) фиксируется на момент её оформления исходя из текущей
+//      editions.base_price (1x или 3x) и не пересчитывается задним числом при последующем
+//      изменении base_price издания.
+//    - Штраф 3:1 считается оплаченным сразу при оформлении квитанции; запись о возмещении 1:1
+//      создаётся только по факту состоявшейся оплаты по заявлению читателя.
+//
+// 5. АТОМАРНЫЕ ОПЕРАЦИИ И ЦЕЛОСТНОСТЬ ДАННЫХ (ТРАНЗАКЦИИ И ТРИГГЕРЫ):
+//    - Выдача книги (одна транзакция с блокировкой строки читателя SELECT ... FOR UPDATE
+//      и строки экземпляра SELECT ... FOR UPDATE):
+//      1) проверить users.status = 'active';
+//      2) проверить book_copies.status = 'available';
+//      3) проверить, что у читателя нет активных просроченных выдач
+//         (COUNT(*) WHERE user_id = :u AND status = 'active' AND due_date < current_date) = 0;
+//      4) проверить, что у читателя менее 3 активных выдач
+//         (COUNT(*) WHERE user_id = :u AND status = 'active') < 3;
+//      5) вставить запись в loans (status = 'active'), обновить book_copies.status = 'borrowed'
+//         и users.last_activity_at = current_timestamp.
+//    - Защита от повторной одновременной выдачи одного экземпляра:
+//      * помимо блокировки строки и проверки status = 'available', в PostgreSQL создаётся
+//        частичный уникальный индекс (не поддерживается напрямую в синтаксисе DBML):
+//        CREATE UNIQUE INDEX uq_loans_active_copy ON loans (copy_id) WHERE status = 'active';
+//      * после возврата книги (status = 'returned') этот же экземпляр может выдаваться повторно.
+//    - Продление книги (одна атомарная транзакция с блокировкой строки loans FOR UPDATE):
+//      1) проверить loans.status = 'active' и users.status = 'active';
+//      2) определить следующий номер продления по истории loan_extensions:
+//         next_num = COALESCE(MAX(extension_number), 0) + 1; проверить next_num <= 3;
+//      3) сохранить прежний срок previous_due_date = loans.due_date;
+//      4) вставить запись в loan_extensions (extension_number = next_num, new_due_date > previous_due_date);
+//      5) обновить loans.due_date = new_due_date и users.last_activity_at = current_timestamp.
+//      * История в loan_extensions сохраняется навсегда и остаётся доступной после возврата.
+//    - Возврат книги (одна транзакция):
+//      * обновить loans (status = 'returned', returned_at = current_date),
+//        book_copies (status = 'available') и users.last_activity_at = current_timestamp.
+//    - Возмещение 1:1 по заявлению или штраф 3:1 при просрочке > 1 года (одна транзакция):
+//      * создать запись в fines_and_compensations;
+//      * закрыть выдачу в loans (status = 'lost_compensated' или 'lost_fined', returned_at = NULL);
+//      * перевести экземпляр в book_copies в статус 'lost' (повторная выдача невозможна);
+//      * при compensation_1x обновить users.last_activity_at = current_timestamp.
+//    - Списание утерянных и невозвращённых книг:
+//      * списание само по себе НЕ погашает задолженность читателя;
+//      * если книга уже числится утерянной после возмещения 1:1 или штрафа 3:1
+//        (book_copies.status = 'lost', активной выдачи в loans нет), экземпляр переводится
+//        в status = 'written_off' с заполнением written_off_at и write_off_reason;
+//      * если списывается невозвращённый экземпляр, по которому не было оплаты 1:1 или
+//        штрафа 3:1 (например, смерть/исчезновение должника по акту списания), сначала
+//        принудительно закрывается активная выдача (loans.status = 'written_off_unpaid',
+//        returned_at = NULL) с сохранением всей истории выдачи и продлений, и только затем
+//        экземпляр переводится в book_copies.status = 'written_off'.
+//
+// 6. ОПРЕДЕЛЕНИЯ ДЛЯ ОТЧЁТОВ (ПРИНЯТЫЕ ДОПУЩЕНИЯ):
+//    - Отчёт 1 «Наиболее популярные книги за произвольный период»:
+//      подсчёт количества записей в loans, у которых issued_at попадает в заданный
+//      интервал [date_from, date_to], с группировкой по editions.id. Продления
+//      (loan_extensions) новой выдачей не считаются.
+//    - Отчёт 2 «Наиболее популярные авторы за произвольный период»:
+//      подсчёт количества записей в loans с issued_at в интервале [date_from, date_to],
+//      связанных через book_copies -> editions -> edition_authors -> authors.
+//      Если у издания несколько соавторов, одна выдача учитывается по 1 разу
+//      для каждого из соавторов.
+//    - Отчёт 3 «Количество прочитанных книг на человека в год»:
+//      подсчёт записей в loans со статусом 'returned', у которых returned_at попадает
+//      в отчётный календарный год. Утерянные и невозвращённые книги не включаются.
+//      Запрос строится от таблицы users (LEFT JOIN loans), поэтому читатели с 0 возвратов
+//      за год включаются в отчёт с результатом 0 и участвуют в сортировке.
+//    - Отчёт 4 «Обобщённая статистика по жанровым предпочтениям за год»:
+//      подсчёт количества выдач в loans, у которых issued_at попадает в отчётный год,
+//      с группировкой по genres.id (через book_copies -> editions -> genres).
+//    - Отчёт 5 «Финансовый отчёт за год (основные фонды + штрафы)»:
+//      * Стоимость основных фондов на начало года (1 января): сумма book_copies.purchase_price
+//        по экземплярам, поступившим до начала года (acquisition_date < year_start) и не
+//        списанным до начала года (written_off_at IS NULL OR written_off_at >= year_start).
+//      * Поступления в основные фонды за год: сумма book_copies.purchase_price по экземплярам
+//        с acquisition_date в отчётном году.
+//      * Списания из основных фондов за год: сумма book_copies.purchase_price по экземплярам
+//        с written_off_at в отчётном году (экземпляр, списанный в следующем году, остаётся
+//        в составе фонда на конец отчётного года).
+//      * Стоимость основных фондов на конец года (31 декабря): начальная стоимость +
+//        поступления за год - списания за год (эквивалентно сумме purchase_price экземпляров
+//        с acquisition_date <= year_end и (written_off_at IS NULL OR written_off_at > year_end)).
+//      * Поступления от читателей за год: рассчитываются по fines_and_compensations.amount
+Используйте код с осторожностью.
+//        (где issued_at в отчётном году) с раздельным отражением штрафов 3:1 (overdue_fine_3x)
+//        и возмещений стоимости 1:1 (compensation_1x).
+//
+// 7. ПОЛИТИКА ХРАНЕНИЯ И УДАЛЕНИЯ ИСТОРИЧЕСКИХ ДАННЫХ:
+//    - Физическое удаление (DELETE) записей из users, book_copies, loans, loan_extensions,
+//      overdue_warnings и fines_and_compensations при обычной работе запрещено (используются
+//      статусы 'expelled', 'written_off', 'returned', 'lost_compensated', 'lost_fined',
+//      'written_off_unpaid').
+//    - Удаление справочных записей (genres, authors, editions, fund_acquisitions) блокируется
+//      внешними ключами ([delete: restrict]) при наличии связанных экземпляров или выдач.
+// ============================================================================
+Enum user_status {
+active   // Действующий читатель абонемента
+expelled // Отчислен (нет активных долгов и нет активности > 1 календарного года)
+}
+Enum copy_status {
+available   // Доступен в фонде для выдачи
+borrowed    // Находится на руках у читателя
+lost        // Признан утерянным (после возмещения 1:1 или штрафа 3:1), выдаче не подлежит
+written_off // Списан из основных фондов библиотеки
+}
+Enum loan_status {
+active             // Книга выдана на руки и ещё не возвращена
+returned           // Книга физически возвращена в библиотеку
+lost_compensated   // Книга утеряна, стоимость возмещена 1:1 по заявлению читателя
+lost_fined         // Просрочка > 1 года, оформлена штрафная квитанция 3:1, книга признана утерянной
+written_off_unpaid // Невозвращённая книга списана по акту без погашения долга
+}
+Enum fine_type {
+compensation_1x // Оплаченное возмещение стоимости 1:1 по заявлению (просрочка <= 1 года)
+overdue_fine_3x // Штрафная квитанция 3:1 при просрочке > 1 года (считается оплаченной сразу)
+}
+// ----------------------------------------------------------------------------
+// СПРАВОЧНИКИ И ОСНОВНЫЕ ФОНДЫ
+// ----------------------------------------------------------------------------
+Table genres {
+id int [pk, increment]
+name varchar(100) [not null, unique, note: 'Название жанра']
+}
+Table authors {
+id int [pk, increment]
+full_name varchar(255) [not null, note: 'ФИО автора']
+birth_year int [null]
+indexes {
+full_name [name: 'idx_authors_full_name']
+}
+}
+Table editions {
+id int [pk, increment]
+genre_id int [not null, note: 'Обязательный жанр издания']
+title varchar(255) [not null, note: 'Название книги (могут совпадать у разных изданий)']
+isbn varchar(20) [null, note: 'ISBN для различения изданий с одинаковым названием']
+publisher varchar(255) [null]
+publish_year int [null]
+base_price decimal(10, 2) [not null, note: 'Текущая цена издания для расчёта возмещения 1:1 и штрафа 3:1']
+checks {
+base_price >= 0 [name: 'chk_editions_base_price_non_negative']
+}
+indexes {
+title [name: 'idx_editions_title']
+genre_id [name: 'idx_editions_genre_id']
+}
+}
+Table edition_authors {
+edition_id int [not null]
+author_id int [not null]
+indexes {
+(edition_id, author_id) [pk]
+author_id [name: 'idx_edition_authors_author_id']
+}
+}
+Table fund_acquisitions {
+id int [pk, increment]
+acquisition_date date [not null, note: 'Дата поступления партии в основные фонды']
+document_number varchar(100) [not null, note: 'Номер приходного документа/накладной']
+supplier varchar(255) [null]
+notes text [null]
+indexes {
+acquisition_date [name: 'idx_fund_acquisitions_date']
+}
+}
+Table book_copies {
+id int [pk, increment]
+edition_id int [not null]
+acquisition_id int [not null, note: 'Ссылка на документ поступления в основные фонды']
+inventory_number varchar(50) [not null, unique, note: 'Уникальный инвентарный номер экземпляра']
+purchase_price decimal(10, 2) [not null, note: 'Балансовая стоимость экземпляра при поступлении']
+status copy_status [not null, default: 'available']
+written_off_at date [null, note: 'Дата списания экземпляра из основных фондов']
+write_off_reason varchar(255) [null, note: 'Причина и номер акта списания']
+checks {
+purchase_price >= 0 [name: 'chk_book_copies_price_non_negative']
+(status = 'written_off' AND written_off_at IS NOT NULL AND write_off_reason IS NOT NULL) OR (status <> 'written_off' AND written_off_at IS NULL AND write_off_reason IS NULL) [name: 'chk_book_copies_written_off_consistency']
+}
+indexes {
+(edition_id, status) [name: 'idx_book_copies_edition_status']
+acquisition_id [name: 'idx_book_copies_acquisition_id']
+written_off_at [name: 'idx_book_copies_written_off_at']
+}
+}
+// ----------------------------------------------------------------------------
+// ПОЛЬЗОВАТЕЛИ АБОНЕМЕНТА
+// ----------------------------------------------------------------------------
+Table users {
+id int [pk, increment]
+card_number varchar(50) [not null, unique, note: 'Номер читательского билета']
+full_name varchar(255) [not null]
+email varchar(255) [null, note: 'Контактный email для ругательных писем']
+phone varchar(50) [null]
+address text [null]
+registered_at date [not null, note: 'Дата оформления нового читателя']
+last_activity_at timestamp [not null, note: 'Момент последней активности читателя (выдача, возврат, продление, возмещение 1:1)']
+status user_status [not null, default: 'active']
+expelled_at date [null, note: 'Дата отчисления читателя']
+checks {
+(status = 'expelled' AND expelled_at IS NOT NULL AND expelled_at >= registered_at) OR (status = 'active' AND expelled_at IS NULL) [name: 'chk_users_expelled_consistency']
+}
+indexes {
+status [name: 'idx_users_status']
+last_activity_at [name: 'idx_users_last_activity']
+}
+}
+// ----------------------------------------------------------------------------
+// ВЫДАЧА, ПРОДЛЕНИЕ И УВЕДОМЛЕНИЯ О ПРОСРОЧКЕ
+// ----------------------------------------------------------------------------
+Table loans {
+id int [pk, increment]
+user_id int [not null]
+copy_id int [not null, note: 'Не уникально в целом по таблице (один экземпляр выдаётся многократно), но уникально среди status = active']
+issued_at date [not null, note: 'Дата первичной выдачи книги на руки']
+due_date date [not null, note: 'Текущий плановый срок возврата (обновляется при продлении)']
+returned_at date [null, note: 'Дата физического возврата книги; NULL для активных, утерянных и списанных без возврата']
+status loan_status [not null, default: 'active']
+checks {
+due_date >= issued_at [name: 'chk_loans_due_date_after_issue']
+returned_at IS NULL OR returned_at >= issued_at [name: 'chk_loans_returned_date_after_issue']
+(status = 'returned' AND returned_at IS NOT NULL) OR (status <> 'returned' AND returned_at IS NULL) [name: 'chk_loans_returned_status_consistency']
+}
+indexes {
+(user_id, status) [name: 'idx_loans_user_status']
+(copy_id, status) [name: 'idx_loans_copy_status']
+issued_at [name: 'idx_loans_issued_at']
+returned_at [name: 'idx_loans_returned_at']
+due_date [name: 'idx_loans_due_date']
+}
+}
+Table loan_extensions {
+id int [pk, increment]
+loan_id int [not null]
+extension_number int [not null, note: 'Порядковый номер продления по данной выдаче (от 1 до 3)']
+extended_at date [not null, note: 'Дата оформления продления']
+previous_due_date date [not null, note: 'Срок возврата до продления']
+new_due_date date [not null, note: 'Новый срок возврата после продления']
+checks {
+extension_number >= 1 AND extension_number <= 3 [name: 'chk_loan_extensions_number_range']
+new_due_date > previous_due_date [name: 'chk_loan_extensions_date_increase']
+}
+indexes {
+(loan_id, extension_number) [unique, name: 'uq_loan_extensions_loan_num']
+}
+}
+Table overdue_warnings {
+id int [pk, increment]
+loan_id int [not null, note: 'Выдача с просрочкой более 1 календарного месяца']
+generated_at timestamp [not null, note: 'Дата и время генерации ругательного письма']
+letter_text text [not null, note: 'Сформированный текст ругательного письма']
+indexes {
+loan_id [name: 'idx_overdue_warnings_loan_id']
+}
+}
+// ----------------------------------------------------------------------------
+// ФИНАНСОВЫЕ ДОКУМЕНТЫ (ШТРАФЫ 3:1 И ВОЗМЕЩЕНИЯ 1:1)
+// ----------------------------------------------------------------------------
+Table fines_and_compensations {
+id int [pk, increment]
+loan_id int [not null, unique, note: 'Читатель однозначно определяется через loans.user_id; одна выдача = максимум одна квитанция']
+type fine_type [not null, note: 'compensation_1x (возмещение 1:1 по заявлению) или overdue_fine_3x (штраф 3:1)']
+amount decimal(10, 2) [not null, note: 'Зафиксированная оплаченная сумма на дату квитанции']
+issued_at date [not null, note: 'Дата оформления и оплаты квитанции']
+receipt_number varchar(50) [not null, unique, note: 'Уникальный номер квитанции']
+checks {
+amount >= 0 [name: 'chk_fines_amount_non_negative']
+}
+indexes {
+issued_at [name: 'idx_fines_issued_at']
+type [name: 'idx_fines_type']
+}
+}
+// ----------------------------------------------------------------------------
+// СВЯЗИ МЕЖДУ ТАБЛИЦАМИ (FOREIGN KEYS)
+// ----------------------------------------------------------------------------
+Ref: editions.genre_id > genres.id [delete: restrict]
+Ref: edition_authors.edition_id > editions.id [delete: cascade]
+Ref: edition_authors.author_id > authors.id [delete: restrict]
+Ref: book_copies.edition_id > editions.id [delete: restrict]
+Ref: book_copies.acquisition_id > fund_acquisitions.id [delete: restrict]
+Ref: loans.user_id > users.id [delete: restrict]
+Ref: loans.copy_id > book_copies.id [delete: restrict]
+Ref: loan_extensions.loan_id > loans.id [delete: restrict]
+Ref: overdue_warnings.loan_id > loans.id [delete: restrict]
+Ref: fines_and_compensations.loan_id > loans.id [delete: restrict]

@@ -1,0 +1,208 @@
+// ============================================================================
+// ДОПУЩЕНИЯ И ПРИНЯТЫЕ ПРОЕКТНЫЕ РЕШЕНИЯ:
+// 1. Разделение "Издание" (editions) и "Экземпляр" (book_copies):
+//    - В задании указан перечень изданий с количеством экземпляров, но каждый 
+//      экземпляр имеет индивидуальный жизненный цикл (выдан на руки, утерян, 
+//      списан), а также дату поступления в фонд и закупочную цену для фин. отчета.
+//    - Количество доступных/всех экземпляров издания вычисляется динамически 
+//      по таблице book_copies (или кэшируется на уровне приложения).
+// 2. Жанры: "Книга принадлежит некоторому жанру" интерпретировано как связь 
+//    многие-ко-многим (edition_genres), так как на практике у издания часто 
+//    бывает 1 основной и несколько дополнительных жанров (если нужен строго 
+//    один, достаточно перенести genre_id в таблицу editions).
+// 3. Денежные суммы (цена издания, штрафы, возмещения) хранятся в decimal(10, 2).
+// 4. Активность пользователя (для отчисления при неактивности > 1 года) 
+//    определяется по дате последнего взаимодействия (last_activity_at в users 
+//    или по последним записям в loans / payments).
+// 5. Текст "ругательного письма" и "штрафной квитанции" формируются в приложении, 
+//    а факт их генерации/отправки фиксируется в БД (warnings и fines).
+// 6. Ограничения "не более 3 книг на руки", "не более 3 продлений" и проверка 
+//    сроков просрочки (1 мес. / 1 год) контролируются бизнес-логикой/триггерами.
+// ============================================================================
+
+Enum user_status {
+  active    // Активный читатель
+  expelled  // Отчислен (нет долгов и активности > 1 года)
+}
+
+Enum copy_status {
+  available   // В фонде, доступна к выдаче
+  borrowed    // Выдана читателю на руки
+  lost        // Утеряна (по заявлению или при просрочке > 1 года)
+  written_off // Списана из основных фондов
+}
+
+Enum loan_status {
+  active           // Книга на руках у читателя
+  returned         // Возвращена в библиотеку
+  lost_compensated // Утеряна, стоимость возмещена 1:1 по заявлению
+  lost_fined       // Просрочка > 1 года, выписан штраф 3x, признана утерянной
+}
+
+Enum fine_type {
+  compensation_1x // Возмещение стоимости 1:1 по заявлению (просрочка <= 1 года)
+  overdue_fine_3x // Штраф 3x от цены издания (просрочка > 1 года)
+}
+
+// ----------------------------------------------------------------------------
+// СПРАВОЧНИКИ И ОСНОВНЫЕ ФОНДЫ
+// ----------------------------------------------------------------------------
+
+Table genres {
+  id int [pk, increment]
+  name varchar(100) [not null, unique, note: 'Название жанра']
+}
+
+Table authors {
+  id int [pk, increment]
+  full_name varchar(255) [not null, note: 'ФИО автора для поиска и отчетов']
+  birth_year int [null]
+}
+
+Table editions {
+  id int [pk, increment]
+  title varchar(255) [not null, note: 'Название книги (могут совпадать)']
+  isbn varchar(20) [null, note: 'Уникальный код издания для различения одноименных книг']
+  publisher varchar(255) [null]
+  publish_year int [null]
+  base_price decimal(10, 2) [not null, note: 'Базовая цена издания для расчета штрафов 1:1 и 3:1']
+
+  indexes {
+    title [name: 'idx_editions_title']
+  }
+}
+
+Table edition_authors {
+  edition_id int [not null]
+  author_id int [not null]
+
+  indexes {
+    (edition_id, author_id) [pk]
+  }
+}
+
+Table edition_genres {
+  edition_id int [not null]
+  genre_id int [not null]
+
+  indexes {
+    (edition_id, genre_id) [pk]
+  }
+}
+
+Table fund_acquisitions {
+  id int [pk, increment]
+  acquisition_date date [not null, note: 'Дата пополнения основных фондов (для годового фин. отчета)']
+  document_number varchar(100) [null, note: 'Номер накладной/акта поступления']
+  supplier varchar(255) [null]
+  notes text [null]
+}
+
+Table book_copies {
+  id int [pk, increment]
+  edition_id int [not null]
+  acquisition_id int [not null, note: 'Партия поступления в основные фонды']
+  inventory_number varchar(50) [not null, unique, note: 'Инвентарный номер экземпляра']
+  purchase_price decimal(10, 2) [not null, note: 'Фактическая стоимость постановки на баланс']
+  status copy_status [not null, default: 'available']
+  written_off_at date [null, note: 'Дата списания утерянной/невозвращенной книги']
+  write_off_reason varchar(255) [null, note: 'Причина списания']
+
+  indexes {
+    (edition_id, status) [name: 'idx_copies_edition_status']
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ПОЛЬЗОВАТЕЛИ И АБОНЕМЕНТ
+// ----------------------------------------------------------------------------
+
+Table users {
+  id int [pk, increment]
+  card_number varchar(50) [not null, unique, note: 'Номер читательского билета']
+  full_name varchar(255) [not null]
+  email varchar(255) [null, note: 'Для отправки ругательных писем']
+  phone varchar(50) [null]
+  address text [null]
+  registered_at date [not null, note: 'Дата оформления нового пользователя']
+  last_activity_at timestamp [not null, note: 'Дата последней активности (для отчисления через 1 год)']
+  status user_status [not null, default: 'active']
+  expelled_at date [null, note: 'Дата отчисления пользователя']
+}
+
+// ----------------------------------------------------------------------------
+// ВЫДАЧА, ПРОДЛЕНИЕ, ВОЗВРАТ И УВЕДОМЛЕНИЯ
+// ----------------------------------------------------------------------------
+
+Table loans {
+  id int [pk, increment]
+  user_id int [not null]
+  copy_id int [not null]
+  issued_at date [not null, note: 'Дата выдачи книги на руки']
+  due_date date [not null, note: 'Плановая дата возврата (обновляется при продлении)']
+  returned_at date [null, note: 'Фактическая дата возврата (для отчета по прочитанным книгам за год)']
+  extensions_count int [not null, default: 0, note: 'Количество продлений (не более 3)']
+  status loan_status [not null, default: 'active']
+
+  indexes {
+    (user_id, status) [name: 'idx_loans_user_status']
+    (issued_at) [name: 'idx_loans_issued_at']
+    (returned_at) [name: 'idx_loans_returned_at']
+  }
+}
+
+Table loan_extensions {
+  id int [pk, increment]
+  loan_id int [not null]
+  extension_number int [not null, note: 'Порядковый номер продления: 1, 2 или 3']
+  extended_at date [not null, note: 'Дата оформления продления']
+  previous_due_date date [not null]
+  new_due_date date [not null]
+}
+
+Table overdue_warnings {
+  id int [pk, increment]
+  loan_id int [not null, note: 'Выдача с просрочкой > 1 месяца']
+  generated_at timestamp [not null, note: 'Дата генерации ругательного письма']
+  letter_text text [not null, note: 'Сгенерированный текст письма']
+}
+
+// ----------------------------------------------------------------------------
+// ФИНАНСОВЫЕ ОПЕРАЦИИ (ШТРАФЫ И ВОЗМЕЩЕНИЯ)
+// ----------------------------------------------------------------------------
+
+Table fines_and_compensations {
+  id int [pk, increment]
+  loan_id int [not null, unique, note: 'По одной проблемной выдаче оформляется одна квитанция']
+  user_id int [not null]
+  type fine_type [not null, note: 'compensation_1x (возмещение 1:1) или overdue_fine_3x (штраф 3x)']
+  amount decimal(10, 2) [not null, note: 'Сумма штрафа/возмещения для годового фин. отчета']
+  issued_at date [not null, note: 'Дата квитанции и оплаты (по условию считается сразу оплаченным)']
+  receipt_number varchar(50) [not null, unique, note: 'Номер штрафной/приходной квитанции']
+
+  indexes {
+    (issued_at) [name: 'idx_fines_issued_at']
+  }
+}
+
+// ----------------------------------------------------------------------------
+// СВЯЗИ (FOREIGN KEYS)
+// ----------------------------------------------------------------------------
+
+Ref: edition_authors.edition_id > editions.id [delete: cascade]
+Ref: edition_authors.author_id > authors.id [delete: restrict]
+
+Ref: edition_genres.edition_id > editions.id [delete: cascade]
+Ref: edition_genres.genre_id > genres.id [delete: restrict]
+
+Ref: book_copies.edition_id > editions.id [delete: restrict]
+Ref: book_copies.acquisition_id > fund_acquisitions.id [delete: restrict]
+
+Ref: loans.user_id > users.id [delete: restrict]
+Ref: loans.copy_id > book_copies.id [delete: restrict]
+
+Ref: loan_extensions.loan_id > loans.id [delete: cascade]
+Ref: overdue_warnings.loan_id > loans.id [delete: cascade]
+
+Ref: fines_and_compensations.loan_id > loans.id [delete: restrict]
+Ref: fines_and_compensations.user_id > users.id [delete: restrict]
