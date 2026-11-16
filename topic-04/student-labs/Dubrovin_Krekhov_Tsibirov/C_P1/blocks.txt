@@ -1,0 +1,67 @@
+@startuml
+left to right direction
+actor "Клиент" as Client
+actor "Сотрудник" as Staff
+rectangle "Прокат" {
+  usecase "Подать заявку" as Submit
+  usecase "Посмотреть свои брони" as Own
+  usecase "Отменить свою бронь" as Cancel
+  usecase "Посмотреть все брони" as All
+}
+Client -- Submit
+Client -- Own
+Client -- Cancel
+Staff -- All
+@enduml
+
+
+@startuml
+class Клиент {
+  ФИО : String
+  почта : String
+}
+class Камера {
+  серийныйНомер : String
+  модель : String
+}
+class Бронь {
+  начало : DateTime
+  конец : DateTime
+  статус : Статус
+}
+enum Статус {
+  ПОДТВЕРЖДЕНА
+  ОТМЕНЕНА
+}
+Клиент "1" -- "0..*" Бронь
+Камера "1" -- "0..*" Бронь
+@enduml
+
+
+@startuml
+actor Клиент as K
+participant Прокат as S
+database Брони as D
+K -> S : заявка(камера, начало, конец)
+alt начало >= конец
+  S --> K : отказ (некорректный интервал)
+else корректный интервал
+S -> D : найти конфликт: подтвержденная бронь той же камеры; начало < чужойКонец и чужоеНачало < конец
+D --> S : конфликт?
+alt конфликт
+  S --> K : отказ
+else свободно
+  S -> D : создать подтвержденную бронь
+  S --> K : подтверждение
+end
+end
+@enduml
+
+
+@startuml
+state "Подтверждена" as OK
+state "Отменена" as OFF
+[*] --> OK : заявка принята
+OK --> OFF : отмена [запросил владелец]
+note right of OFF : запись сохраняется
+@enduml

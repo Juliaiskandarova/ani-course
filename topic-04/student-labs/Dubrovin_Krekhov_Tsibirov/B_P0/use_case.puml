@@ -1,0 +1,14 @@
+@startuml
+left to right direction
+actor "Клиент" as Client
+actor "Сотрудник" as Staff
+rectangle "Прокат" {
+  usecase "Подать заявку" as Submit
+  usecase "Посмотреть свои брони" as Own
+  usecase "Отменить свою бронь" as Cancel
+  usecase "Посмотреть все брони" as All
+}
+Client -- Submit
+Client -- Own
+Client -- Cancel
+@enduml

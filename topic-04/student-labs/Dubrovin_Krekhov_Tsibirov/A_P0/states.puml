@@ -1,0 +1,7 @@
+@startuml
+state "Подтверждена" as OK
+state "Отменена" as OFF
+[*] --> OK : заявка принята
+OK --> OFF : отмена
+note right of OFF : запись сохраняется
+@enduml
