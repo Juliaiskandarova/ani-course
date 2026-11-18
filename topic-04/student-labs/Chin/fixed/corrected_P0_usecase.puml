@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\nна бронирование" as Submit
+  usecase "Просмотреть\nсвои брони" as ViewOwn
+  usecase "Отменить свою\nподтверждённую бронь" as Cancel
+  usecase "Просмотреть\nвсе брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+Employee --> ViewAll
+
+note right of Submit
+  Клиент указывает камеру, начало и конец.
+  Система проверяет, что начало раньше конца и
+  нет пересечения с подтверждённой бронью той же камеры.
+  Иначе система отказывает и сообщает причину.
+end note
+
+note right of Cancel
+  Условие: клиент — владелец брони,
+  статус брони «Подтверждена».
+  Запись сохраняется со статусом «Отменена»
+  и не блокирует интервал.
+end note
+@enduml

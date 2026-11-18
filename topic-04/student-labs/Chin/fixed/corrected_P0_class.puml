@@ -1,0 +1,39 @@
+@startuml
+
+class "Камера" as Camera {
+  серийныйНомер : String
+  модель : String
+}
+
+class "Клиент" as Client {
+  ФИО : String
+  почта : String
+}
+
+class "Бронь" as Booking {
+  начало : DateTime
+  конец : DateTime
+  статус : СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+  Подтверждена
+  Отменена
+}
+
+Camera "1" -- "0..*" Booking : камера
+Client "1" -- "0..*" Booking : клиент
+Booking ..> BookingStatus
+
+note right of Booking
+  начало < конец
+
+  Для двух подтверждённых броней
+  одной камеры должно выполняться
+  A.конец <= B.начало
+  или B.конец <= A.начало.
+
+  Отменённые брони сохраняются
+  и не ограничивают доступность.
+end note
+@enduml

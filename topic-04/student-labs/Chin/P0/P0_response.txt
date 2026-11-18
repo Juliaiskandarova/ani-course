@@ -1,0 +1,141 @@
+### 1. Диаграмма вариантов использования
+
+```plantuml
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\nна бронирование" as Submit
+  usecase "Проверить корректность\nинтервала" as Validate
+  usecase "Проверить доступность\nкамеры" as CheckAvailability
+  usecase "Просмотреть\nсвои брони" as ViewOwn
+  usecase "Отменить свою\nподтверждённую бронь" as Cancel
+  usecase "Просмотреть\nвсе брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+Employee --> ViewAll
+
+Submit ..> Validate : <<include>>
+CheckAvailability ..> Submit : <<extend>>\n[начало < конец]
+
+note right of Submit
+  Клиент указывает камеру, начало и конец.
+  Если интервал корректен и камера доступна,
+  система создаёт подтверждённую бронь.
+  При отказе система сообщает причину.
+end note
+
+note right of Cancel
+  Запись сохраняется со статусом «Отменена».
+  Камера становится доступна для бронирования
+  на этот интервал.
+end note
+@enduml
+```
+
+### 2. Диаграмма классов
+
+```plantuml
+@startuml
+
+class "Камера" as Camera {
+  серийныйНомер : String
+  модель : String
+}
+
+class "Клиент" as Client {
+  ФИО : String
+  почта : String
+}
+
+class "Бронь" as Booking {
+  начало : DateTime
+  конец : DateTime
+  статус : СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+  Подтверждена
+  Отменена
+}
+
+Camera "1" -- "0..*" Booking : камера
+Client "1" -- "0..*" Booking : клиент
+Booking ..> BookingStatus
+
+note right of Booking
+  начало < конец
+
+  Для двух подтверждённых броней
+  одной камеры должно выполняться
+  A.конец <= B.начало
+  или B.конец <= A.начало.
+
+  Отменённые брони сохраняются
+  и не ограничивают доступность.
+end note
+@enduml
+```
+
+### 3. Диаграмма последовательности подачи заявки
+
+```plantuml
+@startuml
+
+actor "Клиент" as Client
+participant "Система бронирования" as System
+database "Хранилище броней" as Store
+
+Client -> System : Подать заявку(камера, начало, конец)
+
+alt начало >= конец
+  System --> Client : Отказ — начало должно быть раньше конца
+else начало < конец
+  critical Проверка и создание брони для выбранной камеры
+    System -> Store : Найти пересекающуюся подтверждённую бронь
+    note right of Store
+      Та же камера, статус «Подтверждена».
+      бронь.начало < конец заявки
+      и начало заявки < бронь.конец
+    end note
+    Store --> System : Результат поиска
+
+    alt Найдена пересекающаяся бронь
+      System --> Client : Отказ — камера уже забронирована\nна пересекающийся интервал
+    else Пересечений нет
+      System -> Store : Создать подтверждённую бронь\n(клиент, камера, начало, конец)
+      Store --> System : Бронь сохранена
+      System --> Client : Подтверждение бронирования
+    end
+  end
+end
+@enduml
+```
+
+### 4. Диаграмма состояний брони
+
+```plantuml
+@startuml
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : Создание брони\n[начало < конец и нет пересечения\nс подтверждённой бронью той же камеры]
+
+Confirmed --> Cancelled : Запрос на отмену\n[запрос подал владелец брони] / сохранить статус
+
+Confirmed : Учитывается при проверке доступности
+Cancelled : Запись хранится и доступна для просмотра
+Cancelled : Интервал больше не блокируется
+
+note right of Confirmed
+  При отказе по заявке бронь не создаётся.
+end note
+@enduml
+```
