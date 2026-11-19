@@ -1,0 +1,30 @@
+@startuml
+skinparam state {
+  BackgroundColor<<active>> #DDFFDD
+  BackgroundColor<<inactive>> #FFDDDD
+}
+
+[*] --> Confirmed <<active>> : заявка одобрена\n(интервал свободен, R2)
+
+Confirmed <<active>> --> Confirmed <<active>> : изменение интервала\n(если новый интервал\nне пересекается с другими)
+
+Confirmed <<active>> --> Cancelled <<inactive>> : клиент отменил бронь (R3)\nзапись сохраняется (R8)
+
+Cancelled <<inactive>> --> [*]
+
+Confirmed <<active>> --> [*]
+
+note right of Confirmed
+  Бронь блокирует свой интервал:
+  любые новые заявки, пересекающие
+  [start, end) по строгому правилу,
+  отклоняются системой (R2).
+end note
+
+note right of Cancelled
+  Отменённая бронь НЕ блокирует
+  интервал — он снова становится
+  доступен для новых бронирований.
+  Запись остаётся в истории (R8).
+end note
+@enduml

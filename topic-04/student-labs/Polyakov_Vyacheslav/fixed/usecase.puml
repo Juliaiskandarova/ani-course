@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Apply
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC_Validate
+  usecase "Проверить пересечение\nс подтверждёнными бронями той же камеры" as UC_Check
+  usecase "Отказать с причиной" as UC_Reject
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтверждённую бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Apply
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Staff --> UC_ViewAll
+
+UC_Apply ..> UC_Validate : <<include>>
+UC_Apply ..> UC_Check : <<include>>
+UC_Reject ..> UC_Apply : <<extend>>\n[интервал некорректен\nили есть пересечение]
+
+note right of UC_Apply
+  Если отказа нет, создаётся бронь
+  в статусе ПОДТВЕРЖДЕНА (R2).
+  При отказе бронь не создаётся.
+end note
+
+note right of UC_Cancel
+  Условие: бронь принадлежит клиенту
+  и имеет статус ПОДТВЕРЖДЕНА (R3).
+end note
+@enduml

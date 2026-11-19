@@ -1,0 +1,40 @@
+@startuml UC
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Apply
+  usecase "Получить отказ с причиной\n(пересечение с подтвержденной бронью)" as UC_Reject
+  usecase "Создать подтвержденную бронь" as UC_Confirm
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC_Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Apply
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+
+Staff --> UC_ViewAll
+
+UC_Apply ..> UC_Validate : <<include>>
+UC_Apply ..> UC_CheckOverlap : <<include>>
+UC_CheckOverlap <.. UC_Reject : <<extend>>\n[пересечение найдено]
+UC_CheckOverlap <.. UC_Confirm : <<extend>>\n[пересечения нет]
+
+note right of UC_Cancel
+  Условие: бронь принадлежит
+  клиенту и имеет статус
+  ПОДТВЕРЖДЕНА.
+  Отмена сохраняет запись (R8).
+end note
+
+note bottom of UC_Confirm
+  При отказе бронь НЕ создается (R2).
+end note
+@enduml

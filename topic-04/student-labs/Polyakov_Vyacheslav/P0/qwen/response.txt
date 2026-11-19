@@ -1,0 +1,201 @@
+Ниже — четыре независимых блока PlantUML, каждый покрывает свой срез требований R1–R8.
+
+---
+
+## 1. Диаграмма вариантов использования
+
+Покрывает R1, R2, R3, R4. Акторы — Клиент и Сотрудник проката. Проверка пересечения интервалов вынесена во включённый use case, т. к. это обязательный шаг R2.
+
+```plantuml
+@startuml
+left to right direction
+skinparam actorStyle awesome
+
+actor "Клиент" as client
+actor "Сотрудник проката" as staff
+
+rectangle "Система проката камер" {
+  usecase "Подать заявку на бронирование\n(камера, начало, конец)" as UC1
+  usecase "Проверить пересечение интервала\nс подтверждёнными бронями" as UC1a
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC1b
+  usecase "Просмотреть свои брони" as UC2
+  usecase "Отменить свою подтверждённую бронь" as UC3
+  usecase "Просмотреть все брони" as UC4
+
+  UC1 ..> UC1a : <<include>>
+  UC1 ..> UC1b : <<include>>
+}
+
+client --> UC1
+client --> UC2
+client --> UC3
+staff --> UC4
+@enduml
+```
+
+---
+
+## 2. Диаграмма классов
+
+Покрывает R5, R6, R7, R8. Атрибуты сущностей — из R5, кратности — из R6, инвариант интервала и статусы — из R7 и R8.
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String
+  - email : String
+  + viewOwnBookings() : List<Booking>
+  + cancelBooking(booking : Booking) : void
+  + submitBooking(camera : Camera, start : DateTime, end : DateTime) : Booking
+}
+
+class Camera {
+  - serialNumber : String
+  - model : String
+  + getConfirmedBookings() : List<Booking>
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  + isOverlapping(s : DateTime, e : DateTime) : boolean
+  + cancel() : void
+  + isConfirmed() : boolean
+  + {invariant} start < end
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class BookingSystem {
+  + submitBooking(client : Client, camera : Camera, start : DateTime, end : DateTime) : Booking
+  + cancelBooking(client : Client, booking : Booking) : void
+  + listAllBookings() : List<Booking>
+  + listClientBookings(client : Client) : List<Booking>
+}
+
+Client "1" -- "0..*" Booking : owns >
+Camera "1" -- "0..*" Booking : has >
+Booking --> BookingStatus
+BookingSystem ..> Booking : creates / mutates
+BookingSystem ..> Client : uses
+BookingSystem ..> Camera : uses
+
+note right of Booking
+  R7: интервал корректен, если start < end.
+  Соседние интервалы могут соприкасаться,
+  поэтому пересечение — строгое:
+  newStart < existingEnd AND newEnd > existingStart.
+end note
+
+note bottom of BookingStatus
+  R8: отмена не удаляет запись,
+  а переводит бронь в CANCELLED.
+  CANCELLED-бронь не блокирует интервал.
+end note
+@enduml
+```
+
+---
+
+## 3. Диаграмма последовательности подачи заявки
+
+Покрывает R1, R2, R7. Показывает оба сценария: отказ из-за некорректного интервала, отказ из-за пересечения и успешное создание подтверждённой брони.
+
+```plantuml
+@startuml
+skinparam sequenceMessageAlign center
+
+actor Клиент
+participant "BookingSystem\n(контроллер)" as BS
+participant "Camera" as C
+participant "Booking" as B
+
+Клиент -> BS: submitBooking(camera, start, end)
+activate BS
+
+BS -> BS: проверить: start < end
+alt start >= end
+  BS --> Клиент: отказ: «некорректный интервал»
+else start < end
+  BS -> C: getConfirmedBookings()
+  activate C
+  C --> BS: список подтверждённых броней камеры
+  deactivate C
+
+  BS -> BS: для каждой брони b:\nпересечение = (start < b.end) AND (end > b.start)\n(равенство границ допустимо — R7)
+
+  alt найдена пересекающаяся подтверждённая бронь
+    BS --> Клиент: отказ: «интервал пересекается с бронью №X»
+  else пересечений нет
+    BS -> B: new Booking(client, camera, start, end, CONFIRMED)
+    activate B
+    B --> BS: сохранённая бронь
+    deactivate B
+    BS --> Клиент: подтверждение: бронь №N создана
+  end
+end
+deactivate BS
+@enduml
+```
+
+---
+
+## 4. Диаграмма состояний брони
+
+Покрывает R2, R3, R8. Бронь сразу создаётся подтверждённой (R2), может быть отменена клиентом (R3), при этом запись сохраняется (R8) и перестаёт блокировать интервал.
+
+```plantuml
+@startuml
+skinparam state {
+  BackgroundColor<<active>> #DDFFDD
+  BackgroundColor<<inactive>> #FFDDDD
+}
+
+[*] --> Confirmed <<active>> : заявка одобрена\n(интервал свободен, R2)
+
+Confirmed <<active>> --> Confirmed <<active>> : изменение интервала\n(если новый интервал\nне пересекается с другими)
+
+Confirmed <<active>> --> Cancelled <<inactive>> : клиент отменил бронь (R3)\nзапись сохраняется (R8)
+
+Cancelled <<inactive>> --> [*]
+
+Confirmed <<active>> --> [*]
+
+note right of Confirmed
+  Бронь блокирует свой интервал:
+  любые новые заявки, пересекающие
+  [start, end) по строгому правилу,
+  отклоняются системой (R2).
+end note
+
+note right of Cancelled
+  Отменённая бронь НЕ блокирует
+  интервал — он снова становится
+  доступен для новых бронирований.
+  Запись остаётся в истории (R8).
+end note
+@enduml
+```
+
+---
+
+### Краткая трассировка требований
+
+| Требование | Варианты использования | Классы | Последовательность | Состояния |
+|---|---|---|---|---|
+| R1 | UC1 | `submitBooking` | первый шаг | — |
+| R2 | UC1, UC1a | `isOverlapping`, `BookingStatus` | проверка пересечения | `Confirmed` блокирует |
+| R3 | UC2, UC3 | `viewOwnBookings`, `cancelBooking` | — | переход в `Cancelled` |
+| R4 | UC4 | `listAllBookings` | — | — |
+| R5 | — | атрибуты `Client`, `Camera` | — | — |
+| R6 | — | связи 1:N | — | — |
+| R7 | UC1b | инвариант `start < end` | валидация + строгое пересечение | — |
+| R8 | UC3 | `BookingStatus.CANCELLED` | — | `Cancelled` не блокирует |

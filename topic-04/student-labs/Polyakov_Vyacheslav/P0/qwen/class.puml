@@ -1,0 +1,61 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String
+  - email : String
+  + viewOwnBookings() : List<Booking>
+  + cancelBooking(booking : Booking) : void
+  + submitBooking(camera : Camera, start : DateTime, end : DateTime) : Booking
+}
+
+class Camera {
+  - serialNumber : String
+  - model : String
+  + getConfirmedBookings() : List<Booking>
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  + isOverlapping(s : DateTime, e : DateTime) : boolean
+  + cancel() : void
+  + isConfirmed() : boolean
+  + {invariant} start < end
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class BookingSystem {
+  + submitBooking(client : Client, camera : Camera, start : DateTime, end : DateTime) : Booking
+  + cancelBooking(client : Client, booking : Booking) : void
+  + listAllBookings() : List<Booking>
+  + listClientBookings(client : Client) : List<Booking>
+}
+
+Client "1" -- "0..*" Booking : owns >
+Camera "1" -- "0..*" Booking : has >
+Booking --> BookingStatus
+BookingSystem ..> Booking : creates / mutates
+BookingSystem ..> Client : uses
+BookingSystem ..> Camera : uses
+
+note right of Booking
+  R7: интервал корректен, если start < end.
+  Соседние интервалы могут соприкасаться,
+  поэтому пересечение — строгое:
+  newStart < existingEnd AND newEnd > existingStart.
+end note
+
+note bottom of BookingStatus
+  R8: отмена не удаляет запись,
+  а переводит бронь в CANCELLED.
+  CANCELLED-бронь не блокирует интервал.
+end note
+@enduml

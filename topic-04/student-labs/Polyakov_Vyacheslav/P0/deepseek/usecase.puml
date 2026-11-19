@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Apply
+  usecase "Проверить корректность интервала" as UC_ValidateInterval
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Создать подтвержденную бронь" as UC_CreateBooking
+  usecase "Отказать с указанием причины" as UC_RejectBooking
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Apply
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Employee --> UC_ViewAll
+
+UC_Apply ..> UC_ValidateInterval : <<include>>
+UC_Apply ..> UC_CheckOverlap : <<include>>
+UC_CheckOverlap ..> UC_CreateBooking : <<extend>>\n[интервал свободен]
+UC_CheckOverlap ..> UC_RejectBooking : <<extend>>\n[есть пересечение]
+UC_ValidateInterval ..> UC_RejectBooking : <<extend>>\n[интервал некорректен]
+
+@enduml

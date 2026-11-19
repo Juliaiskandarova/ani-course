@@ -1,0 +1,32 @@
+@startuml
+actor Клиент as Client
+participant "UI" as UI
+participant "BookingService" as Service
+participant "CameraRepository" as CamRepo
+participant "BookingRepository" as BookRepo
+
+Client -> UI : подать заявку(камера, начало, конец)
+UI -> Service : applyBooking(cameraId, start, end)
+
+Service -> Service : проверить интервал\n(начало < конец)
+alt интервал некорректен (R7)
+    Service --> UI : отказ(причина: некорректный интервал)
+    UI --> Client : показать отказ с причиной
+else интервал корректен
+    Service -> CamRepo : findById(cameraId)
+    CamRepo --> Service : camera
+    Service -> BookRepo : findConfirmedByCamera(cameraId)
+    BookRepo --> Service : список подтвержденных броней
+    Service -> Service : проверить пересечение\nс интервалом (R2)
+    alt есть пересечение
+        Service -> BookRepo : save(Booking{status=REJECTED, reason})
+        Service --> UI : отказ(причина: пересечение)
+        UI --> Client : показать отказ с причиной
+    else пересечения нет
+        Service -> BookRepo : save(Booking{status=CONFIRMED})
+        BookRepo --> Service : booking
+        Service --> UI : успех(booking)
+        UI --> Client : бронь подтверждена
+    end
+end
+@enduml

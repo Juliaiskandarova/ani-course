@@ -1,0 +1,43 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  fullName : String
+  email : String
+}
+
+class Camera {
+  serialNumber : String
+  model : String
+}
+
+class Booking {
+  intervalStart : DateTime
+  intervalEnd : DateTime
+  status : BookingStatus
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+Client "1" -- "0..*" Booking : имеет >
+Camera "1" -- "0..*" Booking : относится к >
+
+Booking ..> BookingStatus
+
+note bottom of Booking
+  R7: инвариант intervalStart < intervalEnd
+  R2: создать Booking со статусом CONFIRMED можно
+      только если нет пересечения с бронями той же
+      камеры в статусе CONFIRMED
+  R8: переход в CANCELLED не удаляет запись;
+      CANCELLED-бронь исключается из проверки пересечений
+end note
+
+note bottom of Camera
+  R6: бронь относится ровно к одной камере
+      и одному клиенту
+end note
+@enduml

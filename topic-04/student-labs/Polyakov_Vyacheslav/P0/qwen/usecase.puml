@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam actorStyle awesome
+
+actor "Клиент" as client
+actor "Сотрудник проката" as staff
+
+rectangle "Система проката камер" {
+  usecase "Подать заявку на бронирование\n(камера, начало, конец)" as UC1
+  usecase "Проверить пересечение интервала\nс подтверждёнными бронями" as UC1a
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC1b
+  usecase "Просмотреть свои брони" as UC2
+  usecase "Отменить свою подтверждённую бронь" as UC3
+  usecase "Просмотреть все брони" as UC4
+
+  UC1 ..> UC1a : <<include>>
+  UC1 ..> UC1b : <<include>>
+}
+
+client --> UC1
+client --> UC2
+client --> UC3
+staff --> UC4
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система проката камер" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC1
+  usecase "Проверить пересечение\nс подтверждёнными бронями" as UC2
+  usecase "Создать подтверждённую бронь" as UC3
+  usecase "Отказать с причиной" as UC4
+  usecase "Просмотреть свои брони" as UC5
+  usecase "Отменить свою\nподтверждённую бронь" as UC6
+  usecase "Просмотреть все брони" as UC7
+}
+
+Client --> UC1
+Client --> UC5
+Client --> UC6
+Staff --> UC7
+
+UC1 ..> UC2 : <<include>>
+UC2 ..> UC3 : <<extend>>\n[нет пересечения]
+UC2 ..> UC4 : <<extend>>\n[есть пересечение]
+
+note bottom of UC3
+  R2: бронь создаётся сразу в статусе «Подтверждена»
+end note
+
+note bottom of UC6
+  R3: клиент может отменить только свою
+      бронь в статусе «Подтверждена»
+end note
+@enduml

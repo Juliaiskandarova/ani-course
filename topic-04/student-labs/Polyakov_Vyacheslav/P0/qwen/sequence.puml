@@ -1,0 +1,34 @@
+@startuml
+skinparam sequenceMessageAlign center
+
+actor Клиент
+participant "BookingSystem\n(контроллер)" as BS
+participant "Camera" as C
+participant "Booking" as B
+
+Клиент -> BS: submitBooking(camera, start, end)
+activate BS
+
+BS -> BS: проверить: start < end
+alt start >= end
+  BS --> Клиент: отказ: «некорректный интервал»
+else start < end
+  BS -> C: getConfirmedBookings()
+  activate C
+  C --> BS: список подтверждённых броней камеры
+  deactivate C
+
+  BS -> BS: для каждой брони b:\nпересечение = (start < b.end) AND (end > b.start)\n(равенство границ допустимо — R7)
+
+  alt найдена пересекающаяся подтверждённая бронь
+    BS --> Клиент: отказ: «интервал пересекается с бронью №X»
+  else пересечений нет
+    BS -> B: new Booking(client, camera, start, end, CONFIRMED)
+    activate B
+    B --> BS: сохранённая бронь
+    deactivate B
+    BS --> Клиент: подтверждение: бронь №N создана
+  end
+end
+deactivate BS
+@enduml

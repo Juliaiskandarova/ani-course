@@ -1,0 +1,58 @@
+@startuml class_diagram
+skinparam classAttributeIconSize 0
+
+class Камера {
+    - серийныйНомер : String
+    - модель : String
+}
+
+class Клиент {
+    - ФИО : String
+    - почта : String
+}
+
+class Бронь {
+    - id : Long
+    - начало : DateTime
+    - конец : DateTime
+    - статус : СтатусБрони
+}
+
+enum СтатусБрони {
+    ПОДТВЕРЖДЕНА
+    ОТМЕНЕНА
+    ОТКАЗАНО
+}
+
+class Заявка {
+    - камера : Камера
+    - начало : DateTime
+    - конец : DateTime
+}
+
+Камера "1" -- "0..*" Бронь : имеет >
+Клиент "1" -- "0..*" Бронь : имеет >
+Бронь --> СтатусБрони
+
+note right of Камера
+R5: У камеры есть серийный номер и модель
+end note
+
+note right of Клиент
+R5: У клиента есть ФИО и почта
+end note
+
+note bottom of Бронь
+R6: Каждая бронь относится к одной камере
+и одному клиенту
+end note
+
+note bottom of Заявка
+R1: Заявка содержит камеру,
+начало и конец интервала
+end note
+
+note right of СтатусБрони
+R2, R3, R8: Статусы брони
+end note
+@enduml

@@ -1,0 +1,156 @@
+# Диаграммы для системы бронирования камер
+
+## 1. Диаграмма вариантов использования
+
+```plantuml
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Apply
+  usecase "Проверить корректность интервала" as UC_ValidateInterval
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Создать подтвержденную бронь" as UC_CreateBooking
+  usecase "Отказать с указанием причины" as UC_RejectBooking
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Apply
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Employee --> UC_ViewAll
+
+UC_Apply ..> UC_ValidateInterval : <<include>>
+UC_Apply ..> UC_CheckOverlap : <<include>>
+UC_CheckOverlap ..> UC_CreateBooking : <<extend>>\n[интервал свободен]
+UC_CheckOverlap ..> UC_RejectBooking : <<extend>>\n[есть пересечение]
+UC_ValidateInterval ..> UC_RejectBooking : <<extend>>\n[интервал некорректен]
+
+@enduml
+```
+
+## 2. Диаграмма классов
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String
+  - email : String
+  + applyBooking(camera, start, end) : Booking
+  + viewOwnBookings() : List<Booking>
+  + cancelBooking(booking) : void
+}
+
+class Camera {
+  - id : UUID
+  - serialNumber : String
+  - model : String
+  + isAvailable(interval) : boolean
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  - rejectionReason : String
+  + isValidInterval() : boolean
+  + overlaps(other : Booking) : boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+class RentalEmployee {
+  - id : UUID
+  - fullName : String
+  + viewAllBookings() : List<Booking>
+}
+
+Client "1" -- "0..*" Booking : подаёт >
+Camera "1" -- "0..*" Booking : относится к >
+RentalEmployee --> Booking : просматривает >
+
+note right of Booking::overlaps
+  Пересечение учитывается
+  только для CONFIRMED броней
+  (R2, R8). Соседние интервалы
+  (end == start) не пересекаются (R7).
+end note
+
+@enduml
+```
+
+## 3. Диаграмма последовательности подачи заявки
+
+```plantuml
+@startuml
+actor Клиент as Client
+participant "UI" as UI
+participant "BookingService" as Service
+participant "CameraRepository" as CamRepo
+participant "BookingRepository" as BookRepo
+
+Client -> UI : подать заявку(камера, начало, конец)
+UI -> Service : applyBooking(cameraId, start, end)
+
+Service -> Service : проверить интервал\n(начало < конец)
+alt интервал некорректен (R7)
+    Service --> UI : отказ(причина: некорректный интервал)
+    UI --> Client : показать отказ с причиной
+else интервал корректен
+    Service -> CamRepo : findById(cameraId)
+    CamRepo --> Service : camera
+    Service -> BookRepo : findConfirmedByCamera(cameraId)
+    BookRepo --> Service : список подтвержденных броней
+    Service -> Service : проверить пересечение\nс интервалом (R2)
+    alt есть пересечение
+        Service -> BookRepo : save(Booking{status=REJECTED, reason})
+        Service --> UI : отказ(причина: пересечение)
+        UI --> Client : показать отказ с причиной
+    else пересечения нет
+        Service -> BookRepo : save(Booking{status=CONFIRMED})
+        BookRepo --> Service : booking
+        Service --> UI : успех(booking)
+        UI --> Client : бронь подтверждена
+    end
+end
+@enduml
+```
+
+## 4. Диаграмма состояний брони
+
+```plantuml
+@startuml
+[*] --> Confirmed : создание брони\n(интервал корректен,\nпересечений нет — R2, R7)
+
+[*] --> Rejected : отказ при создании\n(пересечение или\nнекорректный интервал — R2, R7)
+
+Confirmed --> Cancelled : отмена клиентом (R3, R8)
+Confirmed --> Confirmed : блокирует интервал (R2)
+
+Rejected --> [*]
+Cancelled --> [*] : запись сохраняется,\nинтервал не блокируется (R8)
+
+note right of Cancelled
+  Отмененная бронь остается
+  в системе для истории (R8),
+  но не участвует в проверке
+  пересечений (R2).
+end note
+
+@enduml
+```

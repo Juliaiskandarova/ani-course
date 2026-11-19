@@ -1,0 +1,22 @@
+@startuml
+actor "Клиент" as Client
+participant "Система проката камер" as System
+
+Client -> System : подать заявку(камера, начало, конец)
+activate System
+System -> System : проверка: начало < конец (R7)
+System -> System : поиск пересечений с подтверждёнными\nбронями той же камеры (R2)
+
+alt найдено пересечение
+  System --> Client : отказ, причина = бронь №N\n(интервал уже занят)
+  note right
+    R2: ветка отказа.
+    Объект Booking НЕ создаётся —
+    заявка обработана, брони нет.
+  end note
+else пересечений нет
+  System -> System : создать Booking(камера, клиент,\nинтервал, статус = Подтверждена)
+  System --> Client : подтверждение, бронь №N
+end note
+deactivate System
+@enduml

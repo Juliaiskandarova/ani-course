@@ -1,0 +1,54 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String
+  - email : String
+  + applyBooking(camera, start, end) : Booking
+  + viewOwnBookings() : List<Booking>
+  + cancelBooking(booking) : void
+}
+
+class Camera {
+  - id : UUID
+  - serialNumber : String
+  - model : String
+  + isAvailable(interval) : boolean
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  - rejectionReason : String
+  + isValidInterval() : boolean
+  + overlaps(other : Booking) : boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+class RentalEmployee {
+  - id : UUID
+  - fullName : String
+  + viewAllBookings() : List<Booking>
+}
+
+Client "1" -- "0..*" Booking : подаёт >
+Camera "1" -- "0..*" Booking : относится к >
+RentalEmployee --> Booking : просматривает >
+
+note right of Booking::overlaps
+  Пересечение учитывается
+  только для CONFIRMED броней
+  (R2, R8). Соседние интервалы
+  (end == start) не пересекаются (R7).
+end note
+
+@enduml
