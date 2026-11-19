@@ -1,0 +1,49 @@
+@startuml
+autonumber
+skinparam shadowing false
+
+actor "Клиент" as Client
+boundary "Интерфейс" as UI
+control "Сервис бронирования" as Service
+database "Хранилище броней" as DB
+
+Client -> UI: Выбрать камеру,\nначало и конец интервала
+UI -> Service: createBooking(clientId,\ncameraSerial, start, end)
+activate Service
+
+Service -> Service: Проверить start < end
+
+alt Начало >= конца
+    Service --> UI: Отказ:\nнекорректный интервал
+    UI --> Client: Показать причину отказа
+
+else Интервал корректен
+    group Атомарная операция
+        Service -> DB: Найти подтвержденные брони\nдля камеры с пересечением\n(start < booking.endTime)\nAND (booking.startTime < end)
+        activate DB
+        DB --> Service: Список пересекающихся броней
+        deactivate DB
+
+        alt Пересечения обнаружены
+            Service --> UI: Отказ:\nкамера занята в интервале
+
+        else Пересечений нет
+            Service -> DB: Создать бронь\nstatus = CONFIRMED
+            activate DB
+            DB --> Service: Созданная бронь
+            deactivate DB
+
+            Service --> UI: Успех: данные брони
+        end
+    end
+
+    alt Заявка отклонена
+        UI --> Client: Показать причину отказа
+    else Бронь создана
+        UI --> Client: Показать подтверждение
+    end
+end
+
+deactivate Service
+
+@enduml

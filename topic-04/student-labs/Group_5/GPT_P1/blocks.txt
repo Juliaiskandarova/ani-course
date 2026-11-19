@@ -1,0 +1,245 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования" {
+
+  usecase "Подать заявку\nна бронирование" as UC1
+
+  usecase "Проверить возможность\nбронирования" as UC2
+
+  usecase "Создать бронь\n(Подтверждена)" as UC3
+
+  usecase "Отказать\nс причиной" as UC4
+
+  usecase "Сообщить о\nнекорректном интервале" as UC5
+
+  usecase "Просмотреть\nсвои брони" as UC6
+
+  usecase "Отменить свою\nподтверждённую бронь" as UC7
+
+  usecase "Просмотреть\nвсе брони" as UC8
+}
+
+Client --> UC1
+Client --> UC6
+Client --> UC7
+
+Employee --> UC8
+
+UC1 ..> UC2 : <<include>>
+
+UC3 ..> UC1 : <<extend>>
+UC4 ..> UC1 : <<extend>>
+UC5 ..> UC1 : <<extend>>
+
+note bottom of UC1
+  Входные данные:
+  камера, начало, конец.
+end note
+
+note bottom of UC2
+  1. Начало должно быть раньше конца.
+  2. Проверяются подтверждённые
+     брони той же камеры.
+  3. Соседние интервалы
+     не считаются пересечением.
+end note
+
+note right of UC3
+  Условие:
+  интервал корректен
+  и пересечений нет.
+end note
+
+note right of UC4
+  Условие:
+  интервал корректен,
+  есть пересечение.
+  Бронь не создаётся.
+end note
+
+note right of UC5
+  Условие:
+  начало >= конец.
+  Бронь не создаётся.
+end note
+
+note bottom of UC7
+  Условия отмены:
+  - бронь принадлежит клиенту;
+  - статус = Подтверждена.
+
+  Результат:
+  статус = Отменена.
+  Запись сохраняется.
+end note
+
+@enduml
+
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class "Клиент" as Client {
+  +ФИО: String
+  +почта: String
+}
+
+class "Камера" as Camera {
+  +серийныйНомер: String
+  +модель: String
+}
+
+class "Бронь" as Booking {
+  +начало: DateTime
+  +конец: DateTime
+  +статус: СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+  Подтверждена
+  Отменена
+}
+
+Client "1" -- "0..*" Booking : владеет
+Camera "1" -- "0..*" Booking : относится к
+
+Booking ..> BookingStatus : использует
+
+note bottom of Booking
+  Ограничения:
+
+  1. начало < конец
+
+  2. Интервалы A и B пересекаются,
+     если:
+     A.начало < B.конец
+     и
+     B.начало < A.конец
+
+  3. Новая бронь создаётся
+     только при отсутствии пересечения
+     с подтверждённой бронью
+     той же камеры.
+
+  4. Новая бронь имеет статус
+     Подтверждена.
+
+  5. Отменённая бронь сохраняется,
+     но не блокирует интервал.
+
+  6. Отказ в заявке
+     не создаёт объект Бронь.
+end note
+
+@enduml
+
+@startuml
+
+skinparam shadowing false
+autonumber
+
+actor "Клиент" as Client
+
+box "Граница системы"
+  participant "Система бронирования" as System
+end box
+
+Client -> System : Подать заявку(камера, начало, конец)
+activate System
+
+System -> System : Проверить начало < конец
+
+alt начало >= конец
+
+    System --> Client : Некорректный интервал
+    note right of System
+      Бронь не создаётся.
+    end note
+
+else начало < конец
+
+    System -> System : Проверить подтверждённые брони\nтой же камеры
+
+    note right of System
+      Пересечение с существующей
+      бронью B есть, если:
+
+      начало < B.конец
+      и
+      B.начало < конец
+
+      Учитываются только брони
+      со статусом Подтверждена.
+    end note
+
+    alt Есть пересечение
+
+        System --> Client : Отказ с причиной:\nинтервал пересекается с бронью
+
+        note right of System
+          Объект Бронь
+          не создаётся.
+        end note
+
+    else Нет пересечения
+
+        System -> System : Создать бронь\n(камера, клиент, начало, конец)
+
+        System -> System : Установить статус = Подтверждена
+
+        System --> Client : Бронь подтверждена
+
+    end
+
+end
+
+deactivate System
+
+@enduml
+
+
+@startuml
+
+skinparam shadowing false
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : Создать бронь\n[начало < конец\nи нет пересечения]
+
+Confirmed --> Cancelled : Отменить\n[клиент — владелец брони]\n/ сохранить запись
+
+note right of Confirmed
+  Бронь блокирует интервал
+  своей камеры.
+
+  Отменить бронь может
+  только её владелец.
+end note
+
+note right of Cancelled
+  Запись сохраняется.
+  Интервал не блокируется.
+end note
+
+note bottom of Confirmed
+  При пересечении с подтверждённой
+  бронью той же камеры
+  новая бронь не создаётся.
+
+  Некорректный интервал также
+  не приводит к созданию брони.
+
+  Отказ не является
+  состоянием объекта Бронь.
+end note
+
+@enduml
+

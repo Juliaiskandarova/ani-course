@@ -1,0 +1,31 @@
+@startuml
+state "Проверка интервала" as CheckInterval
+state "Проверка пересечения" as CheckOverlap
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+state "Отказ" as Rejected
+
+[*] --> CheckInterval : подана заявка
+
+CheckInterval --> Rejected : [интервал некорректен]
+CheckInterval --> CheckOverlap : [начало раньше конца]
+
+CheckOverlap --> Rejected : [есть пересечение с подтвержденной бронью]\n/ указать причину
+CheckOverlap --> Confirmed : [пересечений нет]\n/ создать подтвержденную бронь
+
+Confirmed --> Cancelled : отмена клиентом
+
+Cancelled --> [*]
+Rejected --> [*]
+
+note right of CheckOverlap
+  Учитываются только брони в статусе ПОДТВЕРЖДЕНА.
+  Соседние интервалы могут соприкасаться.
+end note
+
+note right of Cancelled
+  R8: запись сохраняется;
+  отмененная бронь не блокирует интервал.
+end note
+
+@enduml

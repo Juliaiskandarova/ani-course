@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+title Диаграмма вариантов использования — прокат камер
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+    usecase "Подать заявку\nна бронирование" as Submit
+    usecase "Проверить корректность\nинтервала" as Validate
+    usecase "Проверить пересечение\nс подтверждёнными бронями" as CheckOverlap
+    usecase "Просмотреть\nсвои брони" as ViewOwn
+    usecase "Отменить свою\nподтверждённую бронь" as Cancel
+    usecase "Просмотреть\nвсе брони" as ViewAll
+}
+
+Client -- Submit
+Client -- ViewOwn
+Client -- Cancel
+Employee -- ViewAll
+
+Submit ..> Validate : <<include>>
+Submit ..> CheckOverlap : <<include>>
+
+note right of Submit
+  Вход: камера, начало и конец.
+  Если начало не раньше конца,
+  заявка отклоняется без проверки пересечений.
+  При пересечении — отказ с причиной.
+  Иначе — создание подтверждённой брони.
+end note
+
+note bottom of Cancel
+  Запись сохраняется.
+  Отменённая бронь не блокирует интервал.
+end note
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+
+skinparam shadowing false
+autonumber
+
+actor "Клиент" as Client
+
+box "Граница системы"
+  participant "Система бронирования" as System
+end box
+
+Client -> System : Подать заявку(камера, начало, конец)
+activate System
+
+System -> System : Проверить начало < конец
+
+alt начало >= конец
+
+    System --> Client : Отказ с причиной:\nначало должно быть раньше конца
+    note right of System
+      Бронь не создаётся.
+    end note
+
+else начало < конец
+
+    System -> System : Проверить подтверждённые брони\nтой же камеры
+
+    note right of System
+      Пересечение с существующей
+      бронью B есть, если:
+
+      начало < B.конец
+      и
+      B.начало < конец
+
+      Учитываются только брони
+      со статусом Подтверждена.
+    end note
+
+    alt Есть пересечение
+
+        System --> Client : Отказ с причиной:\nинтервал пересекается с подтверждённой бронью
+
+        note right of System
+          Объект Бронь
+          не создаётся.
+        end note
+
+    else Нет пересечения
+
+        System -> System : Создать подтверждённую бронь\n(клиент, камера, начало, конец,\nстатус = Подтверждена)
+
+        System --> Client : Бронь подтверждена
+
+    end
+
+end
+
+deactivate System
+
+@enduml

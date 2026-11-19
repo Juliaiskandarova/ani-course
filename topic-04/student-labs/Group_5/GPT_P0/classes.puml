@@ -1,0 +1,77 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class "Клиент" as Client {
+    - id: Integer
+    - fullName: String
+    - email: String
+}
+
+class "Камера" as Camera {
+    - serialNumber: String
+    - model: String
+}
+
+class "Бронь" as Booking {
+    - id: Integer
+    - startTime: DateTime
+    - endTime: DateTime
+    - status: BookingStatus
+    --
+    + cancel(): void
+}
+
+enum "Статус брони" as BookingStatus {
+    CONFIRMED
+    CANCELLED
+}
+
+class "Сотрудник проката" as Employee {
+}
+
+class "Сервис бронирования" as BookingService {
+    + createBooking(clientId: Integer,
+      cameraSerial: String,
+      start: DateTime,
+      end: DateTime): BookingResult
+
+    + cancelBooking(clientId: Integer,
+      bookingId: Integer): void
+
+    + getClientBookings(clientId: Integer): List
+
+    + getAllBookings(): List
+}
+
+Client "1" -- "0..*" Booking : оформляет
+Camera "1" -- "0..*" Booking : бронируется
+
+Booking --> BookingStatus : имеет статус
+
+Client ..> BookingService : использует
+Employee ..> BookingService : использует
+
+BookingService ..> Booking : управляет
+BookingService ..> Camera : проверяет
+
+note bottom of Booking
+  startTime < endTime
+
+  Бронь всегда относится
+  к одному клиенту
+  и одной камере.
+
+  Отмененная бронь сохраняется.
+end note
+
+note right of BookingService
+  Новая бронь создается только
+  при отсутствии пересечений
+  с подтвержденными бронями.
+
+  Проверка и создание должны
+  выполняться атомарно.
+end note
+
+@enduml

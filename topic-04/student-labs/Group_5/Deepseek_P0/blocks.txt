@@ -1,0 +1,154 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Apply
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать с указанием причины" as UC_Reject
+  usecase "Проверить корректность интервала\nи пересечение с подтвержденными бронями" as UC_Check
+  usecase "Просмотреть свои брони" as UC_MyBookings
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_AllBookings
+}
+
+Client --> UC_Apply
+Client --> UC_MyBookings
+Client --> UC_Cancel
+Employee --> UC_AllBookings
+
+UC_Apply ..> UC_Check : <<include>>
+UC_Create .> UC_Apply : <<extend>>
+UC_Reject .> UC_Apply : <<extend>>
+
+note bottom of UC_Create
+  Условие: интервал корректен и нет пересечения
+  с подтвержденной бронью той же камеры.
+end note
+
+note bottom of UC_Reject
+  Условие: интервал некорректен или есть пересечение
+  с подтвержденной бронью; причина указывается.
+end note
+
+note right of UC_Cancel
+  R8: отмена сохраняет запись.
+  Отмененная бронь не блокирует интервал.
+end note
+
+note bottom of UC_Check
+  R7: начало раньше конца.
+  Соседние интервалы могут соприкасаться.
+end note
+
+@enduml
+
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+class "Клиент" as Client {
+  - ФИО: String
+  - почта: String
+}
+
+class "Камера" as Camera {
+  - серийныйНомер: String
+  - модель: String
+}
+
+class "Бронь" as Booking {
+  - начало: DateTime
+  - конец: DateTime
+  - статус: СтатусБрони
+  - причинаОтказа: String [0..1]
+  + пересекает(интервал): Boolean
+}
+
+enum "СтатусБрони" as BookingStatus {
+  ПОДТВЕРЖДЕНА
+  ОТМЕНЕНА
+  ОТКАЗАНА
+}
+
+Client "1" -- "0..*" Booking : подает / имеет
+Camera "1" -- "0..*" Booking : относится к
+Booking --> BookingStatus : имеет
+
+note right of Booking
+  R6: каждая бронь относится к одной камере
+       и одному клиенту.
+  R7: начало раньше конца;
+       соседние интервалы могут соприкасаться.
+  R2: пересечение проверяется только с бронями
+       в статусе ПОДТВЕРЖДЕНА.
+  R8: ОТМЕНЕНА сохраняется и не блокирует интервал.
+end note
+
+@enduml
+
+@startuml
+actor "Клиент" as Client
+participant "Система бронирования" as Sys
+database "Хранилище броней" as DB
+
+Client -> Sys : Подать заявку(камера, начало, конец)
+Sys -> Sys : Проверить: начало раньше конца
+
+alt Интервал некорректен
+  Sys --> Client : Отказ: причина "Начало должно быть раньше конца"
+else Интервал корректен
+  Sys -> DB : Найти подтвержденные брони камеры,\nпересекающие интервал
+  note right of Sys
+    Пересечение: сущ.начало раньше нов.конца
+    И сущ.конец позже нов.начала.
+    Соседние интервалы (конец = начало) не пересекаются.
+    Отмененные брони не учитываются.
+  end note
+  DB --> Sys : Список подтвержденных броней
+
+  alt Есть пересечение
+    Sys --> Client : Отказ с причиной\n"Интервал пересекает подтвержденную бронь"
+  else Пересечений нет
+    Sys -> DB : Создать бронь(статус = ПОДТВЕРЖДЕНА)
+    DB --> Sys : Бронь сохранена
+    Sys --> Client : Бронь подтверждена
+  end
+end
+
+@enduml
+
+@startuml
+state "Проверка интервала" as CheckInterval
+state "Проверка пересечения" as CheckOverlap
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+state "Отказ" as Rejected
+
+[*] --> CheckInterval : подана заявка
+
+CheckInterval --> Rejected : [интервал некорректен]
+CheckInterval --> CheckOverlap : [начало раньше конца]
+
+CheckOverlap --> Rejected : [есть пересечение с подтвержденной бронью]\n/ указать причину
+CheckOverlap --> Confirmed : [пересечений нет]\n/ создать подтвержденную бронь
+
+Confirmed --> Cancelled : отмена клиентом
+
+Cancelled --> [*]
+Rejected --> [*]
+
+note right of CheckOverlap
+  Учитываются только брони в статусе ПОДТВЕРЖДЕНА.
+  Соседние интервалы могут соприкасаться.
+end note
+
+note right of Cancelled
+  R8: запись сохраняется;
+  отмененная бронь не блокирует интервал.
+end note
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+class "Клиент" as Client {
+  - ФИО: String
+  - почта: String
+}
+
+class "Камера" as Camera {
+  - серийныйНомер: String
+  - модель: String
+}
+
+class "Бронь" as Booking {
+  - начало: DateTime
+  - конец: DateTime
+  - статус: СтатусБрони
+  - причинаОтказа: String [0..1]
+  + пересекает(интервал): Boolean
+}
+
+enum "СтатусБрони" as BookingStatus {
+  ПОДТВЕРЖДЕНА
+  ОТМЕНЕНА
+  ОТКАЗАНА
+}
+
+Client "1" -- "0..*" Booking : подает / имеет
+Camera "1" -- "0..*" Booking : относится к
+Booking --> BookingStatus : имеет
+
+note right of Booking
+  R6: каждая бронь относится к одной камере
+       и одному клиенту.
+  R7: начало раньше конца;
+       соседние интервалы могут соприкасаться.
+  R2: пересечение проверяется только с бронями
+       в статусе ПОДТВЕРЖДЕНА.
+  R8: ОТМЕНЕНА сохраняется и не блокирует интервал.
+end note
+
+@enduml

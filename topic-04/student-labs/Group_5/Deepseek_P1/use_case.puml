@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+title Диаграмма вариантов использования
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as Submit
+  usecase "Проверить пересечение подтвержденных броней" as CheckOverlap
+  usecase "Создать подтвержденную бронь" as CreateBooking
+  usecase "Отказать с причиной" as Reject
+  usecase "Просмотреть свои брони" as ViewOwn
+  usecase "Отменить свою подтвержденную бронь" as Cancel
+  usecase "Просмотреть все брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+Employee --> ViewAll
+
+Submit ..> CheckOverlap : <<include>>
+CreateBooking .> Submit : <<extend>>\n[пересечения нет]
+Reject .> Submit : <<extend>>\n[пересечение есть]
+
+note right of Cancel
+  Условие отмены:
+  бронь принадлежит клиенту
+  и имеет статус «Подтверждена»
+end note
+
+note bottom of Reject
+  При отказе бронь не создается
+end note
+
+@enduml

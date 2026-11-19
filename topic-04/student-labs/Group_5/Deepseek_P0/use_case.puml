@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Apply
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать с указанием причины" as UC_Reject
+  usecase "Проверить корректность интервала\nи пересечение с подтвержденными бронями" as UC_Check
+  usecase "Просмотреть свои брони" as UC_MyBookings
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_AllBookings
+}
+
+Client --> UC_Apply
+Client --> UC_MyBookings
+Client --> UC_Cancel
+Employee --> UC_AllBookings
+
+UC_Apply ..> UC_Check : <<include>>
+UC_Create .> UC_Apply : <<extend>>
+UC_Reject .> UC_Apply : <<extend>>
+
+note bottom of UC_Create
+  Условие: интервал корректен и нет пересечения
+  с подтвержденной бронью той же камеры.
+end note
+
+note bottom of UC_Reject
+  Условие: интервал некорректен или есть пересечение
+  с подтвержденной бронью; причина указывается.
+end note
+
+note right of UC_Cancel
+  R8: отмена сохраняет запись.
+  Отмененная бронь не блокирует интервал.
+end note
+
+note bottom of UC_Check
+  R7: начало раньше конца.
+  Соседние интервалы могут соприкасаться.
+end note
+
+@enduml

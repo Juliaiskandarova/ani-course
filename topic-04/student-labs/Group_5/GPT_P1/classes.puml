@@ -1,0 +1,58 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class "Клиент" as Client {
+  +ФИО: String
+  +почта: String
+}
+
+class "Камера" as Camera {
+  +серийныйНомер: String
+  +модель: String
+}
+
+class "Бронь" as Booking {
+  +начало: DateTime
+  +конец: DateTime
+  +статус: СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+  Подтверждена
+  Отменена
+}
+
+Client "1" -- "0..*" Booking : владеет
+Camera "1" -- "0..*" Booking : относится к
+
+Booking ..> BookingStatus : использует
+
+note bottom of Booking
+  Ограничения:
+
+  1. начало < конец
+
+  2. Интервалы A и B пересекаются,
+     если:
+     A.начало < B.конец
+     и
+     B.начало < A.конец
+
+  3. Новая бронь создаётся
+     только при отсутствии пересечения
+     с подтверждённой бронью
+     той же камеры.
+
+  4. Новая бронь имеет статус
+     Подтверждена.
+
+  5. Отменённая бронь сохраняется,
+     но не блокирует интервал.
+
+  6. Отказ в заявке
+     не создаёт объект Бронь.
+end note
+
+@enduml

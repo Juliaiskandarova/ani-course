@@ -1,0 +1,121 @@
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+    usecase "Подать заявку" as Submit
+    usecase "Посмотреть свои брони" as ViewOwn
+    usecase "Отменить бронь" as Cancel
+    usecase "Посмотреть все брони" as ViewAll
+}
+
+Client -- Submit
+Client -- ViewOwn
+Client -- Cancel
+Employee -- ViewAll
+
+note right of Submit
+  Вход: камера, начало, конец.
+  Результат: подтверждённая бронь
+  или отказ с причиной без создания брони.
+end note
+
+note right of Cancel
+  Условие: бронь принадлежит этому клиенту
+  и имеет статус «Подтверждена».
+  Запись сохраняется со статусом «Отменена».
+end note
+@enduml
+
+@startuml
+hide methods
+
+class "Камера" as Camera {
+    серийныйНомер : Строка
+    модель : Строка
+}
+
+class "Клиент" as Client {
+    ФИО : Строка
+    почта : Строка
+}
+
+class "Бронь" as Booking {
+    начало : МоментВремени
+    конец : МоментВремени
+    статус : СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+    Подтверждена
+    Отменена
+}
+
+Camera "1" -- "0..*" Booking : камера / брони
+Client "1" -- "0..*" Booking : клиент / брони
+
+note right of Booking
+  статус принимает одно из значений СтатусБрони.
+  Корректный интервал: начало < конец.
+
+  Интервалы пересекаются, если:
+  начало1 < конец2 и начало2 < конец1.
+
+  При проверке конфликта учитываются только
+  брони той же камеры со статусом «Подтверждена».
+end note
+@enduml
+
+@startuml
+actor "Клиент" as Client
+
+box "Система бронирования камер"
+    participant "Система" as System
+end box
+
+Client -> System : Подать заявку(камера, начало, конец)
+
+alt начало >= конец
+    System --> Client : Отказ: начало должно быть раньше конца
+else начало < конец
+    System -> System : Проверить наличие пересекающейся\nподтверждённой брони той же камеры
+    note right of System
+      Условия конфликта для существующей брони:
+      бронь.камера = камера
+      бронь.статус = «Подтверждена»
+      бронь.начало < конец
+      начало < бронь.конец
+    end note
+
+    alt конфликт найден
+        System --> Client : Отказ: интервал пересекается\nс подтверждённой бронью той же камеры
+    else конфликт не найден
+        create participant "бронь : Бронь" as Booking
+        System -> Booking : Создать(камера, клиент, начало, конец,\nстатус = «Подтверждена»)
+        System --> Client : Подтверждение: бронь создана
+    end
+end
+@enduml
+
+@startuml
+hide empty description
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : создание брони
+
+Confirmed --> Cancelled : Отменить бронь\n[инициатор = клиент брони]\n/ сохранить запись со статусом «Отменена»
+
+note right of Confirmed
+  Бронь учитывается при проверке
+  пересечения для той же камеры.
+end note
+
+note right of Cancelled
+  Запись брони сохраняется.
+  Бронь не блокирует интервал.
+end note
+@enduml

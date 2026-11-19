@@ -1,0 +1,20 @@
+@startuml
+hide empty description
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : создание брони
+
+Confirmed --> Cancelled : Отменить бронь\n[инициатор = клиент брони]\n/ сохранить запись со статусом «Отменена»
+
+note right of Confirmed
+  Бронь учитывается при проверке
+  пересечения для той же камеры.
+end note
+
+note right of Cancelled
+  Запись брони сохраняется.
+  Бронь не блокирует интервал.
+end note
+@enduml

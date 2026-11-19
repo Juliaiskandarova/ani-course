@@ -1,0 +1,139 @@
+@startuml
+left to right direction
+title Диаграмма вариантов использования — прокат камер
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+    usecase "Подать заявку\nна бронирование" as Submit
+    usecase "Проверить корректность\nинтервала" as Validate
+    usecase "Проверить пересечение\nс подтверждёнными бронями" as CheckOverlap
+    usecase "Просмотреть\nсвои брони" as ViewOwn
+    usecase "Отменить свою\nподтверждённую бронь" as Cancel
+    usecase "Просмотреть\nвсе брони" as ViewAll
+}
+
+Client -- Submit
+Client -- ViewOwn
+Client -- Cancel
+Employee -- ViewAll
+
+Submit ..> Validate : <<include>>
+Submit ..> CheckOverlap : <<include>>
+
+note right of Submit
+  Вход: камера, начало и конец.
+  Если начало не раньше конца,
+  заявка отклоняется без проверки пересечений.
+  При пересечении — отказ с причиной.
+  Иначе — создание подтверждённой брони.
+end note
+
+note bottom of Cancel
+  Запись сохраняется.
+  Отменённая бронь не блокирует интервал.
+end note
+@enduml
+
+@startuml
+title Диаграмма классов — модель бронирования камер
+
+class "Камера" as Camera {
+    +серийныйНомер: String
+    +модель: String
+}
+
+class "Клиент" as Client {
+    +ФИО: String
+    +почта: String
+}
+
+class "Бронь" as Booking {
+    +начало: DateTime
+    +конец: DateTime
+    +статус: СтатусБрони
+}
+
+enum "СтатусБрони" as BookingStatus {
+    ПОДТВЕРЖДЕНА
+    ОТМЕНЕНА
+}
+
+Camera "1" -- "0..*" Booking : камера / брони
+Client "1" -- "0..*" Booking : клиент / брони
+Booking ..> BookingStatus : тип статуса
+
+note right of Booking
+  Для каждой брони: начало < конец.
+
+  Две подтверждённые брони A и B
+  одной камеры не должны пересекаться.
+  Условие пересечения:
+  A.начало < B.конец и B.начало < A.конец.
+
+  Равенство конца одной брони и начала
+  другой допустимо. Отменённые брони
+  в проверке не участвуют.
+end note
+@enduml
+
+@startuml
+title Диаграмма последовательности — подача заявки
+
+actor "Клиент" as Client
+participant "Система бронирования" as System
+database "Хранилище броней" as Store
+
+Client -> System : Подать заявку(камера, начало, конец)
+activate System
+
+alt начало >= конец
+    System --> Client : Отказ: начало должно быть раньше конца
+else начало < конец
+    System -> Store : Проверить пересечение и создать бронь,\nесли интервал свободен (клиент, камера, начало, конец)
+    activate Store
+
+    critical Атомарная проверка и создание брони
+        Store -> Store : Найти подтверждённую бронь той же камеры,\nгде бронь.начало < конец\nи начало < бронь.конец
+        alt Пересечение найдено
+            Store -> Store : Не создавать бронь
+        else Пересечений нет
+            Store -> Store : Сохранить бронь со статусом ПОДТВЕРЖДЕНА
+        end
+    end
+
+    Store --> System : Конфликт или созданная бронь
+    deactivate Store
+
+    alt Получен конфликт
+        System --> Client : Отказ: интервал пересекается\nс подтверждённой бронью этой камеры
+    else Получена созданная бронь
+        System --> Client : Подтверждённая бронь
+    end
+end
+
+deactivate System
+@enduml
+
+@startuml
+title Диаграмма состояний — жизненный цикл брони
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : Создание брони\n[начало < конец и нет пересечений\nс подтверждёнными бронями той же камеры]
+
+Confirmed --> Cancelled : Отменить [инициатор — клиент этой брони]\n/ сохранить запись с новым статусом
+
+note right of Confirmed
+  Блокирует пересекающиеся интервалы
+  для той же камеры.
+end note
+
+note right of Cancelled
+  Запись сохраняется.
+  Интервал больше не блокируется.
+  Обратный переход не предусмотрен.
+end note
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+
+skinparam shadowing false
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : Создать бронь\n[начало < конец и нет пересечения\nс подтверждённой бронью той же камеры]
+
+Confirmed --> Cancelled : Отменить\n[клиент — владелец брони]\n/ установить статус Отменена и сохранить запись
+
+note right of Confirmed
+  Бронь блокирует интервал
+  своей камеры.
+
+  Отменить бронь может
+  только её владелец.
+end note
+
+note right of Cancelled
+  Запись сохраняется.
+  Интервал не блокируется.
+end note
+
+note bottom of Confirmed
+  Отказ обрабатывается до создания брони
+  и не является состоянием объекта Бронь.
+end note
+
+@enduml

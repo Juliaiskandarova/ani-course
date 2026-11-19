@@ -1,0 +1,203 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+    usecase "Подать заявку\nна бронирование" as UC1
+    usecase "Просмотреть\nсвои брони" as UC2
+    usecase "Отменить свою\nподтвержденную бронь" as UC3
+    usecase "Просмотреть\nвсе брони" as UC4
+
+    usecase "Проверить\nкорректность интервала" as UC5
+    usecase "Проверить\nдоступность камеры" as UC6
+    usecase "Подтвердить\nбронирование" as UC7
+    usecase "Отказать\nс указанием причины" as UC8
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+
+Employee --> UC4
+
+UC1 ..> UC5 : <<include>>
+
+UC6 ..> UC1 : <<extend>>\n[интервал корректен]
+UC7 ..> UC1 : <<extend>>\n[интервал корректен\nи камера свободна]
+UC8 ..> UC1 : <<extend>>\n[интервал некорректен\nили камера занята]
+
+note bottom of UC6
+  Учитываются только
+  подтвержденные брони.
+  Соприкосновение границ
+  интервалов разрешено.
+end note
+
+note bottom of UC3
+  Бронь не удаляется.
+  Статус меняется на CANCELLED.
+end note
+
+@enduml
+
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class "Клиент" as Client {
+    - id: Integer
+    - fullName: String
+    - email: String
+}
+
+class "Камера" as Camera {
+    - serialNumber: String
+    - model: String
+}
+
+class "Бронь" as Booking {
+    - id: Integer
+    - startTime: DateTime
+    - endTime: DateTime
+    - status: BookingStatus
+    --
+    + cancel(): void
+}
+
+enum "Статус брони" as BookingStatus {
+    CONFIRMED
+    CANCELLED
+}
+
+class "Сотрудник проката" as Employee {
+}
+
+class "Сервис бронирования" as BookingService {
+    + createBooking(clientId: Integer,
+      cameraSerial: String,
+      start: DateTime,
+      end: DateTime): BookingResult
+
+    + cancelBooking(clientId: Integer,
+      bookingId: Integer): void
+
+    + getClientBookings(clientId: Integer): List
+
+    + getAllBookings(): List
+}
+
+Client "1" -- "0..*" Booking : оформляет
+Camera "1" -- "0..*" Booking : бронируется
+
+Booking --> BookingStatus : имеет статус
+
+Client ..> BookingService : использует
+Employee ..> BookingService : использует
+
+BookingService ..> Booking : управляет
+BookingService ..> Camera : проверяет
+
+note bottom of Booking
+  startTime < endTime
+
+  Бронь всегда относится
+  к одному клиенту
+  и одной камере.
+
+  Отмененная бронь сохраняется.
+end note
+
+note right of BookingService
+  Новая бронь создается только
+  при отсутствии пересечений
+  с подтвержденными бронями.
+
+  Проверка и создание должны
+  выполняться атомарно.
+end note
+
+@enduml
+
+@startuml
+autonumber
+skinparam shadowing false
+
+actor "Клиент" as Client
+boundary "Интерфейс" as UI
+control "Сервис бронирования" as Service
+database "Хранилище броней" as DB
+
+Client -> UI: Выбрать камеру,\nначало и конец интервала
+UI -> Service: createBooking(clientId,\ncameraSerial, start, end)
+activate Service
+
+Service -> Service: Проверить start < end
+
+alt Начало >= конца
+    Service --> UI: Отказ:\nнекорректный интервал
+    UI --> Client: Показать причину отказа
+
+else Интервал корректен
+    group Атомарная операция
+        Service -> DB: Найти подтвержденные брони\nдля камеры с пересечением\n(start < booking.endTime)\nAND (booking.startTime < end)
+        activate DB
+        DB --> Service: Список пересекающихся броней
+        deactivate DB
+
+        alt Пересечения обнаружены
+            Service --> UI: Отказ:\nкамера занята в интервале
+
+        else Пересечений нет
+            Service -> DB: Создать бронь\nstatus = CONFIRMED
+            activate DB
+            DB --> Service: Созданная бронь
+            deactivate DB
+
+            Service --> UI: Успех: данные брони
+        end
+    end
+
+    alt Заявка отклонена
+        UI --> Client: Показать причину отказа
+    else Бронь создана
+        UI --> Client: Показать подтверждение
+    end
+end
+
+deactivate Service
+
+@enduml
+
+@startuml
+skinparam shadowing false
+
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Confirmed : Создание брони\n[интервал корректен\nи пересечений нет]
+
+Confirmed --> Cancelled : Клиент отменяет бронь\n[бронь принадлежит клиенту]
+
+Confirmed : status = CONFIRMED
+Confirmed : Блокирует интервал камеры
+
+Cancelled : status = CANCELLED
+Cancelled : Не блокирует интервал
+Cancelled : Запись сохраняется
+
+note right of Confirmed
+  Только подтвержденная бронь
+  участвует в проверке
+  пересечений интервалов.
+end note
+
+note right of Cancelled
+  Восстановление отмененной
+  брони не предусмотрено.
+end note
+
+@enduml

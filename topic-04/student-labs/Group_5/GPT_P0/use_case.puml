@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+    usecase "Подать заявку\nна бронирование" as UC1
+    usecase "Просмотреть\nсвои брони" as UC2
+    usecase "Отменить свою\nподтвержденную бронь" as UC3
+    usecase "Просмотреть\nвсе брони" as UC4
+
+    usecase "Проверить\nкорректность интервала" as UC5
+    usecase "Проверить\nдоступность камеры" as UC6
+    usecase "Подтвердить\nбронирование" as UC7
+    usecase "Отказать\nс указанием причины" as UC8
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+
+Employee --> UC4
+
+UC1 ..> UC5 : <<include>>
+
+UC6 ..> UC1 : <<extend>>\n[интервал корректен]
+UC7 ..> UC1 : <<extend>>\n[интервал корректен\nи камера свободна]
+UC8 ..> UC1 : <<extend>>\n[интервал некорректен\nили камера занята]
+
+note bottom of UC6
+  Учитываются только
+  подтвержденные брони.
+  Соприкосновение границ
+  интервалов разрешено.
+end note
+
+note bottom of UC3
+  Бронь не удаляется.
+  Статус меняется на CANCELLED.
+end note
+
+@enduml
