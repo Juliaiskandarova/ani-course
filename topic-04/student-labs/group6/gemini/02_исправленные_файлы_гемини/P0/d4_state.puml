@@ -1,0 +1,15 @@
+@startuml
+[*] --> CONFIRMED : Заявка принята\n[интервал корректен и нет пересечений] (R2, R7)
+state "Подтверждена\n(CONFIRMED)" as CONFIRMED
+state "Отменена\n(CANCELLED)" as CANCELLED
+note left of CONFIRMED
+Отказ по заявке (R2, R7): бронь не создается,
+состояния нет.
+end note
+CONFIRMED --> CANCELLED : Клиент отменил бронь\n[бронь принадлежит клиенту] (R3)
+note right of CANCELLED
+Запись брони сохраняется (R8).
+Интервал не блокируется и доступен
+для новых заявок (R8).
+end note
+@enduml

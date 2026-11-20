@@ -1,0 +1,34 @@
+@startuml
+skinparam classAttributeIconSize 0
+enum BookingStatus {
+CONFIRMED
+CANCELLED
+}
+class Client {
+• fullName : String
+• email : String
+• submitBooking(camera : Camera, start : DateTime, end : DateTime) : Booking
+• getMyBookings() : List
+• cancelBooking(booking : Booking) : void
+}
+class Camera {
+• serialNumber : String
+• model : String
+• isAvailable(start : DateTime, end : DateTime) : Boolean
+}
+class Booking {
+• startTime : DateTime
+• endTime : DateTime
+• status : BookingStatus
+• isValidInterval() : Boolean
+• overlapsWith(start : DateTime, end : DateTime) : Boolean
+• cancel() : void
+}
+class RentalStaff {
+• getAllBookings() : List
+}
+Client "1" -- "0.." Booking : оформляет >
+Camera "1" -- "0.." Booking : бронируется >
+Booking --> BookingStatus : имеет статус
+RentalStaff ..> Booking : просматривает все
+@enduml

@@ -1,0 +1,38 @@
+@startuml UseCase_Booking
+left to right direction
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Submit
+  usecase "Проверить корректность интервала" as UC_Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_Overlap
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать с причиной" as UC_Reject
+  usecase "Просмотреть свои брони" as UC_MyBookings
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_AllBookings
+}
+
+Client --> UC_Submit
+Client --> UC_MyBookings
+Client --> UC_Cancel
+Employee --> UC_AllBookings
+
+UC_Submit ..> UC_Validate : <<include>>
+UC_Submit ..> UC_Overlap : <<include>>
+UC_Overlap ..> UC_Create : при отсутствии пересечения
+UC_Overlap ..> UC_Reject : при пересечении
+
+note right of UC_Overlap
+  R7: интервал корректен, если начало < конец.
+  Соседние интервалы могут соприкасаться.
+  R2: пересечение проверяется только
+  с подтвержденными бронями той же камеры.
+end note
+
+note bottom of UC_Cancel
+  R8: отмена сохраняет запись.
+  Отмененная бронь не блокирует интервал.
+end note
+@enduml

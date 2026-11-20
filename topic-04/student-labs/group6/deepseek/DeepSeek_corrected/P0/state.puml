@@ -1,0 +1,21 @@
+@startuml State_Booking
+state "CONFIRMED" as Confirmed
+state "CANCELLED" as Cancelled
+
+[*] --> Confirmed
+Confirmed --> Cancelled : отменить бронь\n[клиент является владельцем брони]
+
+note right of Confirmed
+  Бронь создаётся при начале раньше конца
+  и отсутствии пересечения с подтверждённой
+  бронью той же камеры.
+  Подтвержденная бронь блокирует интервал
+  для пересекающихся заявок той же камеры.
+  Соприкосновение интервалов допустимо.
+end note
+
+note right of Cancelled
+  R8: отмена сохраняет запись.
+  Отмененная бронь не блокирует интервал.
+end note
+@enduml

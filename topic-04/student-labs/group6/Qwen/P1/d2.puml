@@ -1,0 +1,28 @@
+@startuml Sequence
+actor Клиент as C
+participant "Система проката" as S
+participant "Хранилище броней" as DB
+
+C -> S : Подать заявку(camera, start, end)
+activate S
+
+S -> DB : Найти все Confirmed брони этой камеры
+activate DB
+DB --> S : список броней
+deactivate DB
+
+alt интервал пересекает хотя бы одну Confirmed бронь (R2)
+  S --> C : Отказ с причиной (R2)
+  note right
+    Бронь НЕ создаётся
+  end note
+else нет пересечений
+  S -> DB : Создать бронь(status=Confirmed)
+  activate DB
+  DB --> S : ok
+  deactivate DB
+  S --> C : Подтверждённая бронь (R2)
+end
+
+deactivate S
+@enduml

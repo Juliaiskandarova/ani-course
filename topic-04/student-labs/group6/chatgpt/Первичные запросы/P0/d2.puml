@@ -1,0 +1,92 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+class "Клиент" as Client {
+  +id: UUID
+  +фио: String
+  +почта: String
+}
+
+class "Камера" as Camera {
+  +серийныйНомер: String
+  +модель: String
+}
+
+class "Бронь" as Booking {
+  +id: UUID
+  +начало: DateTime
+  +конец: DateTime
+  +статус: СтатусБрони
+  --
+  +отменить(): void
+}
+
+enum "Статус брони" as BookingStatus {
+  ПОДТВЕРЖДЕНА
+  ОТМЕНЕНА
+}
+
+class "Сотрудник проката" as Employee {
+  +id: UUID
+}
+
+class "Сервис бронирования" as BookingService {
+  +податьЗаявку(клиент, камера, начало, конец): РезультатЗаявки
+  +получитьБрониКлиента(клиент): List
+  +отменитьБронь(клиент, бронь): Boolean
+  +получитьВсеБрони(): List
+  --
+  -проверитьИнтервал(начало, конец): Boolean
+  -естьПересечение(камера, начало, конец): Boolean
+}
+
+class "Результат заявки" as RequestResult {
+  +принята: Boolean
+  +причинаОтказа: String
+}
+
+Client "1" -- "0..*" Booking : владеет >
+Camera "1" -- "0..*" Booking : бронируется в >
+
+Booking --> BookingStatus : статус
+
+Client ..> BookingService : использует
+Employee ..> BookingService : просматривает все брони
+
+BookingService ..> Booking : управляет
+BookingService ..> RequestResult : возвращает
+
+RequestResult --> "0..1" Booking : созданная бронь
+
+note bottom of Booking
+  Ограничения:
+  1. начало < конец
+  2. Одна бронь относится
+     к одной камере и клиенту.
+  3. Отмена не удаляет запись.
+end note
+
+note right of BookingService
+  Конфликт существует, если:
+
+  existing.start < new.end
+  AND
+  new.start < existing.end
+
+  Учитываются только брони
+  со статусом ПОДТВЕРЖДЕНА.
+
+  Соседние интервалы допустимы.
+end note
+
+note bottom of RequestResult
+  При отказе:
+  принята = false
+  причинаОтказа заполнена
+  созданная бронь отсутствует
+end note
+
+@enduml

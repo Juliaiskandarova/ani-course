@@ -1,0 +1,29 @@
+@startuml Sequence_SubmitBooking
+actor "Клиент" as Client
+participant "Система бронирования" as System
+participant "Хранилище броней" as Repo
+
+Client -> System : податьЗаявку(cameraId, clientId, start, end)
+System -> System : проверить start < end
+
+alt start >= end
+  System --> Client : отказ: некорректный интервал
+else интервал корректен
+  System -> Repo : найтиПодтвержденныеБрони(cameraId)
+  Repo --> System : confirmedBookings
+  System -> System : проверить пересечение\n(соприкосновение разрешено)
+  note right of System
+    Для каждой подтверждённой брони той же камеры
+    пересечение есть, если start < existing.end
+    и existing.start < end.
+  end note
+
+  alt есть пересечение с подтверждённой бронью той же камеры
+    System --> Client : отказ с причиной "интервал занят"
+  else пересечения нет
+    System -> Repo : создатьБронь(cameraId, clientId, start, end, CONFIRMED)
+    Repo --> System : booking
+    System --> Client : успех: подтвержденная бронь
+  end
+end
+@enduml

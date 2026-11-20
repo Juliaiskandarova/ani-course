@@ -1,0 +1,60 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования" {
+    usecase "Подать заявку" as Submit
+    usecase "Проверить пересечение\nподтвержденных броней" as Check
+    usecase "Создать бронь\n«Подтверждена»" as Create
+    usecase "Отказать с причиной" as Reject
+
+    usecase "Просмотреть свои брони" as ViewOwn
+    usecase "Отменить свою\nподтвержденную бронь" as Cancel
+    usecase "Просмотреть все брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+
+Employee --> ViewAll
+
+Submit ..> Check : <<include>>
+
+Create ..> Submit : <<extend>>\n[нет пересечения]
+Reject ..> Submit : <<extend>>\n[есть пересечение]
+
+note top of Submit
+  Входные данные:
+  камера, начало, конец.
+
+  Корректный интервал:
+  начало < конец.
+end note
+
+note bottom of Check
+  Учитываются только брони:
+  - той же камеры;
+  - со статусом «Подтверждена».
+
+  Соприкасающиеся интервалы
+  не считаются пересекающимися.
+end note
+
+note bottom of Reject
+  Возвращается причина отказа.
+  Объект «Бронь» не создается.
+end note
+
+note bottom of Cancel
+  Условие отмены:
+  бронь принадлежит клиенту
+  и имеет статус «Подтверждена».
+
+  Запись сохраняется.
+end note
+
+@enduml

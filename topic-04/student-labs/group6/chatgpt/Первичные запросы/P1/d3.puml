@@ -1,0 +1,75 @@
+
+@startuml
+
+autonumber
+
+actor "Клиент" as Client
+
+box "Система бронирования"
+    boundary "Интерфейс" as UI
+    control "Сервис бронирования" as Service
+    database "Хранилище броней" as Storage
+end box
+
+note over Client, UI
+    Предусловие показанного сценария:
+    начало < конец.
+
+    Поведение при некорректном
+    интервале не определено R1-R8.
+end note
+
+Client -> UI : Подать заявку(камера, начало, конец)
+activate UI
+
+UI -> Service : податьЗаявку(клиент, заявка)
+activate Service
+
+Service -> Storage : проверитьПересечение(\nкамера, начало, конец,\nстатус = Подтверждена)
+activate Storage
+
+note right of Storage
+    Проверяется бронь B:
+
+    B.камера = заявка.камера
+    B.статус = Подтверждена
+
+    B.начало < заявка.конец
+    и
+    заявка.начало < B.конец
+
+    Брони со статусом «Отменена»
+    не блокируют интервал.
+end note
+
+alt Есть пересечение
+    Storage --> Service : Пересечение найдено
+    deactivate Storage
+
+    note right of Service
+        Бронь НЕ создается.
+        Операция создания
+        не вызывается.
+    end note
+
+    Service --> UI : Отказ(причина: пересечение)
+    UI --> Client : Отказ с причиной
+
+else Нет пересечения
+    Storage --> Service : Пересечение отсутствует
+    deactivate Storage
+
+    Service -> Storage : создатьБронь(\nклиент, камера, начало, конец,\nстатус = Подтверждена)
+    activate Storage
+
+    Storage --> Service : Бронь(Подтверждена)
+    deactivate Storage
+
+    Service --> UI : Подтверждение(Бронь)
+    UI --> Client : Бронь подтверждена
+end
+
+deactivate Service
+deactivate UI
+
+@enduml

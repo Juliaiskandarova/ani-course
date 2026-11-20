@@ -1,0 +1,47 @@
+@startuml
+class Camera {
+  serialNumber : String
+  model : String
+}
+
+class Client {
+  fullName : String
+  email : String
+}
+
+class Booking {
+  start : DateTime
+  end : DateTime
+  status : BookingStatus
+  rejectionReason : String [nullable]
+}
+
+enum BookingStatus {
+  Confirmed
+  Cancelled
+}
+
+class Staff {
+  name : String
+}
+
+Camera "1" -- "0..*" Booking : имеет
+Client "1" -- "0..*" Booking : оформил
+Booking "1" -- "1" BookingStatus : имеет
+Booking "1" -- "1" Camera : относится
+Booking "1" -- "1" Client : относится
+
+note right of Booking
+  R7: start < end
+  R8: Cancelled не блокирует интервал
+end note
+note bottom of Camera
+  R5: серийный номер + модель
+end note
+note bottom of Client
+  R5: ФИО + почта
+end note
+note right of Staff
+  R4: видит все брони
+end note
+@enduml

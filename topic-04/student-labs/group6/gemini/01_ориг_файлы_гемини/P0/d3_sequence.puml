@@ -1,0 +1,32 @@
+@startuml
+actor "Клиент" as Client
+participant "Сервис бронирования" as Service
+participant "Камера" as Camera
+participant "Репозиторий броней" as Repo
+participant "Новая бронь" as Booking
+Client -> Service : податьЗаявку(camera, startTime, endTime)
+activate Service
+alt startTime >= endTime (R7)
+Service --> Client : Отказ: некорректный интервал
+else startTime < endTime
+Service -> Repo : найтиПодтвержденныеБрони(camera)
+activate Repo
+Repo --> Service : список активных броней (CONFIRMED)
+deactivate Repo
+loop для каждой подтвержденной брони (R2, R8)
+Service -> Service : проверитьПересечение(existing.start < endTime && startTime < existing.end)
+end
+alt найдено пересечение (R2)
+Service --> Client : Отказ: интервал пересекается с существующей бронью
+else пересечений нет (соседние интервалы разрешены, R7)
+create Booking
+Service -> Booking : создать(Client, Camera, startTime, endTime, CONFIRMED)
+Service -> Repo : сохранить(Booking)
+activate Repo
+Repo --> Service : ок
+deactivate Repo
+Service --> Client : Подтвержденная бронь создана
+end
+end
+deactivate Service
+@enduml
