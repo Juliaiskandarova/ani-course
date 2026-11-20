@@ -1,0 +1,157 @@
+Диаграмма вариантов использования (Use Case Diagram)
+
+plantuml
+Копировать
+@startuml
+left to right direction
+
+actor Клиент
+actor "Сотрудник проката" as Employee
+
+rectangle "Система проката" {
+    usecase "Подать заявку" as UC1
+    usecase "Просмотреть свои брони" as UC2
+    usecase "Отменить свою бронь" as UC3
+    usecase "Просмотреть все брони" as UC4
+}
+
+Клиент --> UC1
+Клиент --> UC2
+Клиент --> UC3
+Employee --> UC4
+@enduml
+
+Диаграмма классов (Class Diagram)
+
+plantuml
+Копировать
+@startuml
+class Client {
+    - id: UUID
+    + fullName: string
+    + email: string
+    + submitApplication(camera, start, end)
+    + getMyBookings()
+    + cancelBooking(bookingId)
+}
+
+class Camera {
+    - id: UUID
+    + serialNumber: string
+    + model: string
+    + isIntervalFree(start, end): boolean
+}
+
+class Booking {
+    - id: UUID
+    + status: BookingStatus
+    + start: DateTime
+    + end: DateTime
+    + cancel(reason: string)
+}
+
+enum BookingStatus {
+    CONFIRMED
+    CANCELLED
+}
+
+Client "1" o-- "0..*" Booking : has >
+Camera "1" o-- "0..*" Booking : is booked for >
+Booking "1" --> "1" Client : belongs to
+Booking "1" --> "1" Camera : for
+
+note top of Booking::cancel
+R8: Отмена сохраняет запись.
+Статус меняется на CANCELLED.
+Отмененная бронь не блокирует интервал.
+end note
+
+note top of Camera::isIntervalFree
+R2: Проверка на пересечение
+только с подтвержденными (CONFIRMED)
+бронями той же камеры.
+end note
+@enduml
+
+Диаграмма последовательности: подача заявки (Sequence Diagram)
+
+plantuml
+Копировать
+@startuml
+actor Client
+participant UI
+participant BookingService
+participant Camera
+participant Repository
+
+Client -> UI: Подать заявку(cameraId, start, end)
+UI -> BookingService: submitApplication(clientId, cameraId, start, end)
+
+alt Интервал некорректен (R7: начало >= конца)
+    BookingService --> UI: Ошибка: некорректный интервал
+    UI --> Client: Показать ошибку
+else Интервал корректен
+    BookingService -> Camera: isIntervalFree(start, end)
+    
+    alt Есть пересечение с подтвержденной броней (R2)
+        Camera --> BookingService: false (conflictInfo)
+        BookingService --> UI: Отказ: конфликт (причина)
+        UI --> Client: Показать причину отказа
+    else Интервал свободен
+        Camera --> BookingService: true
+        BookingService -> Repository: save(new Booking(CONFIRMED, start, end))
+        Repository --> BookingService: bookingId
+        BookingService --> UI: Успех (bookingId)
+        UI --> Client: Показать подтверждение
+    end
+end
+@enduml
+
+Диаграмма состояний брони (State Diagram)
+
+plantuml
+Копировать
+@startuml
+[*] --> PENDING_SUBMISSION : Клиент открывает форму
+
+state PENDING_SUBMISSION {
+    [*] --> VALIDATING
+    VALIDATING --> REJECTED_INVALID : Начало >= конца (R7)
+    VALIDATING --> CHECKING_AVAIL : Начало < конца
+}
+
+state CHECKING_AVAIL {
+    [*] --> QUERYING
+    QUERYING --> CONFLICT : Есть подтвержденная бронь (R2)
+    QUERYING --> CONFIRMED : Интервал свободен
+}
+
+state CONFIRMED {
+    [*] --> ACTIVE
+    ACTIVE --> CANCELLING : Клиент нажимает "Отменить" (R3)
+}
+
+state CANCELLING {
+    [*] --> SAVING
+    SAVING --> CANCELLED : Сохранение записи (R8)
+}
+
+REJECTED_INVALID --> [*]
+CONFLICT --> [*]
+CANCELLED --> [*]
+
+note right of VALIDATING : R7: \nНачало < конца
+note right of QUERYING : R2: \nПроверка только \nподтвержденных броней
+note right of SAVING : R8: \nЗапись сохраняется, \nстатус -> CANCELLED
+@enduml
+
+Краткое обоснование соответствия диаграмм условиям:
+
+R1: Отражено в submitApplication на диаграмме последовательности и в варианте использования "Подать заявку".
+R2: Реализовано в методе isIntervalFree класса Camera (проверка только CONFIRMED) и в альтернативном потоке диаграммы последовательности (ветка "Есть пересечение").
+R3: Варианты использования "Просмотреть свои брони" и "Отменить свою бронь", а также переход ACTIVE -> CANCELLING на диаграмме состояний.
+R4: Вариант использования "Просмотреть все брони" для актера "Сотрудник проката".
+R5: Атрибуты fullName, email в классе Client и serialNumber, model в классе Camera.
+R6: Ассоциации Client "1" o-- "0..*" Booking и Camera "1" o-- "0..*" Booking.
+R7: Валидатор в состоянии PENDING_SUBMISSION (проверка start < end) и комментарий к методу isIntervalFree. Соседние интервалы (где end == start) проходят проверку start < end и не создают пересечения.
+R8: Переход в состояние CANCELLED без удаления объекта, комментарий к методу Booking::cancel и явное действие save в блоке CANCELLING на диаграмме состояний.

@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Submit
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC_ValidateInterval
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать с причиной" as UC_Refuse
+  usecase "Просмотреть свои брони" as UC_MyBookings
+  usecase "Отменить свою подтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_AllBookings
+}
+
+Client --> UC_Submit
+Client --> UC_MyBookings
+Client --> UC_Cancel
+Employee --> UC_AllBookings
+
+UC_Submit ..> UC_ValidateInterval : <<include>>
+UC_Create .> UC_Submit : <<extend>> [интервал корректен и пересечений нет]
+UC_Refuse .> UC_Submit : <<extend>> [интервал некорректен или найдено пересечение]
+
+note right of UC_Submit
+  После проверки корректности интервала
+  учитываются только подтвержденные брони той же камеры.
+  Пересечение: начало < существующий.конец
+  И существующий.начало < конец.
+  Соприкосновение не пересечение (R7).
+end note
+
+note bottom of UC_Cancel
+  Условие: клиент = владелец,
+  статус = ПОДТВЕРЖДЕНА (R3).
+  После отмены запись сохраняется,
+  статус = ОТМЕНЕНА, интервал не блокируется (R8).
+end note
+
+note bottom of UC_Refuse
+  При отказе Бронь не создается (R2).
+end note
+@enduml

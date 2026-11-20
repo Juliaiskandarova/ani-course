@@ -1,0 +1,166 @@
+### 1. Диаграмма вариантов использования
+
+```plantuml
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Submit
+  usecase "Проверить корректность интервала\n(начало < конец)" as UC_Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать с причиной" as UC_Reject
+  usecase "Просмотреть свои брони" as UC_MyBookings
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Сохранить отмену\n(запись сохраняется)" as UC_SaveCancelled
+  usecase "Просмотреть все брони" as UC_AllBookings
+}
+
+Client --> UC_Submit
+Client --> UC_MyBookings
+Client --> UC_Cancel
+Staff --> UC_AllBookings
+
+UC_Submit ..> UC_Validate : <<include>>
+UC_Submit ..> UC_CheckOverlap : <<include>>
+UC_Create .> UC_Submit : <<extend>>\n[пересечения нет]
+UC_Reject .> UC_Submit : <<extend>>\n[интервал некорректен\nили есть пересечение]
+UC_Cancel ..> UC_SaveCancelled : <<include>>
+@enduml
+```
+
+### 2. Диаграмма классов
+
+```plantuml
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id: UUID
+  - fullName: String
+  - email: String
+}
+
+class Camera {
+  - id: UUID
+  - serialNumber: String
+  - model: String
+}
+
+class Booking {
+  - id: UUID
+  - start: DateTime
+  - end: DateTime
+  - status: BookingStatus
+  - refusalReason: String
+  - cancellationDate: DateTime
+  + overlaps(otherStart: DateTime, otherEnd: DateTime): boolean
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  REJECTED
+}
+
+Client "1" -- "0..*" Booking : подает >
+Camera "1" -- "0..*" Booking : относится к >
+Booking --> BookingStatus : имеет
+
+note right of Booking
+  R7: интервал корректен, если start < end.
+  Соседние интервалы могут соприкасаться.
+
+  Пересечение для CONFIRMED:
+  existing.start < new.end
+  и existing.end > new.start.
+
+  R2/R8: интервал блокируют только брони
+  со статусом CONFIRMED.
+  CANCELLED сохраняется и не блокирует.
+  REJECTED хранит причину отказа и не блокирует.
+end note
+@enduml
+```
+
+### 3. Диаграмма последовательности подачи заявки
+
+```plantuml
+@startuml
+autonumber
+actor "Клиент" as Client
+participant "Сервис бронирования" as Service
+participant "Репозиторий броней" as Repo
+
+Client -> Service: податьЗаявку(cameraId, start, end)
+Service -> Service: проверить интервал:\nstart < end
+
+alt интервал некорректен
+  Service -> Repo: сохранить(Booking(status=REJECTED,\nrefusalReason="начало должно быть раньше конца"))
+  Repo --> Service: ok
+  Service --> Client: отказ(причина: "начало должно быть раньше конца")
+else интервал корректен
+  Service -> Repo: найтиПодтвержденныеПересечения(cameraId, start, end)
+  note right of Repo
+    Пересечение: existing.start < end
+    и existing.end > start.
+    Соприкосновение не считается пересечением.
+  end note
+  Repo --> Service: overlappingBookings
+
+  alt есть подтвержденная пересекающая бронь
+    Service -> Repo: сохранить(Booking(status=REJECTED,\nrefusalReason="интервал пересекает подтвержденную бронь"))
+    Repo --> Service: ok
+    Service --> Client: отказ(причина: "интервал пересекает подтвержденную бронь")
+  else пересечений нет
+    Service -> Repo: сохранить(Booking(status=CONFIRMED,\nclientId, cameraId, start, end))
+    Repo --> Service: bookingId
+    Service --> Client: бронь подтверждена(bookingId)
+  end
+end
+@enduml
+```
+
+### 4. Диаграмма состояний брони
+
+```plantuml
+@startuml
+state "Заявка подана" as Submitted
+state "Проверка интервала" as Validate
+state "Проверка пересечений" as CheckOverlap
+state "Отклонена" as Rejected
+state "Подтверждена" as Confirmed
+state "Отменена" as Cancelled
+
+[*] --> Submitted : подать заявку\n(R1)
+
+Submitted --> Validate : проверить интервал
+Validate --> Rejected : [start >= end]\nнекорректный интервал
+Validate --> CheckOverlap : [start < end]
+
+CheckOverlap --> Rejected : [есть CONFIRMED-бронь\nс пересечением]\nотказ с причиной
+CheckOverlap --> Confirmed : [пересечений нет]
+
+Rejected --> [*]
+
+Confirmed --> Cancelled : клиент отменяет\n(R3)
+Cancelled --> [*]
+
+note right of CheckOverlap
+  Пересечение: existing.start < new.end
+  и existing.end > new.start.
+  Соприкосновение допустимо:
+  existing.end = new.start не блокирует.
+end note
+
+note right of Cancelled
+  R8: отмена сохраняет запись.
+  Отмененная бронь не блокирует интервал.
+end note
+@enduml
+```

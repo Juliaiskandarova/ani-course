@@ -1,0 +1,134 @@
+Допущения:
+
+В системе есть два внешних актора: "Клиент" и "Сотрудник проката".
+В диаграмме последовательности (SD) за "Систему" отвечает объект RentalSystem, который инкапсулирует проверку пересечений, создание и отмену броней.
+В диаграмме состояний (State Machine) переходы инициируются событиями от системы (результатами проверок), а не напрямую от актора.
+Причина отказа в SD передается как строка, в Use Case — как расширение (extension point).
+В диаграмме классов (CD) для краткости опущены геттеры/сеттеры, но подразумевается инкапсуляция.
+В диаграмме классов связь между Booking и Camera/Client сделана направленной (агрегация), так как бронь ссылается на существующие сущности.
+1. Диаграмма вариантов использования (Use Case Diagram)
+plantuml
+Копировать
+@startuml
+left to right direction
+rectangle "Система проката" {
+    Клиент --> (Подать заявку)
+    (Подать заявку) .> (Подтвердить бронь) : <<include>>
+    (Подать заявку) .> (Отказать в бронировании) : <<include>>
+    (Подтвердить бронь) .> (Создать бронь) : <<include>>
+    Клиент --> (Просмотреть свои брони)
+    Клиент --> (Отменить бронь)
+    Сотрудник --> (Просмотреть все брони)
+}
+actor Клиент
+actor Сотрудник
+@enduml
+2. Диаграмма классов (Class Diagram)
+plantuml
+Копировать
+@startuml
+class Client {
+    - clientId: UUID
+    - fullName: String
+    - email: String
+    + cancelBooking(bookingId)
+    + getBookings()
+}
+class Camera {
+    - cameraId: UUID
+    - serialNumber: String
+    - model: String
+}
+class Booking {
+    - bookingId: UUID
+    - start: DateTime
+    - end: DateTime
+    - status: BookingStatus
+    + isActive(): Boolean
+}
+class BookingStatus {
+    <<enumeration>>
+    CONFIRMED
+    CANCELLED
+}
+class RentalSystem {
+    + submitBookingRequest(client, camera, start, end)
+    + cancelBooking(bookingId)
+    + getBookingsByClient(clientId)
+    + getAllBookings()
+    - checkOverlap(camera, start, end): boolean
+}
+
+Client "1" o-- "0..*" Booking : creates
+Camera "1" o-- "0..*" Booking : assigned to
+Booking "1" --> "1" Client : by
+Booking "1" --> "1" Camera : for
+Booking "1" --> "1" BookingStatus : has
+@enduml
+3. Диаграмма последовательности подачи заявки (Sequence Diagram)
+plantuml
+Копировать
+@startuml
+actor Клиент
+participant UI
+participant RentalSystem
+participant Camera
+participant Client
+participant Booking
+
+Клиент -> UI: Подать заявку(cameraId, start, end)
+UI -> RentalSystem: submitBookingRequest(clientId, cameraId, start, end)
+RentalSystem -> Camera: load(cameraId)
+RentalSystem -> Client: load(clientId)
+RentalSystem -> RentalSystem: checkOverlap(camera, start, end)
+alt Интервал свободен
+    RentalSystem -> Booking: create(camera, client, start, end, CONFIRMED)
+    RentalSystem -> UI: Success(bookingId)
+    UI -> Клиент: Бронь подтверждена
+else Интервал пересекает подтвержденную бронь
+    RentalSystem -> UI: Failure(reason)
+    UI -> Клиент: Отказ: <причина>
+end
+@enduml
+4. Диаграмма состояний брони (State Machine Diagram)
+plantuml
+Копировать
+@startuml
+[*] --> CREATED : submitBookingRequest
+CREATED --> CONFIRMED : overlapCheck = false / createBooking
+CREATED --> REJECTED : overlapCheck = true / reject(reason)
+REJECTED --> [*]
+CONFIRMED --> CANCELLED : cancelBooking
+CANCELLED --> [*]
+note right of CREATED : R7: start < end
+note right of CONFIRMED : R8: запись сохраняется
+note right of CANCELLED : R8: не блокирует интервал
+@enduml
+Сопоставление требований R1–R8
+R1 (Клиент подает заявку с камерой, началом и концом интервала): 
+Use Case: "Подать заявку".
+Sequence: submitBookingRequest(clientId, cameraId, start, end).
+Class: параметры метода RentalSystem.submitBookingRequest.
+R2 (Если подтвержденная бронь той же камеры пересекает интервал, система отказывает с причиной. Иначе создает подтвержденную бронь):
+Sequence: блок alt, сообщение Failure(reason) и ветка REJECTED в State Machine.
+Class: метод RentalSystem.checkOverlap и создание объекта Booking со статусом CONFIRMED.
+Use Case: расширения "Отказать в бронировании" и "Подтвердить бронь".
+R3 (Клиент видит свои брони и может отменить свою подтвержденную бронь):
+Use Case: "Просмотреть свои брони", "Отменить бронь".
+Class: методы Client.getBookings(), Client.cancelBooking(), RentalSystem.cancelBooking().
+State Machine: переход CONFIRMED --> CANCELLED.
+R4 (Сотрудник проката видит все брони):
+Use Case: "Просмотреть все брони".
+Class: метод RentalSystem.getAllBookings().
+R5 (У камеры есть серийный номер и модель. У клиента есть ФИО и почта):
+Class: атрибуты Camera.serialNumber, Camera.model, Client.fullName, Client.email.
+R6 (Каждая бронь относится к одной камере и одному клиенту. У каждой камеры и каждого клиента может быть несколько броней):
+Class: агрегации Client "1" o-- "0..*" Booking и Camera "1" o-- "0..*" Booking, композиции Booking "1" --> "1" Client и Booking "1" --> "1" Camera.
+R7 (Интервал корректен, если начало раньше конца. Соседние интервалы могут соприкасаться):
+State Machine: примечание note right of CREATED.
+Class: неявная бизнес-логика валидации в RentalSystem.submitBookingRequest (допущение: проверка start < end).
+Sequence: подразумевается, что некорректный интервал отклоняется до checkOverlap.
+R8 (Отмена сохраняет запись. Отмененная бронь не блокирует интервал):
+State Machine: примечания note right of CONFIRMED и note right of CANCELLED.
+Class: атрибут status: BookingStatus в Booking (запись не удаляется, а меняет статус).
+Sequence: переход в CANCELLED сохраняет bookingId в системе.
