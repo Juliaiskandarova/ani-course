@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+rectangle "Система проката камер" {
+usecase "Подать заявку на бронь\n(R1)" as UC_Book
+usecase "Проверить корректность интервала\n(R7)" as UC_ValidateInterval
+usecase "Проверить пересечение броней\n(R2)" as UC_CheckOverlap
+usecase "Просмотреть свои брони\n(R3)" as UC_ViewOwn
+usecase "Отменить подтвержденную бронь\n(R3, R8)" as UC_Cancel
+usecase "Просмотреть все брони\n(R4)" as UC_ViewAll
+}
+Client --> UC_Book
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Staff --> UC_ViewAll
+UC_Book ..> UC_ValidateInterval : <>
+UC_Book ..> UC_CheckOverlap : <>
+UC_Cancel ..> UC_ViewOwn : <>
+@enduml

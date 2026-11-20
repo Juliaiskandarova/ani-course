@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+actor Клиент as C
+actor Сотрудник as S
+
+rectangle "Система проката камер" as sys {
+  usecase "Подать заявку на бронь" as UC1
+  usecase "Проверить пересечение интервалов" as UC2
+  usecase "Создать подтверждённую бронь" as UC3
+  usecase "Отказать в заявке" as UC4
+  usecase "Просмотреть свои брони" as UC5
+  usecase "Отменить свою подтверждённую бронь" as UC6
+  usecase "Просмотреть все брони" as UC7
+}
+
+C --> UC1
+C --> UC5
+C --> UC6
+S --> UC7
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<extend>> [нет пересечений]
+UC1 ..> UC4 : <<extend>> [есть пересечение]
+UC6 ..> UC3 : <<extend>> [перевод в Cancelled]
+
+note right of UC2
+  R2: пересечение только с подтверждёнными
+  (отменённые не блокируют, R8)
+end note
+note bottom of UC6
+  R3: отмена сохраняет запись (R8)
+end note
+@enduml

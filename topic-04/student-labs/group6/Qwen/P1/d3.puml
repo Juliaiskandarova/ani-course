@@ -1,0 +1,14 @@
+@startuml State
+[*] --> Confirmed : заявка принята, нет пересечений (R2)
+Confirmed --> Confirmed : просмотр клиентом (R3)
+Confirmed --> Cancelled : отмена клиентом (R3, R8)
+Cancelled --> [*] : запись сохраняется (R8)
+Confirmed --> [*]
+
+note right of Confirmed
+  Блокирует пересекающиеся интервалы (R2)
+end note
+note right of Cancelled
+  Не блокирует интервал (R8)
+end note
+@enduml

@@ -1,0 +1,101 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+class "Клиент" as Client {
+  +id: UUID
+  +фио: String
+  +почта: String
+}
+
+class "Камера" as Camera {
+  +серийныйНомер: String
+  +модель: String
+}
+
+class "Бронь" as Booking {
+  +id: UUID
+  +начало: DateTime
+  +конец: DateTime
+  +статус: СтатусБрони
+  --
+  +отменить(): void
+}
+
+enum "СтатусБрони" as BookingStatus {
+  ПОДТВЕРЖДЕНА
+  ОТМЕНЕНА
+}
+
+class "Сотрудник проката" as Employee {
+  +id: UUID
+}
+
+class "Сервис бронирования" as BookingService {
+  +податьЗаявку(клиент: Клиент, камера: Камера, начало: DateTime, конец: DateTime): РезультатЗаявки
+  +получитьБрониКлиента(клиент: Клиент): List<Бронь>
+  +отменитьБронь(клиент: Клиент, бронь: Бронь): Boolean
+  +получитьВсеБрони(): List<Бронь>
+  --
+  -проверитьИнтервал(начало: DateTime, конец: DateTime): Boolean
+  -естьПересечение(камера: Камера, начало: DateTime, конец: DateTime): Boolean
+}
+
+class "РезультатЗаявки" as RequestResult {
+  +принята: Boolean
+  +причинаОтказа: String [0..1]
+  +бронь: Бронь [0..1]
+}
+
+class "Хранилище броней" as BookingRepository {
+  +найтиПодтвержденныеБрони(камера: Камера): List<Бронь>
+  +сохранитьБронь(бронь: Бронь): Бронь
+}
+
+Client "1" -- "0..*" Booking : владеет >
+Camera "1" -- "0..*" Booking : бронируется в >
+
+Client ..> BookingService : использует
+Employee ..> BookingService : просматривает все брони
+
+BookingService ..> Booking : управляет
+BookingService ..> RequestResult : возвращает
+BookingService ..> BookingRepository : использует
+BookingRepository ..> Booking : ищет и сохраняет
+
+note bottom of Booking
+  Ограничения:
+  1. начало < конец
+  2. Одна бронь относится
+     к одной камере и клиенту.
+  3. Отмена не удаляет запись.
+end note
+
+note right of BookingService
+  Конфликт существует, если:
+
+  existing.start < new.end
+  AND
+  new.start < existing.end
+
+  Учитываются только брони
+  со статусом ПОДТВЕРЖДЕНА.
+
+  Соседние интервалы допустимы.
+  Реакция на некорректный
+  интервал в R1-R8 не задана.
+end note
+
+note bottom of RequestResult
+  Если пересечение найдено:
+  принята = false;
+  причинаОтказа заполнена;
+  бронь отсутствует.
+
+  Иначе: принята = true,
+  бронь содержит созданный объект.
+end note
+
+@enduml

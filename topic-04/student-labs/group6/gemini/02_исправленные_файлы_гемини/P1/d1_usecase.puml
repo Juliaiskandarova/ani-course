@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+rectangle "Система проката камер" {
+usecase "Подать заявку на бронь" as UC_Submit
+usecase "Просмотреть свои брони" as UC_ViewOwn
+usecase "Отменить подтвержденную бронь" as UC_Cancel
+usecase "Просмотреть все брони" as UC_ViewAll
+}
+Client --> UC_Submit
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Staff --> UC_ViewAll
+note right of UC_Submit
+Начало < конец (R7).
+Пересечение с подтвержденной бронью
+той же камеры: отказ с причиной (R2).
+end note
+note right of UC_Cancel
+Только своя бронь в статусе
+ПОДТВЕРЖДЕНА (R3).
+end note
+@enduml

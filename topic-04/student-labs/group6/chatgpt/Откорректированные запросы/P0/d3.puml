@@ -1,0 +1,48 @@
+@startuml
+
+title Подача заявки на бронирование камеры (P0, исправлено)
+
+autonumber
+
+actor "Клиент" as Client
+participant "Сервис бронирования" as Service
+database "Хранилище броней" as Repository
+
+note over Client, Service
+  Предусловие показанного сценария:
+  начало < конец.
+  Реакция на некорректный интервал
+  не определена требованиями R1-R8.
+end note
+
+Client -> Service: податьЗаявку(клиент, камера, начало, конец)
+activate Service
+
+Service -> Service: проверитьИнтервал(начало, конец)
+Service -> Repository: найтиПодтвержденныеБрони(камера)
+activate Repository
+Repository --> Service: Список подтвержденных броней
+deactivate Repository
+
+Service -> Service: естьПересечение(камера, начало, конец)
+note right of Service
+  Пересечение существует, если:
+  existing.начало < new.конец
+  AND new.начало < existing.конец.
+  Равенство границ разрешено.
+end note
+
+alt Есть пересечение
+    Service --> Client: РезультатЗаявки(принята=false; причинаОтказа="Камера занята")
+else Пересечений нет
+    Service -> Service: Создать объект Бронь (статус = ПОДТВЕРЖДЕНА)
+    Service -> Repository: сохранитьБронь(бронь)
+    activate Repository
+    Repository --> Service: Бронь (ID)
+    deactivate Repository
+    Service --> Client: РезультатЗаявки(принята=true, бронь=Бронь)
+end
+
+deactivate Service
+
+@enduml

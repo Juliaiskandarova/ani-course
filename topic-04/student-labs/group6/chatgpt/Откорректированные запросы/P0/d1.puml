@@ -1,0 +1,72 @@
+@startuml
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+
+  usecase "Подать заявку\nна бронирование" as UC1
+  usecase "Просмотреть\nсвои брони" as UC2
+  usecase "Отменить свою\nподтвержденную бронь" as UC3
+  usecase "Просмотреть\nвсе брони" as UC4
+
+  usecase "Проверить\nкорректность интервала" as UC5
+  usecase "Проверить\nдоступность камеры" as UC6
+  usecase "Создать\nподтвержденную бронь" as UC7
+  usecase "Отказать с\nуказанием причины" as UC8
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+
+Employee --> UC4
+
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC7 ..> UC1 : <<extend>>
+UC8 ..> UC1 : <<extend>>
+
+note right of UC5
+  Начало интервала
+  должно быть раньше конца.
+  Реакция на нарушение
+  в R1-R8 не определена.
+end note
+
+note bottom of UC6
+  Проверяется пересечение только
+  с подтвержденными бронями
+  той же камеры.
+
+  Проверка выполняется после
+  успешной проверки интервала.
+end note
+
+note right of UC7
+  Условие:
+  интервал корректен
+  и конфликтов нет.
+end note
+
+note right of UC8
+  Условие:
+  обнаружено пересечение
+  с подтвержденной бронью
+  той же камеры.
+
+  Бронь не создается.
+end note
+
+note bottom of UC3
+  Отмена доступна только
+  владельцу подтвержденной брони.
+  Запись сохраняется.
+end note
+
+@enduml

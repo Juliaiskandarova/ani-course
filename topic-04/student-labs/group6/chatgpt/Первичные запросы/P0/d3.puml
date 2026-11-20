@@ -1,0 +1,63 @@
+@startuml
+
+title Подача заявки на бронирование камеры
+
+autonumber
+
+actor "Клиент" as Client
+participant "Система бронирования" as System
+database "Хранилище броней" as DB
+
+Client -> System: Подать заявку(камера, начало, конец)
+activate System
+
+System -> System: Проверить начало < конец
+
+alt Интервал некорректен
+
+    System --> Client: Отказ("Начало должно быть раньше конца")
+
+else Интервал корректен
+
+    System -> DB: Найти подтвержденные брони\nвыбранной камеры
+    activate DB
+
+    DB --> System: Список подтвержденных броней
+    deactivate DB
+
+    System -> System: Проверить пересечение интервалов
+
+    note right of System
+      Пересечение существует, если:
+
+      existing.start < new.end
+      AND
+      new.start < existing.end
+
+      Равенство границ
+      не считается пересечением.
+    end note
+
+    alt Есть пересечение
+
+        System --> Client: Отказ("Камера занята\nв выбранный интервал")
+
+    else Пересечений нет
+
+        System -> System: Создать бронь\nсо статусом ПОДТВЕРЖДЕНА
+
+        System -> DB: Сохранить бронь
+        activate DB
+
+        DB --> System: Сохраненная бронь (ID)
+        deactivate DB
+
+        System --> Client: Подтверждение бронирования (ID)
+
+    end
+
+end
+
+deactivate System
+
+@enduml

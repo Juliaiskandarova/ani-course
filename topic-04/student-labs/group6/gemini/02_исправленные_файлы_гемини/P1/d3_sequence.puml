@@ -1,0 +1,26 @@
+@startuml
+actor "Клиент" as Client
+participant "СервисБронирования" as Service
+participant "Бронь" as Booking
+Client -> Service : податьЗаявку(заявка: камера, начало, конец)
+activate Service
+alt не (начало < конец) (R7)
+Service --> Client : Отказ ("Некорректный интервал"), бронь не создается
+else начало < конец
+Service -> Service : найтиПодтвержденныеБрони(камера)
+note right of Service
+Пересечение, если существующая.начало < конец
+И начало < существующая.конец (R2).
+Касание границ допустимо (R7).
+Отмененные брони не учитываются (R8).
+end note
+alt есть пересечение с подтвержденной бронью
+Service --> Client : Отказ ("Камера занята на выбранный интервал"), бронь не создается
+else пересечений нет
+create Booking
+Service -> Booking : «создать»(клиент, камера, начало, конец, ПОДТВЕРЖДЕНА)
+Service --> Client : Принята(бронь)
+end
+end
+deactivate Service
+@enduml

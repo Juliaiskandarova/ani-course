@@ -1,0 +1,46 @@
+@startuml Class_Booking
+class Client {
+  - id: UUID
+  - fullName: String
+  - email: String
+}
+
+class Camera {
+  - id: UUID
+  - serialNumber: String
+  - model: String
+}
+
+class Booking {
+  - id: UUID
+  - start: DateTime
+  - end: DateTime
+  - status: BookingStatus
+  + overlaps(otherStart: DateTime, otherEnd: DateTime): boolean
+  + cancel(): void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+Client "1" -- "0..*" Booking : владеет / подает
+Camera "1" -- "0..*" Booking : относится к
+Booking --> BookingStatus : status
+
+note right of Booking
+  R6: каждая бронь относится к одной камере
+  и одному клиенту; у клиента и камеры
+  может быть несколько броней.
+
+  R2: при пересечении с CONFIRMED-бронь
+  той же камеры заявка отклоняется с причиной;
+  запись подтвержденной брони не создается.
+
+  R7: интервал корректен, если start < end.
+  Соприкосновение интервалов допустимо.
+
+  R8: CANCELLED сохраняется и не блокирует интервал.
+end note
+@enduml

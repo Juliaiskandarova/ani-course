@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\n(камера, начало, конец)" as UC_Submit
+  usecase "Создать подтвержденную бронь" as UC_Create
+  usecase "Отказать в заявке\n(причина: пересечение)" as UC_Reject
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою подтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+  usecase "Проверить пересечение с подтвержденными бронями той же камеры" as UC_CheckOverlap
+}
+
+Client --> UC_Submit
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+Employee --> UC_ViewAll
+
+UC_Submit ..> UC_CheckOverlap : <<include>>
+UC_Create .> UC_Submit : <<extend>>\n[нет пересечения]
+UC_Reject .> UC_Submit : <<extend>>\n[есть пересечение]
+
+note right of UC_Reject
+  R2: при пересечении с подтвержденной бронью
+  той же камеры заявка отклоняется с причиной;
+  бронь не создается.
+end note
+
+note bottom of UC_Submit
+  R1: заявка содержит камеру, начало и конец.
+  R7: начало < конец; касание интервалов допускается.
+end note
+@enduml
