@@ -1,0 +1,4 @@
+﻿prompt,passed,total,tpr_percent,tests_status,cc_max,pylint_score,source_sha256,test_sha256,python,test_suite
+P0,31,31,100.0,OK,16,8.60,0c175a79cd4a9b4d775441449526b6d5d0108cfe29a3e33124336d416922c01c,6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20,3.11,Exercism Python Bowling (скачанный тестовый файл)
+P1,31,31,100.0,OK,17,9.51,7e59b23bfd31db0fb11ff5fc74a12cb4dc6959d31d2b4049a0a41b4bac01c91a,6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20,3.11,Exercism Python Bowling (скачанный тестовый файл)
+P2,31,31,100.0,OK,16,9.50,5a54c3333c6774639792de6df01afdfbcbb860a5649be23e08bd1243a66be909,6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20,3.11,Exercism Python Bowling (скачанный тестовый файл)

@@ -1,0 +1,61 @@
+class BowlingGame:
+    """Track legal rolls and calculate the final score of a bowling game."""
+
+    def __init__(self) -> None:
+        """Start a game with ten empty frames."""
+        self._frames: list[list[int]] = [[] for _ in range(10)]
+        self._frame_index = 0
+
+    def roll(self, pins: int) -> None:
+        """Record a roll or raise ValueError if the roll is illegal."""
+        if self._frame_index == len(self._frames):
+            raise ValueError("Cannot roll after the game is over.")
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise ValueError("The number of knocked-down pins must be an integer.")
+        if pins < 0:
+            raise ValueError("The number of knocked-down pins cannot be negative.")
+
+        frame = self._frames[self._frame_index]
+        standing_pins = 10
+
+        if len(frame) == 1 and frame[0] < 10:
+            standing_pins -= frame[0]
+        elif len(frame) == 2 and frame[0] == 10 and frame[1] < 10:
+            # The second fill ball uses the pins left by the first fill ball.
+            standing_pins -= frame[1]
+
+        if pins > standing_pins:
+            raise ValueError(f"Only {standing_pins} pins are standing for this roll.")
+
+        frame.append(pins)
+
+        if self._frame_index < 9:
+            frame_complete = len(frame) == 2 or frame[0] == 10
+        else:
+            frame_complete = len(frame) == 3 or (
+                len(frame) == 2 and sum(frame) < 10
+            )
+
+        if frame_complete:
+            self._frame_index += 1
+
+    def score(self) -> int:
+        """Return the final score or raise ValueError if the game is incomplete."""
+        if self._frame_index < len(self._frames):
+            raise ValueError("Cannot score before the game is complete.")
+
+        rolls = [pins for frame in self._frames for pins in frame]
+        total = 0
+        next_roll = 0
+
+        for frame in self._frames[:9]:
+            frame_score = sum(frame)
+            next_roll += len(frame)
+            total += frame_score
+
+            if frame[0] == 10:
+                total += rolls[next_roll] + rolls[next_roll + 1]
+            elif frame_score == 10:
+                total += rolls[next_roll]
+
+        return total + sum(self._frames[9])
