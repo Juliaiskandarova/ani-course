@@ -1,0 +1,147 @@
+// ============================================================
+// Схема БД: Станция по ремонту автомобилей
+// ============================================================
+// Допущения (явно отмечены):
+// 1) "Тип-б/у или новая" для запчасти реализован как enum part_condition.
+// 2) Запчасть "подходит для модели" — связь many-to-many (одна запчасть
+//    может подходить к нескольким моделям, и наоборот).
+// 3) Периодические работы задаются через поля periodicity_km и/или
+//    periodicity_months в таблице works. Проверка "пора ли" выполняется
+//    на основе последнего выполненного заказа по авто и текущего пробега/даты.
+// 4) Продажа автомобиля другому клиенту реализована историей владения
+//    (car_ownerships) + текущий владелец в cars.current_owner_id.
+// 5) "Снятие с учета" — soft-delete через флаг is_active (для клиента
+//    и автомобиля), чтобы сохранить историю заказов для отчётов.
+// 6) Стоимость заказа хранится как снимок (order_items.price_at_order),
+//    чтобы отчёт не зависел от изменения цен в справочниках.
+// 7) Показания спидометра — в заказе (orders.odometer_km).
+// ============================================================
+
+Enum part_condition {
+  new
+  used
+}
+
+Enum work_kind {
+  one_time
+  periodic
+}
+
+Table clients {
+  id            int          [pk, increment]
+  full_name     varchar(200) [not null]
+  phone         varchar(30)  [not null]
+  email         varchar(120)
+  address       varchar(300)
+  is_active     boolean      [not null, default: true] // soft-delete при снятии с учёта
+  created_at    timestamp    [not null, default: `now()`]
+  deactivated_at timestamp
+}
+
+Table car_models {
+  id            int          [pk, increment]
+  brand         varchar(80)  [not null]
+  model         varchar(80)  [not null]
+  production_year_from int
+  production_year_to   int
+
+  indexes {
+    (brand, model) [unique]
+  }
+}
+
+Table cars {
+  id              int          [pk, increment]
+  vin             varchar(17)  [unique]
+  license_plate   varchar(20)  [not null, unique]
+  model_id        int          [not null, ref: > car_models.id]
+  current_owner_id int         [not null, ref: > clients.id] // текущий владелец
+  is_active       boolean      [not null, default: true]     // soft-delete при снятии с учёта
+  created_at      timestamp    [not null, default: `now()`]
+  deactivated_at  timestamp
+}
+
+// История владения — поддержка продажи авто от клиента клиенту
+Table car_ownerships {
+  id            int       [pk, increment]
+  car_id        int       [not null, ref: > cars.id]
+  client_id     int       [not null, ref: > clients.id]
+  owned_from    date      [not null]
+  owned_to      date      // null = текущий владелец
+}
+
+Table parts {
+  id            int             [pk, increment]
+  name          varchar(200)    [not null]
+  sku           varchar(60)     [unique]
+  condition     part_condition  [not null]
+  price         numeric(12,2)   [not null]
+  stock_qty     int             [not null, default: 0]
+  is_active     boolean         [not null, default: true]
+}
+
+// Запчасть подходит для нескольких моделей
+Table part_models {
+  part_id       int  [ref: > parts.id]
+  model_id      int  [ref: > car_models.id]
+
+  indexes {
+    (part_id, model_id) [pk]
+  }
+}
+
+Table works {
+  id                 int        [pk, increment]
+  name               varchar(200) [not null]
+  kind               work_kind  [not null]
+  price              numeric(12,2) [not null]
+  duration_minutes   int
+  // Для периодических работ: интервал в км и/или месяцах
+  periodicity_km     int
+  periodicity_months int
+  is_active          boolean    [not null, default: true]
+}
+
+Table orders {
+  id                int          [pk, increment]
+  client_id         int          [not null, ref: > clients.id]
+  car_id            int          [not null, ref: > cars.id]
+  order_date        timestamp    [not null, default: `now()`]
+  odometer_km       int          [not null]
+  total_amount      numeric(12,2) [not null, default: 0] // авто-подсчёт суммы позиций
+  status            varchar(30)  [not null, default: 'open']
+  notes             text
+}
+
+// Позиции заказа: запчасти
+Table order_parts {
+  id            int          [pk, increment]
+  order_id      int          [not null, ref: > orders.id]
+  part_id       int          [not null, ref: > parts.id]
+  qty           int          [not null, default: 1]
+  price_at_order numeric(12,2) [not null] // снимок цены
+}
+
+// Позиции заказа: выполненные работы
+Table order_works {
+  id            int          [pk, increment]
+  order_id      int          [not null, ref: > orders.id]
+  work_id       int          [not null, ref: > works.id]
+  qty           int          [not null, default: 1]
+  price_at_order numeric(12,2) [not null] // снимок цены
+}
+
+// ============================================================
+// Примечания по реализации требований (в схеме):
+// - Новый заказ: вставка в orders + order_parts/order_works.
+//   total_amount = SUM(order_parts.qty*price_at_order) + SUM(order_works.qty*price_at_order).
+//   При отсутствии клиента/авто — сначала INSERT в clients/cars, затем заказ.
+// - Снятие с учёта: UPDATE clients.is_active=false для клиента
+//   (и всех его cars.is_active=false), либо cars.is_active=false для авто.
+// - Годовой фин. отчёт: SUM(orders.total_amount) WHERE EXTRACT(YEAR FROM order_date)=...
+//   (детализация — join order_parts/order_works).
+// - Проверка периодических работ: для каждого активного авто берём последний
+//   заказ и работы с works.kind='periodic'; сравниваем (текущий пробег -
+//   odometer_km последнего выполнения) с periodicity_km и/или разницу дат
+//   с periodicity_months. Результат — список клиентов/авто для писем.
+// ============================================================
