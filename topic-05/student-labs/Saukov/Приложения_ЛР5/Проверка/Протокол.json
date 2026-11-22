@@ -1,0 +1,2118 @@
+{
+  "python": "3.11.18",
+  "tools": {
+    "pytest": "9.2.0",
+    "radon": "6.0.1",
+    "pylint": "4.1.4",
+    "astroid": "4.3.4"
+  },
+  "test_sha256": "6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20",
+  "runs": [
+    {
+      "file": "ChatGPT_P0.py",
+      "source_sha256": "d05182a55fa1ef2921efaa913f88836eeeab8db2897e35196c47453db7996c50",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.13s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "endline": 54,
+          "name": "roll",
+          "classname": "BowlingGame",
+          "col_offset": 4,
+          "complexity": 19,
+          "lineno": 10,
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "endline": 79,
+          "name": "BowlingGame",
+          "col_offset": 0,
+          "complexity": 9,
+          "lineno": 2,
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "endline": 8,
+              "name": "__init__",
+              "classname": "BowlingGame",
+              "col_offset": 4,
+              "complexity": 1,
+              "lineno": 3,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "endline": 54,
+              "name": "roll",
+              "classname": "BowlingGame",
+              "col_offset": 4,
+              "complexity": 19,
+              "lineno": 10,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "endline": 79,
+              "name": "score",
+              "classname": "BowlingGame",
+              "col_offset": 4,
+              "complexity": 5,
+              "lineno": 56,
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "endline": 79,
+          "name": "score",
+          "classname": "BowlingGame",
+          "col_offset": 4,
+          "complexity": 5,
+          "lineno": 56,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "endline": 8,
+          "name": "__init__",
+          "classname": "BowlingGame",
+          "col_offset": 4,
+          "complexity": 1,
+          "lineno": 3,
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-class-docstring",
+            "message": "Missing class docstring",
+            "messageId": "C0115",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "BowlingGame",
+            "line": 2,
+            "column": 0,
+            "endLine": 2,
+            "endColumn": 17,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 10,
+            "column": 4,
+            "endLine": 10,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "unidiomatic-typecheck",
+            "message": "Use isinstance() rather than type() for a typecheck.",
+            "messageId": "C0123",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 11,
+            "column": 11,
+            "endLine": 11,
+            "endColumn": 32,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "chained-comparison",
+            "message": "Simplify chained comparison between the operands: first < 10 < first + pins",
+            "messageId": "R1716",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 35,
+            "column": 19,
+            "endLine": 35,
+            "endColumn": 51,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "unbalanced-tuple-unpacking",
+            "message": "Possible unbalanced tuple unpacking with sequence defined at line 7: left side has 2 labels, right side has 0 values",
+            "messageId": "W0632",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 39,
+            "column": 16,
+            "endLine": 39,
+            "endColumn": 49,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "unbalanced-tuple-unpacking",
+            "message": "Possible unbalanced tuple unpacking with sequence defined at line 7: left side has 2 labels, right side has 0 values",
+            "messageId": "W0632",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 47,
+            "column": 16,
+            "endLine": 47,
+            "endColumn": 49,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (17/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 10,
+            "column": 4,
+            "endLine": 10,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 56,
+            "column": 4,
+            "endLine": 56,
+            "endColumn": 13,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P0\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 2,
+            "refactor": 2,
+            "convention": 5,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 8.333333333333334
+        }
+      }
+    },
+    {
+      "file": "ChatGPT_P1.py",
+      "source_sha256": "d5429ac38d8874fd069bd05ebceb068f413a8802a870021332d135a43a21e996",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.14s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "D",
+          "lineno": 9,
+          "complexity": 22,
+          "col_offset": 4,
+          "endline": 75,
+          "classname": "BowlingGame",
+          "name": "roll",
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "C",
+          "lineno": 1,
+          "complexity": 11,
+          "col_offset": 0,
+          "endline": 127,
+          "name": "BowlingGame",
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 4,
+              "complexity": 2,
+              "col_offset": 4,
+              "endline": 7,
+              "classname": "BowlingGame",
+              "name": "__init__",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "D",
+              "lineno": 9,
+              "complexity": 22,
+              "col_offset": 4,
+              "endline": 75,
+              "classname": "BowlingGame",
+              "name": "roll",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "lineno": 77,
+              "complexity": 7,
+              "col_offset": 4,
+              "endline": 127,
+              "classname": "BowlingGame",
+              "name": "score",
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "lineno": 77,
+          "complexity": 7,
+          "col_offset": 4,
+          "endline": 127,
+          "classname": "BowlingGame",
+          "name": "score",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 4,
+          "complexity": 2,
+          "col_offset": 4,
+          "endline": 7,
+          "classname": "BowlingGame",
+          "name": "__init__",
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 127,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P1\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (15/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 9,
+            "column": 4,
+            "endLine": 9,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P1\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 1,
+            "convention": 2,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 9.423076923076923
+        }
+      }
+    },
+    {
+      "file": "ChatGPT_P2.py",
+      "source_sha256": "829d54845126a811604ea1d35ff5be4056eecc050f062d7def6d01505238398e",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.14s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "lineno": 8,
+          "endline": 68,
+          "col_offset": 4,
+          "complexity": 17,
+          "name": "roll",
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "C",
+          "lineno": 1,
+          "endline": 128,
+          "col_offset": 0,
+          "complexity": 11,
+          "name": "BowlingGame",
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 4,
+              "endline": 6,
+              "col_offset": 4,
+              "complexity": 1,
+              "name": "__init__",
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "lineno": 8,
+              "endline": 68,
+              "col_offset": 4,
+              "complexity": 17,
+              "name": "roll",
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "lineno": 70,
+              "endline": 128,
+              "col_offset": 4,
+              "complexity": 11,
+              "name": "score",
+              "classname": "BowlingGame",
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "C",
+          "lineno": 70,
+          "endline": 128,
+          "col_offset": 4,
+          "complexity": 11,
+          "name": "score",
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 4,
+          "endline": 6,
+          "col_offset": 4,
+          "complexity": 1,
+          "name": "__init__",
+          "classname": "BowlingGame",
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 128,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P2\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P2\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "unidiomatic-typecheck",
+            "message": "Use isinstance() rather than type() for a typecheck.",
+            "messageId": "C0123",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 10,
+            "column": 11,
+            "endLine": 10,
+            "endColumn": 32,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P2\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "unbalanced-tuple-unpacking",
+            "message": "Possible unbalanced tuple unpacking with sequence defined at line 6: left side has 2 labels, right side has 0 values",
+            "messageId": "W0632",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 54,
+            "column": 8,
+            "endLine": 54,
+            "endColumn": 29,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P2\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (13/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 8,
+            "column": 4,
+            "endLine": 8,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\ChatGPT_P2\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 1,
+            "refactor": 1,
+            "convention": 3,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 9.206349206349206
+        }
+      }
+    },
+    {
+      "file": "DeepSeek_P0.py",
+      "source_sha256": "795b56f9dfdc022be7562dd041ae647f0a27b7d59e21a7a78d3387986a3393da",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.15s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "lineno": 14,
+          "endline": 93,
+          "col_offset": 4,
+          "complexity": 18,
+          "name": "roll",
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "lineno": 5,
+          "endline": 115,
+          "col_offset": 0,
+          "complexity": 9,
+          "name": "BowlingGame",
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 6,
+              "endline": 12,
+              "col_offset": 4,
+              "complexity": 1,
+              "name": "__init__",
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "lineno": 14,
+              "endline": 93,
+              "col_offset": 4,
+              "complexity": 18,
+              "name": "roll",
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 95,
+              "endline": 115,
+              "col_offset": 4,
+              "complexity": 5,
+              "name": "score",
+              "classname": "BowlingGame",
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 95,
+          "endline": 115,
+          "col_offset": 4,
+          "complexity": 5,
+          "name": "score",
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 6,
+          "endline": 12,
+          "col_offset": 4,
+          "complexity": 1,
+          "name": "__init__",
+          "classname": "BowlingGame",
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 115,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-class-docstring",
+            "message": "Missing class docstring",
+            "messageId": "C0115",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "BowlingGame",
+            "line": 5,
+            "column": 0,
+            "endLine": 5,
+            "endColumn": 17,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 14,
+            "column": 4,
+            "endLine": 14,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "unbalanced-tuple-unpacking",
+            "message": "Possible unbalanced tuple unpacking with sequence defined at line 11: left side has 2 labels, right side has 0 values",
+            "messageId": "W0632",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 74,
+            "column": 12,
+            "endLine": 74,
+            "endColumn": 45,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (20/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 14,
+            "column": 4,
+            "endLine": 14,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-statements",
+            "message": "Too many statements (52/50)",
+            "messageId": "R0915",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 14,
+            "column": 4,
+            "endLine": 14,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 95,
+            "column": 4,
+            "endLine": 95,
+            "endColumn": 13,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P0\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 1,
+            "refactor": 2,
+            "convention": 5,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 8.88888888888889
+        }
+      }
+    },
+    {
+      "file": "DeepSeek_P1.py",
+      "source_sha256": "9e9f27f83e2c59daa301ae51db3d1e00b5e5dccd97162f472b435da915ec37de",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.15s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "classname": "BowlingGame",
+          "endline": 72,
+          "lineno": 13,
+          "complexity": 17,
+          "name": "roll",
+          "col_offset": 4,
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "endline": 103,
+          "lineno": 1,
+          "complexity": 7,
+          "name": "BowlingGame",
+          "col_offset": 0,
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "classname": "BowlingGame",
+              "endline": 11,
+              "lineno": 4,
+              "complexity": 1,
+              "name": "__init__",
+              "col_offset": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "classname": "BowlingGame",
+              "endline": 72,
+              "lineno": 13,
+              "complexity": 17,
+              "name": "roll",
+              "col_offset": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "classname": "BowlingGame",
+              "endline": 97,
+              "lineno": 74,
+              "complexity": 5,
+              "name": "score",
+              "col_offset": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "classname": "BowlingGame",
+              "endline": 103,
+              "lineno": 99,
+              "complexity": 1,
+              "name": "_advance_frame",
+              "col_offset": 4,
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "classname": "BowlingGame",
+          "endline": 97,
+          "lineno": 74,
+          "complexity": 5,
+          "name": "score",
+          "col_offset": 4,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "classname": "BowlingGame",
+          "endline": 11,
+          "lineno": 4,
+          "complexity": 1,
+          "name": "__init__",
+          "col_offset": 4,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "classname": "BowlingGame",
+          "endline": 103,
+          "lineno": 99,
+          "complexity": 1,
+          "name": "_advance_frame",
+          "col_offset": 4,
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 103,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P1\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (18/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 13,
+            "column": 4,
+            "endLine": 13,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P1\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 1,
+            "convention": 2,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 9.545454545454545
+        }
+      }
+    },
+    {
+      "file": "DeepSeek_P2.py",
+      "source_sha256": "d3509c2a3ecc750b333489cbab899cc497e8a62534515ea8a8036aa8aefe1218",
+      "failures": [],
+      "pytest": "...............................                                          [100%]\n31 passed in 0.13s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "complexity": 16,
+          "col_offset": 4,
+          "lineno": 8,
+          "endline": 60,
+          "classname": "BowlingGame",
+          "name": "roll",
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "complexity": 9,
+          "col_offset": 0,
+          "lineno": 1,
+          "endline": 122,
+          "name": "BowlingGame",
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "complexity": 1,
+              "col_offset": 4,
+              "lineno": 4,
+              "endline": 6,
+              "classname": "BowlingGame",
+              "name": "__init__",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "complexity": 16,
+              "col_offset": 4,
+              "lineno": 8,
+              "endline": 60,
+              "classname": "BowlingGame",
+              "name": "roll",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "complexity": 7,
+              "col_offset": 4,
+              "lineno": 62,
+              "endline": 94,
+              "classname": "BowlingGame",
+              "name": "score",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "complexity": 7,
+              "col_offset": 4,
+              "lineno": 96,
+              "endline": 106,
+              "classname": "BowlingGame",
+              "name": "_is_frame_complete",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "complexity": 8,
+              "col_offset": 4,
+              "lineno": 108,
+              "endline": 122,
+              "classname": "BowlingGame",
+              "name": "_max_pins_for_tenth_roll",
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "complexity": 8,
+          "col_offset": 4,
+          "lineno": 108,
+          "endline": 122,
+          "classname": "BowlingGame",
+          "name": "_max_pins_for_tenth_roll",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "complexity": 7,
+          "col_offset": 4,
+          "lineno": 62,
+          "endline": 94,
+          "classname": "BowlingGame",
+          "name": "score",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "complexity": 7,
+          "col_offset": 4,
+          "lineno": 96,
+          "endline": 106,
+          "classname": "BowlingGame",
+          "name": "_is_frame_complete",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "complexity": 1,
+          "col_offset": 4,
+          "lineno": 4,
+          "endline": 6,
+          "classname": "BowlingGame",
+          "name": "__init__",
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 122,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P2\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P2\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (15/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 8,
+            "column": 4,
+            "endLine": 8,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\DeepSeek_P2\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 1,
+            "convention": 2,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 9.61038961038961
+        }
+      }
+    },
+    {
+      "file": "GigaChat_P0.py",
+      "source_sha256": "2e09a353df9e6555c816f1de4cc1477ed9aab8368042f9c8d52f8a31e93828a8",
+      "failures": [
+        {
+          "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_roll_for_spare",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+          "message": "ValueError: Игра уже завершена, нельзя делать дополнительные броски"
+        },
+        {
+          "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+          "message": "AssertionError: Exception not raised"
+        }
+      ],
+      "pytest": "..F.FF.......FF...F..F........F                                          [100%]\n================================== FAILURES ===================================\n_ BowlingTest.test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once _\nbowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n_ BowlingTest.test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once _\nbowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n_ BowlingTest.test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus _\nbowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ___________\nbowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike __________\nbowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n_ BowlingTest.test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points _\nbowling_test.py:85: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n_ BowlingTest.test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll _\nbowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:13: in roll\n    raise ValueError(\"Игра уже завершена, нельзя делать дополнительные броски\")\nE   ValueError: Игра уже завершена, нельзя делать дополнительные броски\n___ BowlingTest.test_two_rolls_in_a_frame_cannot_score_more_than_10_points ____\nbowling_test.py:115: in test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n    with self.assertRaisesWithMessage(Exception):\nE   AssertionError: Exception not raised\n=========================== short test summary info ===========================\nFAILED bowling_test.py::BowlingTest::test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike\nFAILED bowling_test.py::BowlingTest::test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\nFAILED bowling_test.py::BowlingTest::test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\nFAILED bowling_test.py::BowlingTest::test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n8 failed, 23 passed in 0.33s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "B",
+          "name": "roll",
+          "complexity": 10,
+          "col_offset": 4,
+          "endline": 26,
+          "lineno": 7,
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "name": "BowlingGame",
+          "complexity": 6,
+          "col_offset": 0,
+          "endline": 46,
+          "lineno": 1,
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "name": "__init__",
+              "complexity": 1,
+              "col_offset": 4,
+              "endline": 5,
+              "lineno": 2,
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "name": "roll",
+              "complexity": 10,
+              "col_offset": 4,
+              "endline": 26,
+              "lineno": 7,
+              "classname": "BowlingGame",
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "name": "score",
+              "complexity": 5,
+              "col_offset": 4,
+              "endline": 46,
+              "lineno": 28,
+              "classname": "BowlingGame",
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "name": "score",
+          "complexity": 5,
+          "col_offset": 4,
+          "endline": 46,
+          "lineno": 28,
+          "classname": "BowlingGame",
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "name": "__init__",
+          "complexity": 1,
+          "col_offset": 4,
+          "endline": 5,
+          "lineno": 2,
+          "classname": "BowlingGame",
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 10,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 14,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 17,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 31,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 34,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "trailing-whitespace",
+            "message": "Trailing whitespace",
+            "messageId": "C0303",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 45,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 46,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-class-docstring",
+            "message": "Missing class docstring",
+            "messageId": "C0115",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "BowlingGame",
+            "line": 1,
+            "column": 0,
+            "endLine": 1,
+            "endColumn": 17,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 7,
+            "column": 4,
+            "endLine": 7,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 28,
+            "column": 4,
+            "endLine": 28,
+            "endColumn": 13,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "unused-variable",
+            "message": "Unused variable 'frame'",
+            "messageId": "W0612",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 35,
+            "column": 12,
+            "endLine": 35,
+            "endColumn": 17,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P0\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 1,
+            "refactor": 0,
+            "convention": 11,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 6.363636363636363
+        }
+      }
+    },
+    {
+      "file": "GigaChat_P1.py",
+      "source_sha256": "f4a686cf79378ed607c0e973c15d6a138d298b4ce6dbef87ffa0c26f4d1975c1",
+      "failures": [
+        {
+          "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+          "message": "RuntimeError: Дополнительные броски разрешены только при страйке или спэре в 10-м фрейме."
+        },
+        {
+          "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_all_strikes_is_a_perfect_game",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_an_incomplete_game_cannot_be_scored",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_roll_for_spare",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_cannot_roll_if_game_already_has_ten_frames",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        },
+        {
+          "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Игра уже завершена, вызов roll() недопустим."
+        }
+      ],
+      "pytest": ".FFFFFFF.FFFFFFFFFFFFF.FFFFFFFF                                          [100%]\n================================== FAILURES ===================================\n_______ BowlingTest.test_a_spare_followed_by_zeros_is_worth_ten_points ________\nbowling_test.py:32: in test_a_spare_followed_by_zeros_is_worth_ten_points\n    self.assertEqual(game.score(), 10)\n                     ^^^^^^^^^^^^\nbowling.py:104: in score\n    raise RuntimeError(\nE   RuntimeError: Дополнительные броски разрешены только при страйке или спэре в 10-м фрейме.\n_ BowlingTest.test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once _\nbowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n__ BowlingTest.test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll ___\nbowling_test.py:51: in test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once _\nbowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus _\nbowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_______________ BowlingTest.test_all_strikes_is_a_perfect_game ________________\nbowling_test.py:97: in test_all_strikes_is_a_perfect_game\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n____________ BowlingTest.test_an_incomplete_game_cannot_be_scored _____________\nbowling_test.py:165: in test_an_incomplete_game_cannot_be_scored\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:122: in test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:195: in test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:179: in test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:187: in test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ___________\nbowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike __________\nbowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_________ BowlingTest.test_cannot_roll_if_game_already_has_ten_frames _________\nbowling_test.py:171: in test_cannot_roll_if_game_already_has_ten_frames\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n________ BowlingTest.test_consecutive_spares_each_get_a_one_roll_bonus ________\nbowling_test.py:41: in test_consecutive_spares_each_get_a_one_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n______ BowlingTest.test_consecutive_strikes_each_get_the_two_roll_bonus _______\nbowling_test.py:63: in test_consecutive_strikes_each_get_the_two_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points _\nbowling_test.py:85: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_points_scored_in_the_roll_after_a_spare_are_counted_twice __\nbowling_test.py:36: in test_points_scored_in_the_roll_after_a_spare_are_counted_twice\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus _\nbowling_test.py:58: in test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll _\nbowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:153: in test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_______ BowlingTest.test_should_be_able_to_score_a_game_with_all_zeros ________\nbowling_test.py:21: in test_should_be_able_to_score_a_game_with_all_zeros\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n__ BowlingTest.test_should_be_able_to_score_a_game_with_no_strikes_or_spares __\nbowling_test.py:26: in test_should_be_able_to_score_a_game_with_no_strikes_or_spares\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n___ BowlingTest.test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls ___\nbowling_test.py:80: in test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike _\nbowling_test.py:145: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike _\nbowling_test.py:138: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:130: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n___ BowlingTest.test_two_rolls_in_a_frame_cannot_score_more_than_10_points ____\nbowling_test.py:114: in test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:34: in roll\n    raise RuntimeError(\"Игра уже завершена, вызов roll() недопустим.\")\nE   RuntimeError: Игра уже завершена, вызов roll() недопустим.\n=========================== short test summary info ===========================\nFAILED bowling_test.py::BowlingTest::test_a_spare_followed_by_zeros_is_worth_ten_points\nFAILED bowling_test.py::BowlingTest::test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll\nFAILED bowling_test.py::BowlingTest::test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\nFAILED bowling_test.py::BowlingTest::test_all_strikes_is_a_perfect_game - Run...\nFAILED bowling_test.py::BowlingTest::test_an_incomplete_game_cannot_be_scored\nFAILED bowling_test.py::BowlingTest::test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_if_game_already_has_ten_frames\nFAILED bowling_test.py::BowlingTest::test_consecutive_spares_each_get_a_one_roll_bonus\nFAILED bowling_test.py::BowlingTest::test_consecutive_strikes_each_get_the_two_roll_bonus\nFAILED bowling_test.py::BowlingTest::test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\nFAILED bowling_test.py::BowlingTest::test_points_scored_in_the_roll_after_a_spare_are_counted_twice\nFAILED bowling_test.py::BowlingTest::test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus\nFAILED bowling_test.py::BowlingTest::test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\nFAILED bowling_test.py::BowlingTest::test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_all_zeros\nFAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_no_strikes_or_spares\nFAILED bowling_test.py::BowlingTest::test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls\nFAILED bowling_test.py::BowlingTest::test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\nFAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike\nFAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n28 failed, 3 passed in 0.58s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "classname": "BowlingGame",
+          "endline": 80,
+          "name": "roll",
+          "complexity": 13,
+          "lineno": 21,
+          "col_offset": 4,
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "endline": 132,
+          "name": "BowlingGame",
+          "complexity": 9,
+          "lineno": 1,
+          "col_offset": 0,
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "classname": "BowlingGame",
+              "endline": 19,
+              "name": "__init__",
+              "complexity": 1,
+              "lineno": 12,
+              "col_offset": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "classname": "BowlingGame",
+              "endline": 80,
+              "name": "roll",
+              "complexity": 13,
+              "lineno": 21,
+              "col_offset": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "classname": "BowlingGame",
+              "endline": 132,
+              "name": "score",
+              "complexity": 9,
+              "lineno": 83,
+              "col_offset": 4,
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "classname": "BowlingGame",
+          "endline": 132,
+          "name": "score",
+          "complexity": 9,
+          "lineno": 83,
+          "col_offset": 4,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "classname": "BowlingGame",
+          "endline": 19,
+          "name": "__init__",
+          "complexity": 1,
+          "lineno": 12,
+          "col_offset": 4,
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "line-too-long",
+            "message": "Line too long (101/100)",
+            "messageId": "C0301",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 7,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "line-too-long",
+            "message": "Line too long (109/100)",
+            "messageId": "C0301",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 8,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 136,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (13/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 21,
+            "column": 4,
+            "endLine": 21,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "warning",
+            "symbol": "global-statement",
+            "message": "Using the global statement",
+            "messageId": "W0603",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 90,
+            "column": 8,
+            "endLine": 90,
+            "endColumn": 27,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "invalid-name",
+            "message": "Constant name \"score_called\" doesn't conform to UPPER_CASE naming style",
+            "messageId": "C0103",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 136,
+            "column": 0,
+            "endLine": 136,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P1\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 1,
+            "refactor": 1,
+            "convention": 5,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 8.813559322033898
+        }
+      }
+    },
+    {
+      "file": "GigaChat_P2.py",
+      "source_sha256": "652657cae902e86b762c871494619c673322691700bf9048aba1b8788cf1d82c",
+      "failures": [
+        {
+          "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_all_strikes_is_a_perfect_game",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_roll_for_spare",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_cannot_roll_if_game_already_has_ten_frames",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+          "message": "RuntimeError: Превышено количество фреймов."
+        },
+        {
+          "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+          "message": "AssertionError: Exception not raised"
+        }
+      ],
+      "pytest": ".FFFFFF..FFFFFFFFFFFFF.FFFFFFFF                                          [100%]\n================================== FAILURES ===================================\n_______ BowlingTest.test_a_spare_followed_by_zeros_is_worth_ten_points ________\nbowling_test.py:31: in test_a_spare_followed_by_zeros_is_worth_ten_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once _\nbowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n__ BowlingTest.test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll ___\nbowling_test.py:51: in test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once _\nbowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus _\nbowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_______________ BowlingTest.test_all_strikes_is_a_perfect_game ________________\nbowling_test.py:97: in test_all_strikes_is_a_perfect_game\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:122: in test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:195: in test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:179: in test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _\nbowling_test.py:187: in test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ___________\nbowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike __________\nbowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_________ BowlingTest.test_cannot_roll_if_game_already_has_ten_frames _________\nbowling_test.py:171: in test_cannot_roll_if_game_already_has_ten_frames\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n________ BowlingTest.test_consecutive_spares_each_get_a_one_roll_bonus ________\nbowling_test.py:41: in test_consecutive_spares_each_get_a_one_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n______ BowlingTest.test_consecutive_strikes_each_get_the_two_roll_bonus _______\nbowling_test.py:63: in test_consecutive_strikes_each_get_the_two_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points _\nbowling_test.py:85: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_points_scored_in_the_roll_after_a_spare_are_counted_twice __\nbowling_test.py:36: in test_points_scored_in_the_roll_after_a_spare_are_counted_twice\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus _\nbowling_test.py:58: in test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll _\nbowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:153: in test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_______ BowlingTest.test_should_be_able_to_score_a_game_with_all_zeros ________\nbowling_test.py:21: in test_should_be_able_to_score_a_game_with_all_zeros\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n__ BowlingTest.test_should_be_able_to_score_a_game_with_no_strikes_or_spares __\nbowling_test.py:26: in test_should_be_able_to_score_a_game_with_no_strikes_or_spares\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n___ BowlingTest.test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls ___\nbowling_test.py:80: in test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike _\nbowling_test.py:145: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike _\nbowling_test.py:138: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _\nbowling_test.py:130: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:65: in roll\n    self._check_roll_valid(pins)\nbowling.py:34: in _check_roll_valid\n    self._check_game_active()\nbowling.py:27: in _check_game_active\n    raise RuntimeError(\"Превышено количество фреймов.\")\nE   RuntimeError: Превышено количество фреймов.\n___ BowlingTest.test_two_rolls_in_a_frame_cannot_score_more_than_10_points ____\nbowling_test.py:115: in test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n    with self.assertRaisesWithMessage(Exception):\nE   AssertionError: Exception not raised\n=========================== short test summary info ===========================\nFAILED bowling_test.py::BowlingTest::test_a_spare_followed_by_zeros_is_worth_ten_points\nFAILED bowling_test.py::BowlingTest::test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll\nFAILED bowling_test.py::BowlingTest::test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\nFAILED bowling_test.py::BowlingTest::test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\nFAILED bowling_test.py::BowlingTest::test_all_strikes_is_a_perfect_game - Run...\nFAILED bowling_test.py::BowlingTest::test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike\nFAILED bowling_test.py::BowlingTest::test_cannot_roll_if_game_already_has_ten_frames\nFAILED bowling_test.py::BowlingTest::test_consecutive_spares_each_get_a_one_roll_bonus\nFAILED bowling_test.py::BowlingTest::test_consecutive_strikes_each_get_the_two_roll_bonus\nFAILED bowling_test.py::BowlingTest::test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\nFAILED bowling_test.py::BowlingTest::test_points_scored_in_the_roll_after_a_spare_are_counted_twice\nFAILED bowling_test.py::BowlingTest::test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus\nFAILED bowling_test.py::BowlingTest::test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\nFAILED bowling_test.py::BowlingTest::test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_all_zeros\nFAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_no_strikes_or_spares\nFAILED bowling_test.py::BowlingTest::test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls\nFAILED bowling_test.py::BowlingTest::test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\nFAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike\nFAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\nFAILED bowling_test.py::BowlingTest::test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n27 failed, 4 passed in 0.60s\n",
+      "radon": [
+        {
+          "type": "method",
+          "rank": "C",
+          "lineno": 82,
+          "col_offset": 4,
+          "name": "score",
+          "endline": 138,
+          "classname": "BowlingGame",
+          "complexity": 15,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "B",
+          "lineno": 57,
+          "col_offset": 4,
+          "name": "roll",
+          "endline": 80,
+          "classname": "BowlingGame",
+          "complexity": 8,
+          "closures": []
+        },
+        {
+          "type": "class",
+          "rank": "B",
+          "lineno": 1,
+          "col_offset": 0,
+          "name": "BowlingGame",
+          "endline": 138,
+          "complexity": 7,
+          "methods": [
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 17,
+              "col_offset": 4,
+              "name": "__init__",
+              "endline": 21,
+              "classname": "BowlingGame",
+              "complexity": 2,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 23,
+              "col_offset": 4,
+              "name": "_check_game_active",
+              "endline": 27,
+              "classname": "BowlingGame",
+              "complexity": 3,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 29,
+              "col_offset": 4,
+              "name": "_check_pins",
+              "endline": 31,
+              "classname": "BowlingGame",
+              "complexity": 4,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "A",
+              "lineno": 33,
+              "col_offset": 4,
+              "name": "_check_roll_valid",
+              "endline": 55,
+              "classname": "BowlingGame",
+              "complexity": 5,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "B",
+              "lineno": 57,
+              "col_offset": 4,
+              "name": "roll",
+              "endline": 80,
+              "classname": "BowlingGame",
+              "complexity": 8,
+              "closures": []
+            },
+            {
+              "type": "method",
+              "rank": "C",
+              "lineno": 82,
+              "col_offset": 4,
+              "name": "score",
+              "endline": 138,
+              "classname": "BowlingGame",
+              "complexity": 15,
+              "closures": []
+            }
+          ]
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 33,
+          "col_offset": 4,
+          "name": "_check_roll_valid",
+          "endline": 55,
+          "classname": "BowlingGame",
+          "complexity": 5,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 29,
+          "col_offset": 4,
+          "name": "_check_pins",
+          "endline": 31,
+          "classname": "BowlingGame",
+          "complexity": 4,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 23,
+          "col_offset": 4,
+          "name": "_check_game_active",
+          "endline": 27,
+          "classname": "BowlingGame",
+          "complexity": 3,
+          "closures": []
+        },
+        {
+          "type": "method",
+          "rank": "A",
+          "lineno": 17,
+          "col_offset": 4,
+          "name": "__init__",
+          "endline": 21,
+          "classname": "BowlingGame",
+          "complexity": 2,
+          "closures": []
+        }
+      ],
+      "pylint": {
+        "messages": [
+          {
+            "type": "convention",
+            "symbol": "missing-final-newline",
+            "message": "Final newline missing",
+            "messageId": "C0304",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 138,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P2\\bowling.py"
+          },
+          {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P2\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-nested-blocks",
+            "message": "Too many nested blocks (6/5)",
+            "messageId": "R1702",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 101,
+            "column": 8,
+            "endLine": 135,
+            "endColumn": 35,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P2\\bowling.py"
+          },
+          {
+            "type": "refactor",
+            "symbol": "too-many-branches",
+            "message": "Too many branches (16/12)",
+            "messageId": "R0912",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 82,
+            "column": 4,
+            "endLine": 82,
+            "endColumn": 13,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\user\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9713d531-b6a5-458c-b5c8-efe3d6a365ba}\\Temp\\lab5-bowling-xpts4efy\\GigaChat_P2\\bowling.py"
+          }
+        ],
+        "statistics": {
+          "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 2,
+            "convention": 2,
+            "info": 0
+          },
+          "modulesLinted": 3,
+          "score": 9.428571428571429
+        }
+      }
+    }
+  ]
+}
