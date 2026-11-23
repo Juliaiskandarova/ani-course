@@ -1,0 +1,421 @@
+// =====================================================
+// Станция технического обслуживания (СТО), версия 2
+// Вставить целиком на https://dbdiagram.io/
+// =====================================================
+//
+// ДОПУЩЕНИЯ:
+// 1. Цены работ и запчастей в заказе фиксируются на момент заказа
+//    (price_at_order), поэтому смена прайса не меняет прошлые периоды.
+// 2. Б/у деталь - отдельная позиция склада с полем condition.
+// 3. Совместимость детали с моделью - M:N (part_compatibility).
+//    Универсальные детали: is_universal = true, в part_compatibility не заносятся.
+// 4. Заказ привязан не к клиенту, а к ЗАПИСИ ВЛАДЕНИЯ (ownership_id).
+//    Составной внешний ключ (ownership_id, car_id) гарантирует, что владение
+//    относится именно к этой машине. Клиент заказа = клиент из этого владения.
+//    Дата заказа должна лежать в периоде владения (триггер, см. orders).
+// 5. Единственный текущий владелец: поле current_car_id заполнено (= car_id)
+//    только у открытого владения, иначе NULL. UNIQUE допускает много NULL,
+//    так что у машины не более одного текущего владельца. Заполняет приложение
+//    или триггер вместе с date_to.
+// 6. Нет перекрытия периодов владения. В PostgreSQL добавить:
+//    ALTER TABLE car_ownerships ADD EXCLUDE USING gist
+//      (car_id WITH =, daterange(date_from, coalesce(date_to,'infinity')) WITH &&);
+// 7. Периодичность работ: значения по умолчанию в service_types,
+//    переопределение для конкретной модели в service_intervals.
+//    Работа периодическая, если задан хотя бы один период (отдельный флаг убран).
+//    Напоминание нужно, когда наступило любое из условий (месяцы или километры).
+// 8. Снятие с учёта мягкое. Статус и дата связаны CHECK. Снятие клиента
+//    (транзакция): клиент is_active=false, его открытые владения закрываются,
+//    его активные машины is_active=false, открытые напоминания отменяются.
+//    Повторная постановка на учёт - реактивация той же записи, а не дубль.
+// 9. Уникальность номера: license_plate не уникален глобально,
+//    active_license_plate уникален только среди активных машин (= plate или NULL).
+//    VIN физически уникален, поэтому уникален глобально.
+// 10. Не реализуются в DBML, нужны триггеры или приложение:
+//    a) заказ только для активных клиента и машины, на дату в периоде владения;
+//    b) odometer_km не меньше пробега предыдущего заказа этой машины
+//       (и не больше следующего, если заказ вводится задним числом);
+//    c) совместимость детали с моделью машины заказа
+//       (part_compatibility или is_universal);
+//    d) total_amount = сумма работ + сумма запчастей - discount_amount;
+//    e) остаток parts.stock_qty = сумма stock_movements.qty_delta (кэш,
+//       обновляется только через движения).
+// 11. Выручка годового отчёта: только заказы со status = completed,
+//     по total_amount; поступления денег - по payments.
+//     Себестоимость - по order_parts.cost_at_order, берётся из партий (FIFO).
+
+Enum part_condition {
+  new   [note: 'новая']
+  used  [note: 'б/у']
+}
+
+Enum order_status {
+  draft       [note: 'черновик']
+  in_progress [note: 'в работе']
+  completed   [note: 'выполнен']
+  cancelled   [note: 'отменён']
+}
+
+Enum reminder_status {
+  created    [note: 'сформировано']
+  printed    [note: 'напечатано']
+  fulfilled  [note: 'работа выполнена']
+  cancelled  [note: 'отменено']
+}
+
+Enum movement_type {
+  receipt     [note: 'поступление партии']
+  sale        [note: 'списание в заказ']
+  return_     [note: 'возврат из заказа']
+  write_off   [note: 'списание (брак, потеря)']
+  adjustment  [note: 'инвентаризационная корректировка']
+}
+
+Enum payment_method {
+  cash
+  card
+  transfer
+}
+
+// ---------- Модели автомобилей ----------
+Table car_models {
+  id          int [pk, increment]
+  brand       varchar(60) [not null, note: 'марка']
+  name        varchar(80) [not null, note: 'модель']
+  generation  varchar(60) [note: 'поколение / кузов']
+  year_from   smallint
+  year_to     smallint    [note: 'NULL, если выпускается']
+
+  indexes {
+    (brand, name, generation) [unique]
+  }
+
+  checks {
+    `year_to is null or year_to >= year_from` [name: 'chk_model_years']
+  }
+}
+
+// ---------- Склад ----------
+Table parts {
+  id             int [pk, increment]
+  article        varchar(50)    [unique, note: 'артикул / код']
+  name           varchar(150)   [not null]
+  condition      part_condition [not null, note: 'новая или б/у']
+  is_consumable  boolean        [not null, default: false, note: 'расходный материал']
+  is_universal   boolean        [not null, default: false, note: 'подходит ко всем моделям']
+  unit           varchar(20)    [not null, default: 'шт']
+  price          decimal(12,2)  [not null, note: 'текущая цена продажи']
+  stock_qty      decimal(12,3)  [not null, default: 0, note: 'кэш остатка, обновляется только через stock_movements']
+
+  indexes {
+    name
+    condition
+  }
+
+  checks {
+    `stock_qty >= 0` [name: 'chk_stock_nonneg']
+    `price >= 0` [name: 'chk_part_price']
+  }
+}
+
+Table part_compatibility {
+  part_id       int [not null]
+  car_model_id  int [not null]
+
+  indexes {
+    (part_id, car_model_id) [pk]
+  }
+}
+
+// Партии поступления: каждая со своей закупочной ценой
+Table part_batches {
+  id              int [pk, increment]
+  part_id         int           [not null]
+  received_at     date          [not null]
+  qty_received    decimal(12,3) [not null]
+  purchase_price  decimal(12,2) [not null, note: 'закупочная цена единицы в этой партии']
+  supplier        varchar(150)
+  document_no     varchar(50)   [note: 'номер накладной']
+
+  indexes {
+    (part_id, received_at)
+  }
+
+  checks {
+    `qty_received > 0` [name: 'chk_batch_qty']
+    `purchase_price >= 0` [name: 'chk_batch_price']
+  }
+}
+
+// Движения склада: источник правды для остатка и себестоимости
+Table stock_movements {
+  id             bigint [pk, increment]
+  part_id        int           [not null]
+  batch_id       int           [note: 'партия, из которой пришло или ушло']
+  order_part_id  int           [note: 'строка заказа (для sale / return_)']
+  movement_type  movement_type [not null]
+  qty_delta      decimal(12,3) [not null, note: '+ приход, - расход']
+  unit_cost      decimal(12,2) [note: 'себестоимость единицы']
+  moved_at       timestamp     [not null, default: `now()`]
+  comment        varchar(255)
+
+  indexes {
+    (part_id, moved_at)
+    batch_id
+    order_part_id
+  }
+
+  checks {
+    `qty_delta <> 0` [name: 'chk_movement_nonzero']
+  }
+}
+
+// ---------- Работы ----------
+Table service_types {
+  id                    int [pk, increment]
+  name                  varchar(150)  [not null, unique]
+  price                 decimal(12,2) [not null, note: 'текущая стоимость работы']
+  default_period_months smallint      [note: 'период по умолчанию, месяцы (для периодических)']
+  default_period_km     int           [note: 'период по умолчанию, км (для периодических)']
+  is_active             boolean       [not null, default: true, note: 'выполняется ли сейчас']
+
+  checks {
+    `price >= 0` [name: 'chk_service_price']
+    `default_period_months is null or default_period_months > 0` [name: 'chk_default_months']
+    `default_period_km is null or default_period_km > 0` [name: 'chk_default_km']
+  }
+}
+
+// Периодичность для конкретной модели (переопределяет значение по умолчанию)
+Table service_intervals {
+  id               int [pk, increment]
+  service_type_id  int      [not null]
+  car_model_id     int      [not null]
+  period_months    smallint [note: 'месяцы']
+  period_km        int      [note: 'км пробега']
+
+  indexes {
+    (service_type_id, car_model_id) [unique]
+  }
+
+  checks {
+    `period_months is not null or period_km is not null` [name: 'chk_interval_has_period']
+    `period_months is null or period_months > 0` [name: 'chk_interval_months']
+    `period_km is null or period_km > 0` [name: 'chk_interval_km']
+  }
+}
+
+// ---------- Клиенты ----------
+Table clients {
+  id                    int [pk, increment]
+  full_name             varchar(150) [not null]
+  phone                 varchar(30)  [not null, unique, note: 'в едином формате; признак против дублей при автооформлении']
+  email                 varchar(100) [unique]
+  postal_address        varchar(255) [note: 'адрес для печатных писем']
+  registered_at         date         [not null, default: `now()`]
+  is_active             boolean      [not null, default: true, note: 'false = снят с учёта']
+  deregistered_at       date
+  deregistration_reason varchar(255)
+
+  indexes {
+    full_name
+  }
+
+  checks {
+    `(is_active and deregistered_at is null) or (not is_active and deregistered_at is not null)` [name: 'chk_client_status']
+  }
+}
+
+// ---------- Автомобили ----------
+Table cars {
+  id                   int [pk, increment]
+  car_model_id         int         [not null]
+  vin                  varchar(17) [unique]
+  license_plate        varchar(20) [not null]
+  active_license_plate varchar(20) [unique, note: '= license_plate, если is_active, иначе NULL']
+  manufacture_year     smallint
+  color                varchar(40)
+  registered_at        date        [not null, default: `now()`]
+  is_active            boolean     [not null, default: true, note: 'false = снят с учёта']
+  deregistered_at      date
+  deregistration_reason varchar(255)
+
+  indexes {
+    license_plate
+    car_model_id
+  }
+
+  checks {
+    `(is_active and deregistered_at is null) or (not is_active and deregistered_at is not null)` [name: 'chk_car_status']
+    `(is_active and active_license_plate = license_plate) or (not is_active and active_license_plate is null)` [name: 'chk_car_active_plate']
+  }
+}
+
+// ---------- История владения ----------
+Table car_ownerships {
+  id             int [pk, increment]
+  car_id         int  [not null]
+  client_id      int  [not null]
+  date_from      date [not null]
+  date_to        date [note: 'NULL = текущий владелец']
+  current_car_id int  [unique, note: '= car_id, если date_to IS NULL, иначе NULL. Гарантирует одного текущего владельца']
+
+  indexes {
+    (id, car_id) [unique, note: 'цель составного внешнего ключа']
+    car_id
+    client_id
+    (car_id, date_from)
+  }
+
+  checks {
+    `date_to is null or date_to >= date_from` [name: 'chk_ownership_dates']
+    `(date_to is null and current_car_id = car_id) or (date_to is not null and current_car_id is null)` [name: 'chk_ownership_current']
+  }
+}
+
+// ---------- Заказы ----------
+Table orders {
+  id               int [pk, increment]
+  order_number     varchar(30)   [not null, unique]
+  car_id           int           [not null]
+  ownership_id     int           [not null, note: 'владение, в рамках которого оформлен заказ; клиент определяется отсюда']
+  order_date       date          [not null, note: 'должна лежать в периоде ownership (триггер)']
+  started_at       timestamp
+  completed_at     timestamp
+  odometer_km      int           [not null, note: 'показания спидометра; не меньше предыдущего заказа машины (триггер)']
+  status           order_status  [not null, default: 'draft']
+  discount_amount  decimal(12,2) [not null, default: 0]
+  total_amount     decimal(14,2) [not null, default: 0, note: 'работы + запчасти - скидка; считается автоматически']
+  created_at       timestamp     [not null, default: `now()`]
+
+  indexes {
+    order_date
+    (car_id, order_date)
+    ownership_id
+    status
+  }
+
+  checks {
+    `odometer_km >= 0` [name: 'chk_odometer']
+    `discount_amount >= 0` [name: 'chk_discount']
+    `total_amount >= 0` [name: 'chk_total']
+    `completed_at is null or started_at is null or completed_at >= started_at` [name: 'chk_order_times']
+  }
+}
+
+Table order_works {
+  id               int [pk, increment]
+  order_id         int           [not null]
+  service_type_id  int           [not null]
+  quantity         decimal(8,2)  [not null, default: 1]
+  price_at_order   decimal(12,2) [not null]
+
+  indexes {
+    order_id
+    service_type_id
+  }
+
+  checks {
+    `quantity > 0` [name: 'chk_work_qty']
+    `price_at_order >= 0` [name: 'chk_work_price']
+  }
+}
+
+Table order_parts {
+  id              int [pk, increment]
+  order_id        int           [not null]
+  part_id         int           [not null]
+  quantity        decimal(12,3) [not null, default: 1]
+  price_at_order  decimal(12,2) [not null]
+  cost_at_order   decimal(12,2) [note: 'себестоимость единицы из партий (FIFO)']
+
+  indexes {
+    order_id
+    part_id
+  }
+
+  checks {
+    `quantity > 0` [name: 'chk_part_qty']
+    `price_at_order >= 0` [name: 'chk_part_line_price']
+  }
+}
+
+// Оплаты (допускают оплату частями)
+Table payments {
+  id        int [pk, increment]
+  order_id  int            [not null]
+  paid_at   timestamp      [not null, default: `now()`]
+  amount    decimal(12,2)  [not null]
+  method    payment_method [not null]
+
+  indexes {
+    order_id
+    paid_at
+  }
+
+  checks {
+    `amount > 0` [name: 'chk_payment_amount']
+  }
+}
+
+// ---------- Письма-напоминания ----------
+Table reminder_letters {
+  id                 int [pk, increment]
+  car_id             int  [not null]
+  ownership_id       int  [not null, note: 'владение на момент формирования']
+  service_type_id    int  [not null]
+  last_order_id      int  [note: 'последний заказ с этой работой (NULL, если не выполнялась)']
+  due_date           date [note: 'расчётная дата по периоду в месяцах']
+  due_odometer_km    int  [note: 'расчётный пробег по периоду в км']
+  recipient_name     varchar(150) [not null, note: 'снимок ФИО на момент формирования']
+  recipient_address  varchar(255) [not null, note: 'снимок адреса на момент формирования']
+  generated_at       timestamp [not null, default: `now()`]
+  printed_at         timestamp
+  status             reminder_status [not null, default: 'created']
+  open_flag          smallint [note: '1, пока status IN (created, printed), иначе NULL']
+  fulfilled_order_id int  [note: 'заказ, в котором работа выполнена']
+
+  indexes {
+    (car_id, service_type_id, open_flag) [unique, note: 'не более одного открытого напоминания на пару авто и работа']
+    ownership_id
+    status
+  }
+
+  checks {
+    `(status in ('created','printed') and open_flag = 1) or (status in ('fulfilled','cancelled') and open_flag is null)` [name: 'chk_reminder_open']
+    `(status = 'fulfilled') = (fulfilled_order_id is not null)` [name: 'chk_reminder_fulfilled']
+    `due_date is not null or due_odometer_km is not null` [name: 'chk_reminder_due']
+  }
+}
+
+// ---------- Связи ----------
+Ref: part_compatibility.part_id > parts.id [delete: cascade]
+Ref: part_compatibility.car_model_id > car_models.id [delete: cascade]
+
+Ref: part_batches.part_id > parts.id
+Ref: stock_movements.part_id > parts.id
+Ref: stock_movements.batch_id > part_batches.id
+Ref: stock_movements.order_part_id > order_parts.id
+
+Ref: service_intervals.service_type_id > service_types.id [delete: cascade]
+Ref: service_intervals.car_model_id > car_models.id [delete: cascade]
+
+Ref: cars.car_model_id > car_models.id
+
+Ref: car_ownerships.car_id > cars.id
+Ref: car_ownerships.client_id > clients.id
+
+Ref: orders.car_id > cars.id
+Ref: orders.(ownership_id, car_id) > car_ownerships.(id, car_id)
+
+Ref: order_works.order_id > orders.id [delete: cascade]
+Ref: order_works.service_type_id > service_types.id
+Ref: order_parts.order_id > orders.id [delete: cascade]
+Ref: order_parts.part_id > parts.id
+Ref: payments.order_id > orders.id
+
+Ref: reminder_letters.car_id > cars.id
+Ref: reminder_letters.(ownership_id, car_id) > car_ownerships.(id, car_id)
+Ref: reminder_letters.service_type_id > service_types.id
+Ref: reminder_letters.last_order_id > orders.id
+Ref: reminder_letters.fulfilled_order_id > orders.id

@@ -1,0 +1,266 @@
+// ============================================================
+// Схема БД: Станция по ремонту автомобилей (исправленная версия)
+// ============================================================
+// Допущения (явно отмечены):
+// 1) part_condition — enum для типа запчасти (new/used).
+// 2) Запчасть подходит к нескольким моделям — M:N через part_models.
+// 3) Периодичность работ задаётся в work_intervals (интервал зависит
+//    от модели). Поля в works.periodicity_* оставлены как дефолт
+//    для моделей без явного интервала.
+// 4) Текущий владелец авто НЕ хранится в cars — вычисляется из
+//    car_ownerships WHERE owned_to IS NULL (единственный источник истины).
+//    Частичный UNIQUE (car_id) WHERE owned_to IS NULL гарантирует одного
+//    текущего владельца.
+// 5) "Снятие с учёта" — soft-delete (is_active). UNIQUE на номере/VIN —
+//    частичные (только для активных записей).
+// 6) orders.client_id — заказчик/плательщик на дату заказа; согласованность
+//    с историей владения обеспечивается триггером (вне DBML) и/или
+//    проверкой в приложении. Здесь явно документировано.
+// 7) Стоимость позиций — снимок цены (price_at_order). orders.total_amount
+//    поддерживается триггерами AFTER INSERT/UPDATE/DELETE на позициях
+//    (в DBML триггеры не выражаются — отмечено комментарием).
+// 8) Напоминания клиентам учитываются в notifications (факт отправки).
+// 9) Годовой фин. отчёт строится по closed_at (факт закрытия), а не по
+//    order_date; поля paid_at/paid_amount — для сверки с бухгалтерией.
+// ============================================================
+
+Enum part_condition {
+  new
+  used
+}
+
+Enum work_kind {
+  one_time
+  periodic
+}
+
+Enum order_status {
+  open
+  in_progress
+  closed
+  cancelled
+}
+
+Enum notification_status {
+  pending
+  sent
+  failed
+}
+
+Table clients {
+  id             int          [pk, increment]
+  full_name      varchar(200) [not null]
+  phone          varchar(30)  [not null, unique] // нормализованный телефон
+  email          varchar(120) [unique]           // NULL допускается (в PostgreSQL NULL не конфликтует)
+  address        varchar(300)
+  is_active      boolean      [not null, default: true]
+  created_at     timestamp    [not null, default: `now()`]
+  deactivated_at timestamp
+
+  // CHECK: (is_active=true AND deactivated_at IS NULL) OR (is_active=false AND deactivated_at IS NOT NULL)
+  // CHECK: email IS NULL OR email <> ''
+}
+
+Table car_models {
+  id                   int         [pk, increment]
+  brand                varchar(80) [not null]
+  model                varchar(80) [not null]
+  production_year_from int
+  production_year_to   int
+
+  indexes {
+    (brand, model) [unique]
+  }
+}
+
+Table cars {
+  id             int          [pk, increment]
+  vin            varchar(17)
+  license_plate  varchar(20)  [not null]
+  model_id       int          [not null, ref: > car_models.id]
+  is_active      boolean      [not null, default: true]
+  created_at     timestamp    [not null, default: `now()`]
+  deactivated_at timestamp
+
+  // Частичные UNIQUE (только для активных авто) — в DBML не выражаются,
+  // реализуются как CREATE UNIQUE INDEX ... WHERE is_active = true:
+  //   UNIQUE (license_plate) WHERE is_active = true
+  //   UNIQUE (vin)           WHERE is_active = true AND vin IS NOT NULL
+  // CHECK: (is_active=true AND deactivated_at IS NULL) OR (is_active=false AND deactivated_at IS NOT NULL)
+}
+
+// Единственный источник истины о владельце. Текущий владелец —
+// запись с owned_to IS NULL (частичный UNIQUE на car_id).
+Table car_ownerships {
+  id         int  [pk, increment]
+  car_id     int  [not null, ref: > cars.id]
+  client_id  int  [not null, ref: > clients.id]
+  owned_from date [not null]
+  owned_to   date
+
+  // Частичный UNIQUE: (car_id) WHERE owned_to IS NULL — один текущий владелец.
+  // EXCLUDE USING gist (car_id WITH =, daterange(owned_from, owned_to) WITH &&) —
+  //   непересечение периодов владения (PostgreSQL).
+  // CHECK: owned_to IS NULL OR owned_to > owned_from
+}
+
+Table parts {
+  id         int            [pk, increment]
+  name       varchar(200)   [not null]
+  sku        varchar(60)    [unique]
+  condition  part_condition [not null]
+  price      numeric(12,2)  [not null]
+  stock_qty  int            [not null, default: 0]
+  is_active  boolean        [not null, default: true]
+
+  // CHECK: price >= 0; stock_qty >= 0
+}
+
+Table part_models {
+  part_id  int [ref: > parts.id]
+  model_id int [ref: > car_models.id]
+
+  indexes {
+    (part_id, model_id) [pk]
+  }
+}
+
+Table works {
+  id                 int        [pk, increment]
+  name               varchar(200) [not null]
+  kind               work_kind  [not null]
+  price              numeric(12,2) [not null]
+  duration_minutes   int
+  periodicity_km     int   // дефолт для моделей без явного интервала
+  periodicity_months int
+  is_active          boolean [not null, default: true]
+
+  // CHECK: price >= 0; duration_minutes >= 0
+  // CHECK: kind <> 'periodic' OR periodicity_km IS NOT NULL OR periodicity_months IS NOT NULL
+}
+
+// Интервалы периодических работ по моделям (переопределяют дефолт works)
+Table work_intervals {
+  id               int [pk, increment]
+  work_id          int [not null, ref: > works.id]
+  model_id         int [not null, ref: > car_models.id]
+  interval_km      int
+  interval_months  int
+
+  indexes {
+    (work_id, model_id) [unique]
+  }
+
+  // CHECK: interval_km IS NOT NULL OR interval_months IS NOT NULL
+  // Логика проверки "пора ли": срабатывает, если превышен ЛЮБОЙ из заданных
+  // порогов (ИЛИ). Если нужна логика "И" — зафиксировать в приложении.
+}
+
+Table employees {
+  id         int          [pk, increment]
+  full_name  varchar(200) [not null]
+  position   varchar(80)
+  is_active  boolean      [not null, default: true]
+}
+
+Table orders {
+  id                  int          [pk, increment]
+  client_id           int          [not null, ref: > clients.id] // заказчик/плательщик
+  car_id              int          [not null, ref: > cars.id]
+  assigned_employee_id int         [ref: > employees.id]
+  order_date          timestamp    [not null, default: `now()`]
+  odometer_km         int          [not null]
+  total_amount        numeric(12,2) [not null, default: 0] // поддерживается триггерами на позициях
+  status              order_status [not null, default: 'open']
+  closed_at           timestamp    // дата закрытия — база для годового отчёта
+  paid_at             timestamp
+  paid_amount         numeric(12,2)
+  notes               text
+
+  // CHECK: odometer_km >= 0; total_amount >= 0; paid_amount >= 0
+  // CHECK: (status = 'closed') = (closed_at IS NOT NULL)
+  // Триггер: orders.client_id должен быть владельцем car_id на order_date
+  //   (сверка с car_ownerships) — либо явно допускается "плательщик ≠ владелец".
+  // Триггер/проверка: odometer_km монотонно не убывает по car_id
+  //   относительно предыдущего заказа по order_date.
+}
+
+Table order_parts {
+  id             int          [pk, increment]
+  order_id       int          [not null, ref: > orders.id]
+  part_id        int          [not null, ref: > parts.id]
+  qty            int          [not null, default: 1]
+  price_at_order numeric(12,2) [not null]
+
+  indexes {
+    (order_id, part_id) [unique]
+  }
+
+  // CHECK: qty > 0; price_at_order >= 0
+  // Триггер AFTER INSERT/UPDATE/DELETE — пересчёт orders.total_amount.
+  // Триггер/проверка совместимости: part_models содержит model_id авто заказа.
+}
+
+Table order_works {
+  id               int          [pk, increment]
+  order_id         int          [not null, ref: > orders.id]
+  work_id          int          [not null, ref: > works.id]
+  employee_id      int          [ref: > employees.id] // исполнитель
+  qty              int          [not null, default: 1]
+  price_at_order   numeric(12,2) [not null]
+  duration_minutes int          // снимок нормо-времени для отчётов по загрузке
+
+  indexes {
+    (order_id, work_id) [unique]
+  }
+
+  // CHECK: qty > 0; price_at_order >= 0; duration_minutes >= 0
+  // Триггер AFTER INSERT/UPDATE/DELETE — пересчёт orders.total_amount.
+}
+
+// Учёт отправленных напоминаний клиентам о периодических работах
+Table notifications {
+  id           int                 [pk, increment]
+  client_id    int                 [not null, ref: > clients.id]
+  car_id       int                 [not null, ref: > cars.id]
+  work_id      int                 [not null, ref: > works.id]
+  created_at   timestamp           [not null, default: `now()`]
+  sent_at      timestamp
+  channel      varchar(30)         [not null, default: 'print']
+  status       notification_status [not null, default: 'pending']
+  notes        text
+
+  // CHECK: (status = 'sent') = (sent_at IS NOT NULL)
+  // Индекс для проверки "не дублировать": (car_id, work_id, sent_at DESC)
+}
+
+// Движения склада (списание/возврат по заказам, закупки) — для корректных остатков
+Table stock_movements {
+  id          int          [pk, increment]
+  part_id     int          [not null, ref: > parts.id]
+  order_id    int          [ref: > orders.id]  // NULL для закупок/инвентаризации
+  qty_delta   int          [not null]          // + приход, − расход
+  moved_at    timestamp    [not null, default: `now()`]
+  reason      varchar(60)  [not null]          // 'sale','return','purchase','adjustment'
+
+  // CHECK: qty_delta <> 0
+  // Триггер: обновление parts.stock_qty = SUM(qty_delta) по part_id
+  //   (или поддержание stock_qty через триггеры на stock_movements).
+}
+
+// ============================================================
+// Сводка исправлений относительно первой версии:
+// - Убран cars.current_owner_id → владелец из car_ownerships (owned_to IS NULL).
+// - Частичные UNIQUE на license_plate/vin (только активные).
+// - Частичный UNIQUE + EXCLUDE на car_ownerships (один текущий владелец,
+//   непересечение периодов).
+// - order_status как enum; CHECK на цены/количество/пробег/флаги.
+// - UNIQUE(order_id, part_id) и UNIQUE(order_id, work_id) в позициях.
+// - total_amount поддерживается триггерами на позициях.
+// - work_intervals — периодичность по модели; CHECK на заполненность.
+// - notifications — учёт отправленных писем (без дублей).
+// - employees + исполнитель в order_works; снимок duration_minutes.
+// - closed_at/paid_at/paid_amount — база для годового фин. отчёта.
+// - stock_movements — корректный учёт остатков склада.
+// - CHECK-согласованность is_active ↔ deactivated_at.
+// ============================================================
