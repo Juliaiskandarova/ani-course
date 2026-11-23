@@ -1,0 +1,3 @@
+Received 2026-11-23; code prefix matched to screenshot.
+Transcribed from user message, decoding Markdown escaping and HTML space entities; logic and comments preserved. Transport whitespace may differ.
+Qwen screenshot displays 2/2; earlier alternative not supplied, cause unknown.

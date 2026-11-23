@@ -1,0 +1,111 @@
+Вот готовое решение — начну с кода, потом коротко поясню логику.
+Теперь проверю на классических тест-кейсах:
+Поймал баг в трекинге стоящих кеглей — исправлю:
+Почти всё зелёное. Разберусь с двумя последними кейсами — похоже, я сам неверно построил тесты:
+Есть расхождение: ожидаю 264, код даёт 257. Разберусь:
+Расхождение разобрано — ошибка была в моём ручном ожидании, а не в коде: при девяти страйках и финальных бросках 3 и 4 восьмой страйк стоит 10+10+3=23, девятый 10+3+4=17, итого 257 — классический подсчёт это подтверждает. Все тесты зелёные: perfect game 300, все спэры 150, «гуттер» 0, пример из описания kata 187, пример с Википедии 133.
+
+Вот финальное решение:
+
+```python
+class BowlingGame:
+    """Учёт очков в боулинге (10 фреймов)."""
+
+    MAX_PINS = 10
+    TOTAL_FRAMES = 10
+
+    def __init__(self):
+        self._rolls = []
+
+    def roll(self, pins: int):
+        # Валидация отдельного броска
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise ValueError("Number of pins must be an integer")
+        if pins < 0:
+            raise ValueError("Number of pins cannot be negative")
+        if pins > self.MAX_PINS:
+            raise ValueError("Number of pins cannot exceed 10")
+
+        standing = self._pins_standing_now()
+        if standing is None:
+            raise IndexError("Game is already over, cannot roll more balls")
+        if pins > standing:
+            raise ValueError(
+                f"Cannot knock down {pins} pins, only {standing} are standing"
+            )
+
+        self._rolls.append(pins)
+
+    def score(self) -> int:
+        # score() вызывается только по завершении игры
+        if self._pins_standing_now() is not None:
+            raise IndexError("Game is not finished yet, cannot score")
+
+        return self._compute_score()
+
+    # ---------- внутренние методы ----------
+
+    def _pins_standing_now(self):
+        """Сколько кеглей стоит перед следующим броском; None — игра окончена."""
+        rolls = self._rolls
+        i = 0
+
+        # Первые 9 фреймов: один или два броска
+        for _ in range(self.TOTAL_FRAMES - 1):
+            if i >= len(rolls):                       # фрейм только начался
+                return self.MAX_PINS
+            if rolls[i] == self.MAX_PINS:             # strike — фрейм завершён
+                i += 1
+            elif i + 1 < len(rolls):                  # есть второй бросок
+                i += 2
+            else:                                     # ждём второй бросок
+                return self.MAX_PINS - rolls[i]
+
+        # 10-й фрейм
+        if i >= len(rolls):
+            return self.MAX_PINS
+        frame_rolls = rolls[i:]
+        first = frame_rolls[0]
+
+        if first == self.MAX_PINS:                    # strike — до трёх бросков
+            rest = frame_rolls[1:]
+            if len(rest) >= 2:
+                return None                           # три броска сыграны — конец
+            if len(rest) == 1:
+                return self.MAX_PINS if rest[0] == self.MAX_PINS else self.MAX_PINS - rest[0]
+            return self.MAX_PINS
+
+        if len(frame_rolls) == 1:                     # ждём второй бросок
+            return self.MAX_PINS - first
+
+        second = frame_rolls[1]
+        if first + second == self.MAX_PINS:           # spare — нужен fill-бросок
+            return None if len(frame_rolls) >= 3 else self.MAX_PINS
+        return None                                   # open frame — конец игры
+
+    def _compute_score(self) -> int:
+        rolls = self._rolls
+        total = 0
+        i = 0
+
+        for _ in range(self.TOTAL_FRAMES):
+            if rolls[i] == self.MAX_PINS:                   # strike
+                total += self.MAX_PINS + rolls[i + 1] + rolls[i + 2]
+                i += 1
+            elif rolls[i] + rolls[i + 1] == self.MAX_PINS:  # spare
+                total += self.MAX_PINS + rolls[i + 2]
+                i += 2
+            else:                                           # open frame
+                total += rolls[i] + rolls[i + 1]
+                i += 2
+
+        return total
+```
+
+Как это устроено:
+
+- **`roll`** валидирует бросок: целое число (bool отбрасывается отдельно — `True` в Python это `int`), от 0 до 10, и не больше кеглей, которые реально стоят. Бросок после конца игры — `IndexError`, слишком много кеглей — `ValueError` с сообщением, сколько осталось стоять.
+- **`_pins_standing_now`** — сердце валидации: восстанавливает состояние игры по списку бросков. Первые девять фреймов идут по одному (страйк) или два броска; десятый — особый: страйк открывает два fill-броска, спэр — один. Существенно, что страйк или спэр **на fill-броске** не добавляют дополнительных бросков — это учтено. Возвращает `None`, когда игра закончена.
+- **`score`** вызывает `score()` только по завершении: если игра не дойдена — `IndexError`. Сам подсчёт классический: идём по фреймам, страйк берёт два следующих броска, спэр — один.
+
+Проверено на: perfect game (300), все спэры (150), нули (0), пример из kata (187), пример с Википедии (133), девять страйков + открытый десятый (257), а также на всех ошибках — отрицательный бросок, больше 10 кеглей, бросок в стоящие кегли, лишний бросок после конца игры и `score()` до завершения.

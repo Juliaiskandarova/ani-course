@@ -1,0 +1,3 @@
+Received 2026-11-23; matched code prefix with screenshot.
+Code transcribed from user message; Markdown escaping and HTML space entities decoded. Logic and comments preserved; transport whitespace may differ.
+Screenshot preserved as screenshot.png.

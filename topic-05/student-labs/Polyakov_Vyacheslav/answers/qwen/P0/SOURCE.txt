@@ -1,0 +1,3 @@
+Received 2026-11-23. Prompt P0 identified from screenshot.
+Code transcribed from user message; Markdown escaping and HTML space entities decoded. Original code logic and comments preserved. Transport whitespace may differ.
+Screenshot preserved as screenshot.png.

@@ -1,0 +1,6 @@
+Upstream: Exercism Python track, bowling/bowling_test.py
+https://github.com/exercism/python/blob/main/exercises/practice/bowling/bowling_test.py
+Local source: topic-05/student-labs/Saukov/Приложения_ЛР5/Проверка/bowling_test.py
+Copied byte-for-byte; no changes. Snapshot header: 2023-07-21.
+SHA256: 6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20
+Test cases: 31

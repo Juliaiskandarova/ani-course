@@ -1,0 +1,13 @@
+Score a bowling game.
+
+The game consists of 10 frames. A frame is composed of one or two ball throws with 10 pins standing at frame initialization. An open frame is where a score of less than 10 is recorded for the frame; the score for the frame is the number of pins knocked down. A spare is where all ten pins are knocked down by the second throw; the total value of a spare is 10 plus the number of pins knocked down in their next throw. A strike is where all ten pins are knocked down by the first throw; the total value of a strike is 10 plus the number of pins knocked down in the next two throws. If a strike is immediately followed by a second strike, then the value of the first strike cannot be determined until the ball is thrown one more time.
+
+The tenth frame is a special case. If someone throws a spare or a strike then they get one or two fill balls respectively. Fill balls exist to calculate the total of the 10th frame. Scoring a strike or spare on the fill ball does not give the player more fill balls. The total value of the 10th frame is the total number of pins knocked down.
+
+Requirements: write code to keep track of the score of a game of bowling. It should support two operations:
+- roll(pins: int) is called each time the player rolls a ball. The argument is the number of pins knocked down.
+- score(): int is called only at the very end of the game. It returns the total score for that game.
+
+When scoring or playing rules are not followed, use the raise statement with a meaningful error message.
+
+Implement class BowlingGame with methods roll(pins: int) and score() -> int, instantiated as BowlingGame().

@@ -1,0 +1,1330 @@
+[
+  {
+    "model": "deepseek",
+    "prompt": "P0",
+    "passed": 3,
+    "total": 31,
+    "tpr": 9.67741935483871,
+    "cc_max": 18,
+    "cc_method": "roll",
+    "pylint_raw": 9.444444444444445,
+    "pylint_score": 9.444444444444445,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 4,
+    "fatal": 0,
+    "sha256": "e9069a33ed72da62463beae2c18bab889d8f5471f72c997c3cf448d4c3aee162",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:31: in test_a_spare_followed_by_zeros_is_worth_ten_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "failed",
+        "traceback": "bowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "failed",
+        "traceback": "bowling_test.py:51: in test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "failed",
+        "traceback": "bowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "failed",
+        "traceback": "bowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "failed",
+        "traceback": "bowling_test.py:97: in test_all_strikes_is_a_perfect_game\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "failed",
+        "traceback": "bowling_test.py:165: in test_an_incomplete_game_cannot_be_scored\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:122: in test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "failed",
+        "traceback": "bowling_test.py:195: in test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "failed",
+        "traceback": "bowling_test.py:179: in test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "failed",
+        "traceback": "bowling_test.py:187: in test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "failed",
+        "traceback": "bowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "failed",
+        "traceback": "bowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "failed",
+        "traceback": "bowling_test.py:171: in test_cannot_roll_if_game_already_has_ten_frames\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "failed",
+        "traceback": "bowling_test.py:41: in test_consecutive_spares_each_get_a_one_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "failed",
+        "traceback": "bowling_test.py:63: in test_consecutive_strikes_each_get_the_two_roll_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:85: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "failed",
+        "traceback": "bowling_test.py:36: in test_points_scored_in_the_roll_after_a_spare_are_counted_twice\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "failed",
+        "traceback": "bowling_test.py:58: in test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "failed",
+        "traceback": "bowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:153: in test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "failed",
+        "traceback": "bowling_test.py:21: in test_should_be_able_to_score_a_game_with_all_zeros\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "failed",
+        "traceback": "bowling_test.py:26: in test_should_be_able_to_score_a_game_with_no_strikes_or_spares\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "failed",
+        "traceback": "bowling_test.py:80: in test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "failed",
+        "traceback": "bowling_test.py:145: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "failed",
+        "traceback": "bowling_test.py:138: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:130: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:114: in test_two_rolls_in_a_frame_cannot_score_more_than_10_points\n    game = self.roll_new_game(rolls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling_test.py:16: in roll_new_game\n    game.roll(roll)\nbowling.py:55: in roll\n    if self._is_game_over():\n       ^^^^^^^^^^^^^^^^^^^^\nbowling.py:96: in _is_game_over\n    start = self._last_frame_start()\n            ^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:71: in _last_frame_start\n    if self._is_strike(roll_index):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbowling.py:59: in _is_strike\n    return self.rolls[i] == 10\n           ^^^^^^^^^^^^^\nE   IndexError: list index out of range"
+      }
+    ]
+  },
+  {
+    "model": "deepseek",
+    "prompt": "P1",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 14,
+    "cc_method": "_validate_roll",
+    "pylint_raw": 9.565217391304348,
+    "pylint_score": 9.565217391304348,
+    "error": 0,
+    "warning": 1,
+    "refactor": 3,
+    "convention": 0,
+    "fatal": 0,
+    "sha256": "aecda8b70bd926bce6345d4994769c2f0d6ff09c6044ca58c5000d7a40bd494f",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "deepseek",
+    "prompt": "P2",
+    "passed": 29,
+    "total": 31,
+    "tpr": 93.54838709677419,
+    "cc_max": 8,
+    "cc_method": "_validate_tenth_frame_roll",
+    "pylint_raw": 9.901960784313726,
+    "pylint_score": 9.901960784313726,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 0,
+    "fatal": 0,
+    "sha256": "2d25a08ffd7535615f02b76141aa515f55672e33136dc8e48783a193e653f3bb",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "failed",
+        "traceback": "bowling_test.py:146: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\n    with self.assertRaisesWithMessage(Exception):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AssertionError: Exception not raised"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:131: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    with self.assertRaisesWithMessage(Exception):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AssertionError: Exception not raised"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "alice",
+    "prompt": "P0",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 13,
+    "cc_method": "_pins_standing_now",
+    "pylint_raw": 9.375,
+    "pylint_score": 9.375,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 3,
+    "fatal": 0,
+    "sha256": "b8d088b5d740377b76abd92f587975ef66d1f2a30d13a4faa3c2f84c58764fd2",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "alice",
+    "prompt": "P1",
+    "passed": 29,
+    "total": 31,
+    "tpr": 93.54838709677419,
+    "cc_max": 15,
+    "cc_method": "roll",
+    "pylint_raw": 9.62962962962963,
+    "pylint_score": 9.62962962962963,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 1,
+    "fatal": 0,
+    "sha256": "8d6a80ab58b1f7cbaca7477c31f4f8509b0811196083eefb15c1c1f7d713fd40",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "failed",
+        "traceback": "bowling_test.py:146: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike\n    with self.assertRaisesWithMessage(Exception):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AssertionError: Exception not raised"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "failed",
+        "traceback": "bowling_test.py:131: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points\n    with self.assertRaisesWithMessage(Exception):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AssertionError: Exception not raised"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "alice",
+    "prompt": "P2",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 10,
+    "cc_method": "_advance",
+    "pylint_raw": 9.848484848484848,
+    "pylint_score": 9.848484848484848,
+    "error": 0,
+    "warning": 0,
+    "refactor": 0,
+    "convention": 1,
+    "fatal": 0,
+    "sha256": "78da684d10a2bd5e7715c1174c7306b759744aae60fdde5c651e772d08a3d5af",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "qwen",
+    "prompt": "P0",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 18,
+    "cc_method": "roll",
+    "pylint_raw": 7.719298245614035,
+    "pylint_score": 7.719298245614035,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 12,
+    "fatal": 0,
+    "sha256": "7793d55ee74b40e157f29c9ec84852111674b7ad3f8e29f903a4d29b869faccb",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "qwen",
+    "prompt": "P1",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 15,
+    "cc_method": "roll",
+    "pylint_raw": 8.709677419354838,
+    "pylint_score": 8.709677419354838,
+    "error": 0,
+    "warning": 0,
+    "refactor": 1,
+    "convention": 7,
+    "fatal": 0,
+    "sha256": "e39a0828d200cf458607ccb14c641dbbfc5852db656a3090a7a5f2ee451be251",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "model": "qwen",
+    "prompt": "P2",
+    "passed": 31,
+    "total": 31,
+    "tpr": 100.0,
+    "cc_max": 19,
+    "cc_method": "roll",
+    "pylint_raw": 8.88888888888889,
+    "pylint_score": 8.88888888888889,
+    "error": 0,
+    "warning": 0,
+    "refactor": 2,
+    "convention": 6,
+    "fatal": 0,
+    "sha256": "2093bdfca7fdad41f466d8e4f402eb360ef45489c062830f60ddbd2abe754271",
+    "syntax_python311": true,
+    "cases": [
+      {
+        "test": "test_a_roll_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_followed_by_zeros_is_worth_ten_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once",
+        "status": "passed"
+      },
+      {
+        "test": "test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_all_strikes_is_a_perfect_game",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_incomplete_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_an_unstarted_game_cannot_be_scored",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_roll_for_spare",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_after_bonus_rolls_for_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_cannot_roll_if_game_already_has_ten_frames",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_spares_each_get_a_one_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_consecutive_strikes_each_get_the_two_roll_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_roll_after_a_spare_are_counted_twice",
+        "status": "passed"
+      },
+      {
+        "test": "test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll",
+        "status": "passed"
+      },
+      {
+        "test": "test_rolls_cannot_score_negative_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_all_zeros",
+        "status": "passed"
+      },
+      {
+        "test": "test_should_be_able_to_score_a_game_with_no_strikes_or_spares",
+        "status": "passed"
+      },
+      {
+        "test": "test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls",
+        "status": "passed"
+      },
+      {
+        "test": "test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      },
+      {
+        "test": "test_two_rolls_in_a_frame_cannot_score_more_than_10_points",
+        "status": "passed"
+      }
+    ]
+  }
+]

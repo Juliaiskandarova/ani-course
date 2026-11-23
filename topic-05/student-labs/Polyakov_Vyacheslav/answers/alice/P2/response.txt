@@ -1,0 +1,117 @@
+```python
+class BowlingGame:
+    """Tracks and scores a single game of ten-pin bowling.
+
+    A game consists of ten frames. Frames 1-9 consist of one or two rolls;
+    the tenth frame may consist of up to three rolls: fill balls are awarded
+    for a strike (two fill balls) or a spare (one fill ball) in the tenth
+    frame. A strike or a spare made on a fill ball does not grant extra
+    fill balls.
+    """
+
+    def __init__(self) -> None:
+        """Initialise an empty game with no rolls played yet."""
+        self._rolls: list[int] = []
+        self._frame: int = 1               # current frame, 1..10
+        self._throw: int = 1               # throw number inside the current frame
+        self._pins_standing: int = 10      # pins still standing on the current rack
+        self._first_throw_pins: int | None = None  # first throw of the current frame
+        self._game_over: bool = False
+
+    def roll(self, pins: int) -> None:
+        """Record a single roll of the ball.
+
+        Args:
+            pins: the number of pins knocked down by this roll.
+
+        Raises:
+            ValueError: if ``pins`` is not an integer, if the game is
+                already over, if ``pins`` is outside the range 0..10, or if
+                the roll would knock down more pins than are standing.
+        """
+        if isinstance(pins, bool) or not isinstance(pins, int):
+            raise ValueError("The number of pins knocked down must be an integer.")
+        if self._game_over:
+            raise ValueError("Cannot roll after the game is over.")
+        if not 0 <= pins <= 10:
+            raise ValueError("The number of pins knocked down must be between 0 and 10.")
+        if pins > self._pins_standing:
+            raise ValueError(
+                "A roll cannot knock down more pins than are standing on the lane."
+            )
+        self._rolls.append(pins)
+        self._advance(pins)
+
+    def score(self) -> int:
+        """Return the total score of the completed game.
+
+        Raises:
+            ValueError: if the game is not finished yet.
+        """
+        if not self._game_over:
+            raise ValueError("Score cannot be taken until the end of the game.")
+        return self._calculate_score()
+
+    def _start_new_frame(self) -> None:
+        """Move to the next frame and reset the rack."""
+        self._frame += 1
+        self._throw = 1
+        self._pins_standing = 10
+        self._first_throw_pins = None
+
+    def _advance(self, pins: int) -> None:
+        """Update the frame state after a valid roll.
+
+        Args:
+            pins: the number of pins knocked down by the just-made roll.
+        """
+        if self._frame < 10:
+            if pins == self._pins_standing:  # strike or spare closes the frame
+                self._start_new_frame()
+            elif self._throw == 1:
+                self._first_throw_pins = pins
+                self._throw = 2
+                self._pins_standing -= pins
+            else:  # open frame completed by the second throw
+                self._start_new_frame()
+        elif self._throw == 1:
+            self._throw = 2
+            if pins == 10:  # strike in the tenth frame: fill balls on a fresh rack
+                self._first_throw_pins = None
+                self._pins_standing = 10
+            else:
+                self._first_throw_pins = pins
+                self._pins_standing -= pins
+        elif self._throw == 2:
+            self._throw = 3
+            if self._first_throw_pins is None:
+                # The first throw of the tenth frame was a strike, so this
+                # roll was a fill ball on a fresh rack.
+                self._pins_standing = 10 if pins == 10 else 10 - pins
+            elif self._first_throw_pins + pins == 10:
+                # Spare in the tenth frame: the fill ball starts on a fresh rack.
+                self._pins_standing = 10
+            else:
+                # Open tenth frame: no fill balls, the game is over.
+                self._game_over = True
+        else:  # third throw of the tenth frame just completed
+            self._game_over = True
+
+    def _calculate_score(self) -> int:
+        """Calculate and return the total score of the finished game."""
+        total = 0
+        index = 0
+        for _ in range(9):  # frames 1..9
+            if self._rolls[index] == 10:  # strike: 10 plus next two rolls
+                total += 10 + self._rolls[index + 1] + self._rolls[index + 2]
+                index += 1
+            elif self._rolls[index] + self._rolls[index + 1] == 10:  # spare
+                total += 10 + self._rolls[index + 2]
+                index += 2
+            else:  # open frame
+                total += self._rolls[index] + self._rolls[index + 1]
+                index += 2
+        # The tenth frame scores the total number of pins knocked down in it.
+        total += sum(self._rolls[index:])
+        return total
+```

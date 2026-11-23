@@ -1,0 +1,210 @@
+"""Bowling game scoring.
+
+This module implements a standard ten-pin bowling game scorer
+according to the rules described in the task.
+"""
+
+from __future__ import annotations
+
+
+class BowlingGame:
+    """Keeps track of the score of a single game of ten-pin bowling.
+
+    A game consists of 10 frames. The ``roll`` method is called for
+    each ball thrown; ``score`` returns the final total.
+
+    Invalid argument values and operations performed in an invalid
+    state raise :class:`ValueError` with a meaningful message.
+    """
+
+    _MAX_PINS: int = 10
+    _FRAMES: int = 10
+
+    def __init__(self) -> None:
+        """Initialize an empty game."""
+        # Flat list of pins knocked down on each roll, in order.
+        self._rolls: list[int] = []
+        # Index into ``self._rolls`` of the first roll of the current frame.
+        self._frame_start: int = 0
+        # Number of frames started so far (0..10).
+        self._frame: int = 0
+        # Whether the game has been completed (all 10 frames finished).
+        self._finished: bool = False
+
+    def roll(self, pins: int) -> None:
+        """Record a single ball throw.
+
+        Args:
+            pins: Number of pins knocked down by this throw.
+
+        Raises:
+            ValueError: If ``pins`` is not an ``int`` in the range 0..10,
+                if the game is already finished, if more pins are reported
+                than are standing in the current frame, or if the roll would
+                otherwise violate the rules of play.
+        """
+        if isinstance(pins, bool) or not isinstance(pins, int):
+            raise ValueError(
+                f"roll() argument 'pins' must be an int, got {type(pins).__name__}"
+            )
+        if self._finished:
+            raise ValueError(
+                "roll() called after the game is finished; no more rolls are allowed"
+            )
+        if pins < 0 or pins > self._MAX_PINS:
+            raise ValueError(
+                f"roll() argument 'pins' must be between 0 and {self._MAX_PINS}, "
+                f"got {pins}"
+            )
+
+        self._validate_roll(pins)
+        self._rolls.append(pins)
+        self._advance_frame()
+
+    def score(self) -> int:
+        """Return the total score for the completed game.
+
+        Returns:
+            The total score of the game as an ``int``.
+
+        Raises:
+            ValueError: If the game is not yet finished.
+        """
+        if not self._finished:
+            raise ValueError(
+                "score() called before the game is finished; "
+                f"completed {self._frame} of {self._FRAMES} frames"
+            )
+
+        total: int = 0
+        roll_index: int = 0
+
+        for frame in range(self._FRAMES):
+            if self._is_strike(roll_index):
+                total += self._MAX_PINS + self._rolls[roll_index + 1] + self._rolls[roll_index + 2]
+                roll_index += 1
+            elif self._is_spare(roll_index):
+                total += self._MAX_PINS + self._rolls[roll_index + 2]
+                roll_index += 2
+            else:
+                total += self._rolls[roll_index] + self._rolls[roll_index + 1]
+                roll_index += 2
+
+        return total
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _validate_roll(self, pins: int) -> None:
+        """Validate a roll against the current state of the game.
+
+        Args:
+            pins: Number of pins knocked down by the prospective roll.
+
+        Raises:
+            ValueError: If the roll is not legal in the current state.
+        """
+        # Rolls needed to start and complete the current frame.
+        frame_start = self._frame_start
+        frame_rolls = self._rolls[frame_start:]
+        is_tenth = self._frame == self._FRAMES - 1
+
+        if not is_tenth:
+            if len(frame_rolls) == 0:
+                # First roll of an ordinary frame: any 0..10 is fine.
+                return
+            # Second roll of an ordinary frame.
+            first = frame_rolls[0]
+            if first == self._MAX_PINS:
+                raise ValueError(
+                    f"roll({pins}) not allowed: a strike already ended frame "
+                    f"{self._frame + 1}, the next roll starts a new frame"
+                )
+            standing = self._MAX_PINS - first
+            if pins > standing:
+                raise ValueError(
+                    f"roll({pins}) not allowed: only {standing} pin(s) standing "
+                    f"in frame {self._frame + 1} after a first roll of {first}"
+                )
+            return
+
+        # Tenth frame handling: up to three rolls depending on bonuses.
+        roll_in_frame = len(frame_rolls)
+        if roll_in_frame == 0:
+            return
+        first = frame_rolls[0]
+
+        if roll_in_frame == 1:
+            if first == self._MAX_PINS:
+                # Strike: second (fill) ball may knock down any 0..10.
+                return
+            standing = self._MAX_PINS - first
+            if pins > standing:
+                raise ValueError(
+                    f"roll({pins}) not allowed: only {standing} pin(s) standing "
+                    f"in the tenth frame after a first roll of {first}"
+                )
+            return
+
+        second = frame_rolls[1]
+
+        if roll_in_frame == 2:
+            # Third roll only exists as a fill ball after a strike or spare.
+            if first == self._MAX_PINS:
+                if second != self._MAX_PINS:
+                    standing = self._MAX_PINS - second
+                    if pins > standing:
+                        raise ValueError(
+                            f"roll({pins}) not allowed: only {standing} pin(s) "
+                            f"standing on the third ball of the tenth frame "
+                            f"after a fill ball of {second}"
+                        )
+                return
+            if first + second == self._MAX_PINS:
+                # Spare: one fill ball, any 0..10.
+                return
+            raise ValueError(
+                f"roll({pins}) not allowed: tenth frame already ended as an "
+                f"open frame with {first} + {second}"
+            )
+
+        raise ValueError(
+            f"roll({pins}) not allowed: tenth frame is already complete"
+        )
+
+    def _advance_frame(self) -> None:
+        """Update frame bookkeeping after a roll has been recorded."""
+        frame_rolls = self._rolls[self._frame_start:]
+
+        if self._frame < self._FRAMES - 1:
+            if len(frame_rolls) == 2:
+                self._frame += 1
+                self._frame_start += 2
+            elif len(frame_rolls) == 1 and frame_rolls[0] == self._MAX_PINS:
+                self._frame += 1
+                self._frame_start += 1
+            return
+
+        # Tenth frame: complete after two rolls unless a bonus ball is earned.
+        first = frame_rolls[0]
+        if len(frame_rolls) == 3:
+            self._finished = True
+        elif len(frame_rolls) == 2:
+            bonus = first == self._MAX_PINS or (first + frame_rolls[1] == self._MAX_PINS)
+            if not bonus:
+                self._finished = True
+
+    def _is_strike(self, roll_index: int) -> bool:
+        """Return whether the roll at ``roll_index`` is a strike."""
+        return (
+            roll_index < len(self._rolls)
+            and self._rolls[roll_index] == self._MAX_PINS
+        )
+
+    def _is_spare(self, roll_index: int) -> bool:
+        """Return whether the roll at ``roll_index`` starts a spare."""
+        return (
+            roll_index + 1 < len(self._rolls)
+            and self._rolls[roll_index] + self._rolls[roll_index + 1] == self._MAX_PINS
+        )

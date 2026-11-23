@@ -1,0 +1,564 @@
+.FFFFFFF.FFFFFFFFFFFFF.FFFFFFFF                                          [100%]
+=================================== FAILURES ===================================
+________ BowlingTest.test_a_spare_followed_by_zeros_is_worth_ten_points ________
+bowling_test.py:31: in test_a_spare_followed_by_zeros_is_worth_ten_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once _
+bowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+___ BowlingTest.test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll ___
+bowling_test.py:51: in test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once _
+bowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus _
+bowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+________________ BowlingTest.test_all_strikes_is_a_perfect_game ________________
+bowling_test.py:97: in test_all_strikes_is_a_perfect_game
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_____________ BowlingTest.test_an_incomplete_game_cannot_be_scored _____________
+bowling_test.py:165: in test_an_incomplete_game_cannot_be_scored
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _
+bowling_test.py:122: in test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _
+bowling_test.py:195: in test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _
+bowling_test.py:179: in test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated _
+bowling_test.py:187: in test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ____________
+bowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike ___________
+bowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_________ BowlingTest.test_cannot_roll_if_game_already_has_ten_frames __________
+bowling_test.py:171: in test_cannot_roll_if_game_already_has_ten_frames
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+________ BowlingTest.test_consecutive_spares_each_get_a_one_roll_bonus _________
+bowling_test.py:41: in test_consecutive_spares_each_get_a_one_roll_bonus
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_______ BowlingTest.test_consecutive_strikes_each_get_the_two_roll_bonus _______
+bowling_test.py:63: in test_consecutive_strikes_each_get_the_two_roll_bonus
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points _
+bowling_test.py:85: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+__ BowlingTest.test_points_scored_in_the_roll_after_a_spare_are_counted_twice __
+bowling_test.py:36: in test_points_scored_in_the_roll_after_a_spare_are_counted_twice
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus _
+bowling_test.py:58: in test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll _
+bowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _
+bowling_test.py:153: in test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+________ BowlingTest.test_should_be_able_to_score_a_game_with_all_zeros ________
+bowling_test.py:21: in test_should_be_able_to_score_a_game_with_all_zeros
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+__ BowlingTest.test_should_be_able_to_score_a_game_with_no_strikes_or_spares ___
+bowling_test.py:26: in test_should_be_able_to_score_a_game_with_no_strikes_or_spares
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+___ BowlingTest.test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls ____
+bowling_test.py:80: in test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike _
+bowling_test.py:145: in test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike _
+bowling_test.py:138: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points _
+bowling_test.py:130: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+____ BowlingTest.test_two_rolls_in_a_frame_cannot_score_more_than_10_points ____
+bowling_test.py:114: in test_two_rolls_in_a_frame_cannot_score_more_than_10_points
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:55: in roll
+    if self._is_game_over():
+       ^^^^^^^^^^^^^^^^^^^^
+bowling.py:96: in _is_game_over
+    start = self._last_frame_start()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:71: in _last_frame_start
+    if self._is_strike(roll_index):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bowling.py:59: in _is_strike
+    return self.rolls[i] == 10
+           ^^^^^^^^^^^^^
+E   IndexError: list index out of range
+=========================== short test summary info ============================
+FAILED bowling_test.py::BowlingTest::test_a_spare_followed_by_zeros_is_worth_ten_points
+FAILED bowling_test.py::BowlingTest::test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once
+FAILED bowling_test.py::BowlingTest::test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll
+FAILED bowling_test.py::BowlingTest::test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once
+FAILED bowling_test.py::BowlingTest::test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus
+FAILED bowling_test.py::BowlingTest::test_all_strikes_is_a_perfect_game - Ind...
+FAILED bowling_test.py::BowlingTest::test_an_incomplete_game_cannot_be_scored
+FAILED bowling_test.py::BowlingTest::test_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+FAILED bowling_test.py::BowlingTest::test_bonus_roll_for_a_spare_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+FAILED bowling_test.py::BowlingTest::test_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+FAILED bowling_test.py::BowlingTest::test_both_bonus_rolls_for_a_strike_in_the_last_frame_must_be_rolled_before_score_can_be_calculated
+FAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare
+FAILED bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike
+FAILED bowling_test.py::BowlingTest::test_cannot_roll_if_game_already_has_ten_frames
+FAILED bowling_test.py::BowlingTest::test_consecutive_spares_each_get_a_one_roll_bonus
+FAILED bowling_test.py::BowlingTest::test_consecutive_strikes_each_get_the_two_roll_bonus
+FAILED bowling_test.py::BowlingTest::test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points
+FAILED bowling_test.py::BowlingTest::test_points_scored_in_the_roll_after_a_spare_are_counted_twice
+FAILED bowling_test.py::BowlingTest::test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus
+FAILED bowling_test.py::BowlingTest::test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll
+FAILED bowling_test.py::BowlingTest::test_second_bonus_roll_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+FAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_all_zeros
+FAILED bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_no_strikes_or_spares
+FAILED bowling_test.py::BowlingTest::test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls
+FAILED bowling_test.py::BowlingTest::test_the_second_bonus_rolls_after_a_strike_in_the_last_frame_cannot_be_a_strike_if_the_first_one_is_not_a_strike
+FAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike
+FAILED bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_cannot_score_more_than_10_points
+FAILED bowling_test.py::BowlingTest::test_two_rolls_in_a_frame_cannot_score_more_than_10_points
+28 failed, 3 passed in 0.45s

@@ -1,0 +1,3 @@
+Received 2026-11-23; matched code prefix with screenshot.
+Full answer copied from attached Pasted text.txt; Python block extracted without edits.
+Screenshot preserved as screenshot.png.

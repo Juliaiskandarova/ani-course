@@ -1,0 +1,262 @@
+"""Bowling game scoring.
+
+Implements a ten-pin bowling game tracker supporting the standard
+``roll`` and ``score`` operations, including open frames, spares,
+strikes, and the special rules for the tenth frame with fill balls.
+"""
+
+from __future__ import annotations
+
+from typing import List
+
+
+class BowlingGame:
+    """Track the score of a single ten-pin bowling game.
+
+    The game consists of ten frames. Each frame allows up to two rolls,
+    except the tenth frame which may grant fill balls after a spare or
+    strike. Roll validation enforces the physical rules of the game and
+    the correct sequencing of frames.
+    """
+
+    _MAX_PINS: int = 10
+    _NUM_FRAMES: int = 10
+
+    def __init__(self) -> None:
+        """Initialize an empty game with no rolls recorded."""
+        self._rolls: List[int] = []
+
+    def roll(self, pins: int) -> None:
+        """Record a single ball throw.
+
+        Args:
+            pins: Number of pins knocked down by this throw.
+
+        Raises:
+            TypeError: If ``pins`` is not an integer.
+            ValueError: If ``pins`` is negative, exceeds ten, or violates
+                the rules of the current frame (pin count exceeds what
+                remains standing, or a roll is attempted after the game
+                has already been completed).
+        """
+        if isinstance(pins, bool) or not isinstance(pins, int):
+            raise TypeError(
+                f"pins must be an int, got {type(pins).__name__}"
+            )
+        if pins < 0:
+            raise ValueError(
+                f"pins must be non-negative, got {pins}"
+            )
+        if pins > self._MAX_PINS:
+            raise ValueError(
+                f"pins must not exceed {self._MAX_PINS}, got {pins}"
+            )
+
+        self._validate_roll_against_state(pins)
+        self._rolls.append(pins)
+
+    def score(self) -> int:
+        """Return the total score for the completed game.
+
+        Returns:
+            The total score across all ten frames.
+
+        Raises:
+            RuntimeError: If the game is not yet complete.
+        """
+        if not self._is_game_complete():
+            raise RuntimeError(
+                "score() may only be called at the very end of a completed game"
+            )
+        return self._compute_score()
+
+    def _validate_roll_against_state(self, pins: int) -> None:
+        """Validate a proposed roll against the current game state.
+
+        Args:
+            pins: Number of pins the player attempts to knock down.
+
+        Raises:
+            ValueError: If the roll is not allowed in the current state.
+        """
+        frame_index = 0
+        roll_index = 0
+        total_rolls = len(self._rolls)
+
+        while frame_index < self._NUM_FRAMES:
+            if frame_index == self._NUM_FRAMES - 1:
+                self._validate_tenth_frame_roll(roll_index, total_rolls, pins)
+                return
+
+            if roll_index >= total_rolls:
+                # First roll of a fresh frame: any value 0..10 is valid.
+                return
+
+            first = self._rolls[roll_index]
+            if first == self._MAX_PINS:
+                # Strike: frame complete after one roll.
+                frame_index += 1
+                roll_index += 1
+                continue
+
+            if roll_index + 1 >= total_rolls:
+                # Second roll of an open/spare frame.
+                if pins + first > self._MAX_PINS:
+                    raise ValueError(
+                        f"frame {frame_index + 1}: second roll of {pins} "
+                        f"with {first} pins already down exceeds "
+                        f"{self._MAX_PINS}"
+                    )
+                return
+
+            # Frame complete; advance.
+            frame_index += 1
+            roll_index += 2
+
+        # All ten frames are complete; any further roll is invalid.
+        raise ValueError(
+            "cannot roll after the game is complete"
+        )
+
+    def _validate_tenth_frame_roll(
+        self, roll_index: int, total_rolls: int, pins: int
+    ) -> None:
+        """Validate a roll within the tenth frame.
+
+        Args:
+            roll_index: Index into ``_rolls`` where the tenth frame starts.
+            total_rolls: Number of rolls recorded so far.
+            pins: Number of pins the player attempts to knock down.
+
+        Raises:
+            ValueError: If the roll violates tenth-frame rules.
+        """
+        rolls_in_frame = total_rolls - roll_index
+
+        if rolls_in_frame == 0:
+            # First roll of the tenth frame.
+            return
+
+        first = self._rolls[roll_index]
+
+        if rolls_in_frame == 1:
+            if first == self._MAX_PINS:
+                # First roll was a strike; second roll gets a fresh rack.
+                return
+            if pins + first > self._MAX_PINS:
+                raise ValueError(
+                    f"tenth frame: second roll of {pins} with {first} "
+                    f"pins already down exceeds {self._MAX_PINS}"
+                )
+            return
+
+        second = self._rolls[roll_index + 1]
+
+        if rolls_in_frame == 2:
+            if first == self._MAX_PINS:
+                # Strike then second roll: if second is a strike, fresh
+                # rack; otherwise the third roll is a fill ball and may
+                # take any remaining pins of a fresh rack (since strike
+                # grants two fill balls total).
+                return
+            if first + second == self._MAX_PINS:
+                # Spare: third roll is a fill ball on a fresh rack.
+                return
+            # Open frame: no third roll permitted.
+            raise ValueError(
+                "tenth frame: a third roll is not allowed after an open frame"
+            )
+
+        # rolls_in_frame == 3: frame is complete.
+        raise ValueError(
+            "cannot roll after the game is complete"
+        )
+
+    def _is_game_complete(self) -> bool:
+        """Return True if all ten frames and any fill balls are recorded.
+
+        Returns:
+            Whether the game has no more rolls remaining.
+        """
+        frame_index = 0
+        roll_index = 0
+        total_rolls = len(self._rolls)
+
+        while frame_index < self._NUM_FRAMES:
+            if frame_index == self._NUM_FRAMES - 1:
+                return self._is_tenth_frame_complete(roll_index, total_rolls)
+
+            if roll_index >= total_rolls:
+                return False
+
+            first = self._rolls[roll_index]
+            if first == self._MAX_PINS:
+                frame_index += 1
+                roll_index += 1
+                continue
+
+            if roll_index + 1 >= total_rolls:
+                return False
+
+            frame_index += 1
+            roll_index += 2
+
+        return False
+
+    def _is_tenth_frame_complete(
+        self, roll_index: int, total_rolls: int
+    ) -> bool:
+        """Return True if the tenth frame is fully recorded.
+
+        Args:
+            roll_index: Index into ``_rolls`` where the tenth frame starts.
+            total_rolls: Number of rolls recorded so far.
+
+        Returns:
+            Whether the tenth frame has received all required rolls.
+        """
+        rolls_in_frame = total_rolls - roll_index
+
+        if rolls_in_frame < 2:
+            return False
+
+        first = self._rolls[roll_index]
+        second = self._rolls[roll_index + 1]
+
+        if first == self._MAX_PINS or first + second == self._MAX_PINS:
+            return rolls_in_frame >= 3
+
+        return True
+
+    def _compute_score(self) -> int:
+        """Compute the total score using strike and spare bonuses.
+
+        Returns:
+            The total score for the game.
+        """
+        score = 0
+        roll_index = 0
+
+        for _ in range(self._NUM_FRAMES):
+            if self._rolls[roll_index] == self._MAX_PINS:
+                score += (
+                    self._MAX_PINS
+                    + self._rolls[roll_index + 1]
+                    + self._rolls[roll_index + 2]
+                )
+                roll_index += 1
+            elif (
+                self._rolls[roll_index] + self._rolls[roll_index + 1]
+                == self._MAX_PINS
+            ):
+                score += (
+                    self._MAX_PINS + self._rolls[roll_index + 2]
+                )
+                roll_index += 2
+            else:
+                score += (
+                    self._rolls[roll_index] + self._rolls[roll_index + 1]
+                )
+                roll_index += 2
+
+        return score

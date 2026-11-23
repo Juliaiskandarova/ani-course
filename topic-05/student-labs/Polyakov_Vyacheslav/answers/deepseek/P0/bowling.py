@@ -1,0 +1,122 @@
+class BowlingGame:
+    def __init__(self):
+        self.rolls = []
+        self._game_over = False
+
+    def roll(self, pins: int) -> None:
+        if self._game_over:
+            raise ValueError("Cannot roll: the game is already over.")
+
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise TypeError("Pins must be an integer.")
+
+        if pins < 0 or pins > 10:
+            raise ValueError("Pins must be between 0 and 10.")
+
+        # Validate against the current frame's pins
+        frame_index = 0
+        roll_index = 0
+        for _ in range(10):
+            if roll_index >= len(self.rolls):
+                break
+            if self._is_strike(roll_index):
+                roll_index += 1
+                frame_index += 1
+            elif roll_index + 1 >= len(self.rolls):
+                # We're about to add the second roll of this frame
+                if self.rolls[roll_index] + pins > 10:
+                    raise ValueError(
+                        "A frame cannot knock down more than 10 pins."
+                    )
+                break
+            else:
+                roll_index += 2
+                frame_index += 1
+        else:
+            # All 10 frames already recorded; this roll must be a fill ball.
+            # Determine how many fill balls are allowed.
+            if frame_index == 10:
+                # We're in fill-ball territory. Validate total.
+                if self._fill_balls_used() >= self._max_fill_balls():
+                    raise ValueError("Cannot roll: no fill balls remaining.")
+                # Validate fill-ball pin limits
+                last_frame_start = self._last_frame_start()
+                last_frame = self.rolls[last_frame_start:]
+                if len(last_frame) == 2:
+                    if last_frame[0] == 10:
+                        # Strike + one fill ball so far; any pins ok
+                        pass
+                    elif last_frame[0] + last_frame[1] == 10:
+                        # Spare; fill ball can be 0-10
+                        pass
+                return
+
+        self.rolls.append(pins)
+        if self._is_game_over():
+            self._game_over = True
+
+    def _is_strike(self, i: int) -> bool:
+        return self.rolls[i] == 10
+
+    def _is_spare(self, i: int) -> bool:
+        return (
+            i + 1 < len(self.rolls)
+            and self.rolls[i] + self.rolls[i + 1] == 10
+        )
+
+    def _last_frame_start(self) -> int:
+        # Find start index of the 10th frame
+        roll_index = 0
+        for _ in range(9):
+            if self._is_strike(roll_index):
+                roll_index += 1
+            else:
+                roll_index += 2
+        return roll_index
+
+    def _fill_balls_used(self) -> int:
+        start = self._last_frame_start()
+        return max(0, len(self.rolls) - start - 2)
+
+    def _max_fill_balls(self) -> int:
+        start = self._last_frame_start()
+        tenth = self.rolls[start:]
+        if len(tenth) == 0:
+            return 0
+        if tenth[0] == 10:
+            return 2
+        if len(tenth) >= 2 and tenth[0] + tenth[1] == 10:
+            return 1
+        return 0
+
+    def _is_game_over(self) -> bool:
+        if len(self.rolls) < 12:
+            # Need at least 10 frames; check whether 10th is complete
+            pass
+        start = self._last_frame_start()
+        tenth = self.rolls[start:]
+        if len(tenth) < 2:
+            return False
+        if tenth[0] == 10:
+            return len(tenth) >= 3
+        if tenth[0] + tenth[1] == 10:
+            return len(tenth) >= 3
+        return True
+
+    def score(self) -> int:
+        if not self._is_game_over():
+            raise ValueError("Cannot score: the game is not finished yet.")
+
+        total = 0
+        roll_index = 0
+        for _ in range(10):
+            if self._is_strike(roll_index):
+                total += 10 + self.rolls[roll_index + 1] + self.rolls[roll_index + 2]
+                roll_index += 1
+            elif self._is_spare(roll_index):
+                total += 10 + self.rolls[roll_index + 2]
+                roll_index += 2
+            else:
+                total += self.rolls[roll_index] + self.rolls[roll_index + 1]
+                roll_index += 2
+        return total

@@ -1,0 +1,15 @@
+{
+  "python": "3.12.14",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+  "tools": {
+    "pytest": "9.2.0",
+    "radon": "6.0.1",
+    "pylint": "4.1.4"
+  },
+  "test_sha256": "6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20",
+  "test_count": 31,
+  "date": "2026-11-23",
+  "pylint_config": "default; rcfile=/dev/null; py-version=3.11",
+  "cc_definition": "maximum of Radon function/method complexity, excluding class aggregate",
+  "pylint_score_definition": "max(0, actual Pylint score); raw score also retained"
+}

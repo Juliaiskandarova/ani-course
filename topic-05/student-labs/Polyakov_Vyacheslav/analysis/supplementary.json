@@ -1,0 +1,82 @@
+[
+  {
+    "model": "deepseek",
+    "prompt": "P0",
+    "bool": "TypeError: Pins must be an integer.",
+    "fraction": "TypeError: Pins must be an integer.",
+    "empty_score": "IndexError: list index out of range",
+    "recovery": "IndexError: list index out of range"
+  },
+  {
+    "model": "deepseek",
+    "prompt": "P1",
+    "bool": "ValueError: roll() argument 'pins' must be an int, got bool",
+    "fraction": "ValueError: roll() argument 'pins' must be an int, got float",
+    "empty_score": "ValueError: score() called before the game is finished; completed 0 of 10 frames",
+    "rejection": "ValueError: roll(6) not allowed: only 5 pin(s) standing in frame 1 after a first roll of 5",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "deepseek",
+    "prompt": "P2",
+    "bool": "TypeError: pins must be an int, got bool",
+    "fraction": "TypeError: pins must be an int, got float",
+    "empty_score": "RuntimeError: score() may only be called at the very end of a completed game",
+    "rejection": "ValueError: frame 1: second roll of 6 with 5 pins already down exceeds 10",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "alice",
+    "prompt": "P0",
+    "bool": "ValueError: Number of pins must be an integer",
+    "fraction": "ValueError: Number of pins must be an integer",
+    "empty_score": "IndexError: Game is not finished yet, cannot score",
+    "rejection": "ValueError: Cannot knock down 6 pins, only 5 are standing",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "alice",
+    "prompt": "P1",
+    "bool": "TypeError: Number of pins must be an integer, got bool",
+    "fraction": "TypeError: Number of pins must be an integer, got float",
+    "empty_score": "ValueError: Cannot calculate score: the game is not finished yet",
+    "rejection": "ValueError: Invalid roll: 6 pins knocked down, but only 5 pins are standing",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "alice",
+    "prompt": "P2",
+    "bool": "ValueError: The number of pins knocked down must be an integer.",
+    "fraction": "ValueError: The number of pins knocked down must be an integer.",
+    "empty_score": "ValueError: Score cannot be taken until the end of the game.",
+    "rejection": "ValueError: A roll cannot knock down more pins than are standing on the lane.",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "qwen",
+    "prompt": "P0",
+    "bool": "accepted",
+    "fraction": "accepted",
+    "empty_score": "ValueError: Cannot score a game that is not over.",
+    "rejection": "ValueError: Pin count exceeds number of standing pins.",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "qwen",
+    "prompt": "P1",
+    "bool": "TypeError: Pins must be an integer",
+    "fraction": "TypeError: Pins must be an integer",
+    "empty_score": "ValueError: Cannot score an incomplete game",
+    "rejection": "ValueError: Not enough pins remaining",
+    "recovery": "score=10 (expected 10)"
+  },
+  {
+    "model": "qwen",
+    "prompt": "P2",
+    "bool": "accepted",
+    "fraction": "accepted",
+    "empty_score": "ValueError: Cannot get score before game is over",
+    "rejection": "ValueError: Pin count exceeds pins on the lane",
+    "recovery": "ValueError: Pin count exceeds pins on the lane"
+  }
+]

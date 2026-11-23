@@ -1,0 +1,118 @@
+```python
+class BowlingGame:
+    """Счёт игры в боулинг (10 фреймов).
+
+    Поддерживает два режима работы:
+    - roll(pins) — фиксация каждого броска с проверкой правил игры;
+    - score() — подсчёт итогового счёта только после завершения игры.
+
+    Raises:
+        TypeError: если количество сбитых кеглей не является целым числом.
+        ValueError: если значение вне диапазона 0-10, в текущем фрейме
+            сбивается больше кеглей, чем стоит, бросок сделан после
+            окончания игры или score() вызван до её завершения.
+    """
+
+    _FRAMES: int = 10
+    _PINS: int = 10
+
+    def __init__(self) -> None:
+        """Инициализирует новую игру: счёт пуст, старт с 1-го фрейма."""
+        self._rolls: list[int] = []
+        self._current_frame: int = 1
+        self._standing_pins: int = self._PINS
+        self._balls_in_frame: int = 0
+        self._game_over: bool = False
+
+    def roll(self, pins: int) -> None:
+        """Регистрирует один бросок игрока.
+
+        Args:
+            pins: количество сбитых кеглей (0-10).
+
+        Raises:
+            TypeError: если pins не int (bool также не допускается).
+            ValueError: если pins вне диапазона 0-10; если в текущем
+                броске указано больше кеглей, чем осталось стоять;
+                если игра уже завершена и бросать больше нельзя.
+        """
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise TypeError(
+                f"Number of pins must be an integer, got {type(pins).__name__}"
+            )
+        if self._game_over:
+            raise ValueError("Cannot roll: the game of 10 frames is already over")
+        if pins < 0 or pins > self._PINS:
+            raise ValueError(
+                f"Number of pins must be between 0 and {self._PINS}, got {pins}"
+            )
+        if pins > self._standing_pins:
+            raise ValueError(
+                f"Invalid roll: {pins} pins knocked down, "
+                f"but only {self._standing_pins} pins are standing"
+            )
+
+        self._rolls.append(pins)
+        self._balls_in_frame += 1
+
+        if self._current_frame < self._FRAMES:
+            self._standing_pins -= pins
+            # Фрейм завершается страйком или вторым броском.
+            if pins == self._PINS or self._balls_in_frame == 2:
+                self._current_frame += 1
+                self._standing_pins = self._PINS
+                self._balls_in_frame = 0
+        else:
+            # Десятый фрейм: после страйка или спара кегли выставляются заново.
+            self._standing_pins -= pins
+            if self._balls_in_frame == 1:
+                if pins == self._PINS:
+                    self._standing_pins = self._PINS
+            elif self._balls_in_frame == 2:
+                strike_first = self._rolls[-2] == self._PINS
+                spare = self._rolls[-2] + pins == self._PINS
+                if strike_first or spare:
+                    # Право на один филл-болл: кегли выставляются заново.
+                    self._standing_pins = self._PINS
+                else:
+                    self._finish_game()
+            else:
+                # Третий бросок в 10-м фрейме — филл-боллы закончились.
+                self._finish_game()
+
+    def score(self) -> int:
+        """Возвращает итоговый счёт завершённой игры.
+
+        Страйк даёт 10 плюс кегли двух следующих бросков, спар — 10 плюс
+        кегли следующего броска, открытый фрейм — сумму двух бросков.
+        Десятый фрейм считается как фактическая сумма сбитых кеглей.
+
+        Returns:
+            Общее количество очков за игру.
+
+        Raises:
+            ValueError: если игра ещё не завершена.
+        """
+        if not self._game_over:
+            raise ValueError(
+                "Cannot calculate score: the game is not finished yet"
+            )
+
+        total: int = 0
+        i: int = 0
+        for _ in range(self._FRAMES):
+            if self._rolls[i] == self._PINS:  # страйк
+                total += self._PINS + self._rolls[i + 1] + self._rolls[i + 2]
+                i += 1
+            elif self._rolls[i] + self._rolls[i + 1] == self._PINS:  # спар
+                total += self._PINS + self._rolls[i + 2]
+                i += 2
+            else:  # открытый фрейм
+                total += self._rolls[i] + self._rolls[i + 1]
+                i += 2
+        return total
+
+    def _finish_game(self) -> None:
+        """Помечает игру завершённой после корректного окончания 10-го фрейма."""
+        self._game_over = True
+```

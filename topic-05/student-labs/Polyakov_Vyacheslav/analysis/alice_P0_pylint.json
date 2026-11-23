@@ -1,0 +1,76 @@
+{
+    "messages": [
+        {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "/tmp/bowling-lab5-2rxc3z2v/bowling.py"
+        },
+        {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.roll",
+            "line": 10,
+            "column": 4,
+            "endLine": 10,
+            "endColumn": 12,
+            "path": "bowling.py",
+            "absolutePath": "/tmp/bowling-lab5-2rxc3z2v/bowling.py"
+        },
+        {
+            "type": "convention",
+            "symbol": "missing-function-docstring",
+            "message": "Missing function or method docstring",
+            "messageId": "C0116",
+            "confidence": "INFERENCE",
+            "module": "bowling",
+            "obj": "BowlingGame.score",
+            "line": 29,
+            "column": 4,
+            "endLine": 29,
+            "endColumn": 13,
+            "path": "bowling.py",
+            "absolutePath": "/tmp/bowling-lab5-2rxc3z2v/bowling.py"
+        },
+        {
+            "type": "refactor",
+            "symbol": "too-many-return-statements",
+            "message": "Too many return statements (9/6)",
+            "messageId": "R0911",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame._pins_standing_now",
+            "line": 38,
+            "column": 4,
+            "endLine": 38,
+            "endColumn": 26,
+            "path": "bowling.py",
+            "absolutePath": "/tmp/bowling-lab5-2rxc3z2v/bowling.py"
+        }
+    ],
+    "statistics": {
+        "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 1,
+            "convention": 3,
+            "info": 0
+        },
+        "modulesLinted": 4,
+        "score": 9.375
+    }
+}
