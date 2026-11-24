@@ -1,0 +1,62 @@
+class BowlingGame:
+    def __init__(self):
+        self._frames = [[]]
+        self._finished = False
+
+    def roll(self, pins):
+        if self._finished:
+            raise ValueError("Игра уже завершена: все 10 фреймов сыграны.")
+
+        if not 0 <= pins <= 10:
+            raise ValueError(
+                f"Бросок должен сбивать от 0 до 10 кеглей, получено {pins}."
+            )
+
+        frame = self._frames[-1]
+        last_frame = len(self._frames) == 10
+
+        if not frame:
+            standing = 10
+        elif not last_frame:
+            standing = 10 - frame[0]
+        elif len(frame) == 1:
+            standing = 10 if frame[0] == 10 else 10 - frame[0]
+        elif frame[0] == 10:
+            standing = 10 if frame[1] == 10 else 10 - frame[1]
+        else:
+            standing = 10
+
+        if pins > standing:
+            raise ValueError(
+                f"На дорожке осталось {standing} кеглей, нельзя сбить {pins}."
+            )
+
+        frame.append(pins)
+
+        if not last_frame:
+            if frame[0] == 10 or len(frame) == 2:
+                self._frames.append([])
+        elif len(frame) == 3:
+            self._finished = True
+        elif len(frame) == 2 and frame[0] != 10 and sum(frame) < 10:
+            self._finished = True
+
+    def score(self):
+        if not self._finished:
+            raise ValueError(
+                "Игра не закончена: счёт доступен только после последнего броска."
+            )
+
+        rolls = [pins for frame in self._frames for pins in frame]
+        total = 0
+        index = 0
+
+        for frame in self._frames[:-1]:
+            total += sum(frame)
+            if frame[0] == 10:
+                total += rolls[index + 1] + rolls[index + 2]
+            elif sum(frame) == 10:
+                total += rolls[index + 2]
+            index += len(frame)
+
+        return total + sum(self._frames[-1])

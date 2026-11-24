@@ -1,0 +1,8 @@
+Upstream: Exercism Python track, bowling/bowling_test.py
+https://github.com/exercism/python/blob/main/exercises/practice/bowling/bowling_test.py
+Local source: topic-05/student-labs/Saukov/Приложения_ЛР5/Проверка/bowling_test.py
+Copied byte-for-byte; no changes. Snapshot header: 2023-07-21.
+The local file keeps CRLF line endings, so its checksum differs from the LF
+snapshot quoted in the neighbouring lab folders.
+SHA256: 2caebee15018a7fb02f248c8fd31898b355188832e64ada825f17693292f9837
+Test cases: 31

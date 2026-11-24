@@ -1,0 +1,56 @@
+{
+  "P0": {
+    "roll_true": {
+      "accepted": true,
+      "exception": null
+    },
+    "roll_float": {
+      "accepted": true,
+      "exception": null
+    },
+    "roll_str": {
+      "accepted": false,
+      "exception": "TypeError"
+    },
+    "resume_after_rejection": {
+      "rejected": true,
+      "score": 10
+    }
+  },
+  "P1": {
+    "roll_true": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "roll_float": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "roll_str": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "resume_after_rejection": {
+      "rejected": true,
+      "score": 10
+    }
+  },
+  "P2": {
+    "roll_true": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "roll_float": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "roll_str": {
+      "accepted": false,
+      "exception": "ValueError"
+    },
+    "resume_after_rejection": {
+      "rejected": true,
+      "score": 10
+    }
+  }
+}

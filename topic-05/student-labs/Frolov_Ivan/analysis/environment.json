@@ -1,0 +1,15 @@
+{
+  "python": "3.12.3",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "tools": {
+    "pytest": "9.2.0",
+    "radon": "6.0.1",
+    "pylint": "4.1.4"
+  },
+  "model": "DeepSeek",
+  "test_sha256": "2caebee15018a7fb02f248c8fd31898b355188832e64ada825f17693292f9837",
+  "test_count": 31,
+  "target_python": "3.11",
+  "pylint_config": "default; rcfile=/dev/null; persistent=n; py-version=3.11",
+  "cc_definition": "maximum of Radon function/method complexity, class aggregate excluded"
+}
