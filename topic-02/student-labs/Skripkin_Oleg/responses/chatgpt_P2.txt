@@ -1,0 +1,42 @@
+[A]
+Approximating the Nonlinear Motor Torque–Speed Characteristic Using a Neural Network Method
+
+Abstract
+
+Introduction. In recent years, artificial neural networks have been used to solve many applied problems in various fields. Neural networks can be used to model the behavior of physical systems, predict process dynamics, analyze experimental data, and optimize physical processes. They can be useful for modeling phenomena ranging from simple physical models to complex nonlinear systems describing, for example, the behavior of a composite mechanism.
+
+Materials and methods. This study demonstrates the effectiveness of a neural network approach using a model of the AIR56A2 induction motor. Motors of this type are well suited to the pumping equipment used in complex mechanical systems such as drawbridge hydraulic drives. A neural network was used to approximate the motor torque–speed characteristic, expressed as the dependence of torque on rotational speed. The results are compared with a parabolic approximation of this relationship obtained using the classical statistical least squares method. The resulting approximations are then used in a numerical solution, obtained by Euler’s method, of the nonlinear differential equation describing the motor dynamics. The results are subsequently evaluated against a predetermined steady-state angular velocity for this motor.
+
+Results. Numerical experiments show a substantial difference in the results obtained by applying a multilayer perceptron to this problem compared with the classical approach.
+
+Discussion and conclusion. Because the neural network approximates the motor torque–speed characteristic substantially more accurately, the neural network approach yields more accurate results when mathematically modeling the motor itself.
+
+Keywords: motor torque–speed characteristic, induction motor, least squares method approximation, Euler’s method, best linear unbiased estimators, Gauss–Markov assumptions, multilayer perceptron, multilayer neural network, activation function, loss function
+
+[B]
+The differential equation describing the motor dynamics is solved:
+
+J · dω/dt = M_д − (M_н + M_у)   (1)
+
+The problem includes approximating the motor torque–speed characteristic. The motor torque–speed characteristic is defined as the dependence of its rotational speed n on the torque M it develops, that is, n = f(M), as described in this study. A parabola with unknown coefficients is usually chosen for its approximation:
+
+M_д = aω² + bω + c,   ω₁ < ω < ω₂.   (2)
+
+We will compare this approximation with a neural network approximation.
+
+Equation (1) describes, for example, the dynamics of a drawbridge hydraulic drive [14]. In this problem, the total resistive torque applied to the motor consists of M_н and M_у—the torques on the pump and control-pump shafts.
+
+where J is the equivalent moment of inertia of the rotating masses of the motor, coupling, and pumps;
+M_д is the motor driving torque;
+M_н and M_у are the torques on the pump and control-pump shafts;
+a, b, and c are the coefficients used to approximate the motor torque–speed characteristic.
+
+The initial condition is taken as ω = ω₀ at t = 0, where ω₀ is the motor angular velocity used as the initial condition for solving the system and is equal to the minimum stable rotational speed at startup.
+
+In this study, the torques on the pump and control-pump shafts are assumed to be constant.
+
+The AIR56A2 induction motor was selected as the motor model under study. This model is commonly used in automation systems across various industries, can perform lifting operations, and is compatible with pumping equipment.
+
+The motor is equipped with a stator that generates a magnetic field using enamelled copper wire. The magnetic field causes the rotor to rotate. The windings are connected to a power supply that delivers electric current to the system.
+
+The technical specifications of this model will be used to construct the motor torque–speed characteristic, which will be approximated both by a parabola using the classical least squares method and by a neural network.

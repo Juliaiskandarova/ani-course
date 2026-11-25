@@ -1,0 +1,42 @@
+[A]
+Approximation of the nonlinear dependence of the motor torque–speed characteristic using a neural network method
+
+Abstract
+
+Introduction. In recent years, artificial neural networks have been used to solve many applied problems of various kinds. Neural networks can be used to model the behavior of physical systems, predict process dynamics, analyze experimental data, and optimize physical processes. The use of neural networks can be useful for modeling various phenomena, ranging from simple physical models to complex nonlinear systems describing, for example, the behavior of a composite mechanism.
+
+Materials and methods. In this work, the effectiveness of the neural network approach is demonstrated for the model of an AIR56A2 induction motor. Motors of this type are well compatible with pumping equipment used in the complex mechanical structure of such installations as drawbridge hydraulic drives. Using a neural network, the motor torque–speed characteristic was approximated, which represents the dependence of the developed torque on rotational speed. The obtained results are compared with the approximation of this dependence by a parabola constructed using the classical least squares method. Then the obtained approximations are used in the numerical solution by Euler’s method for the nonlinear differential equation describing the motor dynamics, and the results are subsequently evaluated using a predetermined value of the steady-state angular speed for this motor.
+
+Results. Numerical experiments demonstrate that a substantial difference in the results is achieved when using a multilayer perceptron for such a problem compared with the classical approach.
+
+Discussion and conclusion. Since the neural network approximates the motor torque–speed characteristic substantially more accurately, the neural network approach makes it possible to obtain more accurate results of mathematical modeling of the motor itself.
+
+Keywords: motor torque–speed characteristic, induction motor, least squares approximation, Euler’s method, best linear unbiased estimates, Gauss–Markov conditions, multilayer perceptron, multilayer neural network, activation function, loss function
+
+[B]
+The differential equation of electric motor dynamics is solved
+
+J · dω/dt = M_d − (M_n + M_u)   (1)
+
+The problem includes approximation of the motor torque–speed characteristic. The torque–speed characteristic of an electric motor is the dependence of its rotational speed n on the torque M it develops, that is, n = f(M), described in the work. Usually, to approximate it, a parabola with unknown coefficients is chosen:
+
+M_d = aω² + bω + c,   ω₁ < ω < ω₂.   (2)
+
+We will compare this approximation with a neural network one.
+
+Equation (1) describes, for example, the dynamics of a drawbridge hydraulic drive [14]. In this problem, the total torque of the resistances applied to the motor will consist of M_n, M_u – the torques on the shafts of the pump and the control pump.
+
+where J is the reduced moment of inertia of the rotating masses of the electric motor, coupling, and pumps;
+M_d is the driving torque of the electric motor;
+M_n, M_u are the torques on the shafts of the pump and the control pump;
+a, b, c are the coefficients of approximation of the motor torque–speed characteristic.
+
+Let us take the following as the initial conditions: at t = 0, ω = ω₀, where ω₀ is the angular speed of the motor, taken as the initial condition for solving the system and equal to the minimum value of stable speed at startup.
+
+In this work, the torques on the shafts of the pump and the control pump are assumed to be constants.
+
+As the motor model under study, an AIR56A2 induction motor was taken. This model is often found in most automation systems in various industrial fields, and is also capable of performing lifting operations and is compatible with pumping equipment.
+
+The electric motor is equipped with a stator, which creates a magnetic field using copper enameled wire. The magnetic field drives the rotor into rotation. The windings are connected to a power source, which ensures the supply of electric current to the system.
+
+The technical characteristics of this model will subsequently be used to construct the motor torque–speed characteristic, which will be approximated by the classical least squares method in the form of a parabola and by a neural network.

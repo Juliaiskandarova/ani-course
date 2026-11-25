@@ -1,0 +1,7 @@
+﻿model;prompt;BLEU-4;cosine_TFIDF;chrF
+glm;P1;55.56;0.9289;80.97
+glm;P2;51.54;0.9134;78.18
+chatgpt;P1;46.06;0.8868;75.57
+chatgpt;P2;47.78;0.8606;74.33
+deepseek;P1;53.32;0.9300;81.09
+deepseek;P2;52.19;0.9002;76.86

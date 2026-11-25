@@ -1,0 +1,49 @@
+﻿модель;промпт;термин;вариант;балл
+GLM 5.2;P1;механическая характеристика двигателя;mechanical characteristic of the motor;1
+GLM 5.2;P1;асинхронный электродвигатель;asynchronous motor;1
+GLM 5.2;P1;метод наименьших квадратов;least squares method;1
+GLM 5.2;P1;метод Эйлера;Euler's method;1
+GLM 5.2;P1;многослойный персептрон;multilayer perceptron;1
+GLM 5.2;P1;гидропривод разводного моста;drawbridge hydraulic drive;1
+GLM 5.2;P1;крутящий / развиваемый момент;developed torque;1
+GLM 5.2;P1;скорость / частота вращения;rotation speed;1
+GLM 5.2;P2;механическая характеристика двигателя;motor torque–speed characteristic;1
+GLM 5.2;P2;асинхронный электродвигатель;induction motor;1
+GLM 5.2;P2;метод наименьших квадратов;least squares method;1
+GLM 5.2;P2;метод Эйлера;Euler’s method;1
+GLM 5.2;P2;многослойный персептрон;multilayer perceptron;1
+GLM 5.2;P2;гидропривод разводного моста;drawbridge hydraulic drive;1
+GLM 5.2;P2;крутящий / развиваемый момент;torque;1
+GLM 5.2;P2;скорость / частота вращения;rotational speed;1
+GPT-6 Sol;P1;механическая характеристика двигателя;torque–speed characteristic;1
+GPT-6 Sol;P1;асинхронный электродвигатель;induction motor;1
+GPT-6 Sol;P1;метод наименьших квадратов;method of least squares;1
+GPT-6 Sol;P1;метод Эйлера;Euler method;1
+GPT-6 Sol;P1;многослойный персептрон;multilayer perceptron;1
+GPT-6 Sol;P1;гидропривод разводного моста;hydraulic drives for movable bridges;1
+GPT-6 Sol;P1;крутящий / развиваемый момент;driving torque;1
+GPT-6 Sol;P1;скорость / частота вращения;rotational speed;1
+GPT-6 Sol;P2;механическая характеристика двигателя;motor torque–speed characteristic;1
+GPT-6 Sol;P2;асинхронный электродвигатель;induction motor;1
+GPT-6 Sol;P2;метод наименьших квадратов;least squares method;1
+GPT-6 Sol;P2;метод Эйлера;Euler’s method;1
+GPT-6 Sol;P2;многослойный персептрон;multilayer perceptron;1
+GPT-6 Sol;P2;гидропривод разводного моста;drawbridge hydraulic drive;1
+GPT-6 Sol;P2;крутящий / развиваемый момент;torque;1
+GPT-6 Sol;P2;скорость / частота вращения;rotational speed;1
+DeepSeek V4.1 Flash;P1;механическая характеристика двигателя;mechanical characteristic of the motor;1
+DeepSeek V4.1 Flash;P1;асинхронный электродвигатель;asynchronous motor;1
+DeepSeek V4.1 Flash;P1;метод наименьших квадратов;least squares method;1
+DeepSeek V4.1 Flash;P1;метод Эйлера;Euler method;1
+DeepSeek V4.1 Flash;P1;многослойный персептрон;multilayer perceptron;1
+DeepSeek V4.1 Flash;P1;гидропривод разводного моста;hydraulic drive of a drawbridge;1
+DeepSeek V4.1 Flash;P1;крутящий / развиваемый момент;total moment of resistances;0,5
+DeepSeek V4.1 Flash;P1;скорость / частота вращения;rotational speed;1
+DeepSeek V4.1 Flash;P2;механическая характеристика двигателя;motor torque–speed characteristic;1
+DeepSeek V4.1 Flash;P2;асинхронный электродвигатель;induction motor;1
+DeepSeek V4.1 Flash;P2;метод наименьших квадратов;least squares method;1
+DeepSeek V4.1 Flash;P2;метод Эйлера;Euler’s method;1
+DeepSeek V4.1 Flash;P2;многослойный персептрон;multilayer perceptron;1
+DeepSeek V4.1 Flash;P2;гидропривод разводного моста;drawbridge hydraulic drive;1
+DeepSeek V4.1 Flash;P2;крутящий / развиваемый момент;developed torque;1
+DeepSeek V4.1 Flash;P2;скорость / частота вращения;rotational speed;1

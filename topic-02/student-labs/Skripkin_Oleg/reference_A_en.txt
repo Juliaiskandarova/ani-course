@@ -1,0 +1,13 @@
+Approximation of the Nonlinear Dependence of the Mechanical Characteristics of an Electric Motor Using a Neural Network Method
+
+Abstract
+
+Introduction. In recent years, artificial neural networks have been used to solve a wide range of practical tasks. Neural networks can be utilized for modeling the behavior of physical systems, forecasting process dynamics, analyzing experimental data, and optimizing physical processes. The application of neural networks can be beneficial for modeling various phenomena, ranging from simple physical models to complex nonlinear systems, describing, for example, the behavior of composite mechanisms.
+
+Materials and Methods. This study demonstrates the effectiveness of a neural network approach for modeling the asynchronous motor AIR56A2. Motors of this type are well-suited for compatibility with pump equipment used in the intricate mechanical structures of facilities such as drawbridge hydraulic drives. The neural network was employed to approximate the mechanical characteristics of the motor, representing the relationship between the developed torque and rotational speed. The obtained results are compared with the approximation of this relationship using a parabola, constructed using the classical statistical method of least squares. Subsequently, the obtained approximations are employed in the numerical solution using the Euler method for the nonlinear differential equation describing the engine’s dynamics. The results are then assessed against a predefined value of the steady-state angular velocity for this motor.
+
+Results. Numerical experiments demonstrate a significant difference in outcomes when applying a multilayer perceptron to such a task compared to the classical approach.
+
+Discussion and Conclusion. Because the neural network approximates the mechanical characteristics much more accurately, the neural network approach enables more precise results in the mathematical modeling of the motor itself.
+
+Keywords: Mechanical engine characteristics, asynchronous motor, least squares approximation, Euler’s method, best linear unbiased estimate, Gauss-Markov conditions, multilayer perceptron, multilayer neural network, activation function, loss function
