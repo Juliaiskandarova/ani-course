@@ -1,0 +1,15 @@
+{
+  "requested_model": "gpt-6-sol",
+  "response_model": "gpt-6-sol",
+  "prompt": "P2",
+  "time_utc": "2026-11-25T22:49:33.5538574+00:00",
+  "id": "chat-0353xPcnKBI9iKDdpdql8M",
+  "finish_reason": "stop",
+  "tokens_input": 727,
+  "tokens_output": 746,
+  "tokens_reasoning": 0,
+  "cost_rub": 1.77,
+  "max_tokens": 4200,
+  "reasoning_effort": "none",
+  "messages": 1
+}

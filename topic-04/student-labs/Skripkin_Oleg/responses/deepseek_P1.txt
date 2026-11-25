@@ -1,0 +1,221 @@
+Ниже — четыре отдельные диаграммы PlantUML. Названия акторов, сущностей, статусов и сообщений согласованы между диаграммами.
+
+## 1. Диаграмма вариантов использования
+
+```plantuml
+@startuml UC
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система проката камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Submit
+  usecase "Получить отказ с причиной" as UC_Reject
+  usecase "Создать подтвержденную бронь" as UC_Confirm
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Submit
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+
+Employee --> UC_ViewAll
+
+UC_Submit ..> UC_CheckOverlap : <<include>>
+UC_CheckOverlap ..> UC_Reject : <<extend>>\n[интервал пересекается]
+UC_CheckOverlap ..> UC_Confirm : <<extend>>\n[интервал свободен]
+
+note right of UC_Cancel
+  R3, R8: отмена доступна только
+  для своей подтвержденной брони.
+  Отмена сохраняет запись (статус CANCELLED),
+  отмененная бронь не блокирует интервал.
+end note
+
+note bottom of UC_CheckOverlap
+  R2, R7: проверяются только подтвержденные
+  брони той же камеры; интервал корректен,
+  если начало < конца; соседние интервалы
+  могут соприкасаться (конец == начало).
+end note
+@enduml
+```
+
+## 2. Диаграмма классов
+
+```plantuml
+@startuml Class
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String   <<R5>>
+  - email : String      <<R5>>
+  + submitRequest(camera, start, end) : Request
+  + cancelBooking(booking) : void
+}
+
+class Camera {
+  - id : UUID
+  - serialNumber : String <<R5>>
+  - model : String        <<R5>>
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  + overlaps(other : Booking) : Boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class Request {
+  - id : UUID
+  - camera : Camera
+  - start : DateTime
+  - end : DateTime
+  + validateInterval() : Boolean
+}
+
+class BookingService {
+  + submitRequest(client, camera, start, end) : Request
+  + checkOverlap(camera, start, end) : Boolean
+  + confirmBooking(request) : Booking
+  + rejectRequest(request, reason) : void
+}
+
+Client "1" -- "0..*" Booking : владеет >
+Camera "1" -- "0..*" Booking : относится к >
+Booking "1" --> "1" BookingStatus : имеет >
+Client "1" -- "0..*" Request : подает >
+Camera "1" -- "0..*" Request : указывает >
+BookingService ..> Request : создает >
+BookingService ..> Booking : создает >
+BookingService ..> Camera : проверяет >
+
+note top of Booking
+  R6: каждая бронь относится ровно к одной
+  камере и ровно к одному клиенту.
+  У камеры и у клиента может быть много броней.
+end note
+
+note right of BookingStatus
+  R2: CONFIRMED создается только если
+  нет пересечения с другой CONFIRMED.
+  R8: CANCELLED сохраняется, но не блокирует интервал.
+end note
+@enduml
+```
+
+## 3. Диаграмма последовательности подачи заявки
+
+```plantuml
+@startuml Sequence
+autonumber
+actor "Клиент" as Client
+participant "BookingService" as Service
+participant "Camera" as Camera
+participant "Request" as Request
+participant "Booking" as Booking
+database "Хранилище броней" as Repo
+
+Client -> Service : submitRequest(camera, start, end)
+activate Service
+Service -> Service : validateInterval(start, end)  ' R7: start < end
+
+alt interval некорректен (start >= end)
+  Service --> Client : отказ с причиной "некорректный интервал"
+else интервал корректен
+  Service -> Request ** : create(camera, start, end)  ' R1
+  Service -> Repo : findConfirmedByCamera(camera)     ' R2
+  activate Repo
+  Repo --> Service : confirmedBookings
+  deactivate Repo
+
+  alt найдено пересечение с подтвержденной бронью  ' R2
+    Service -> Request : reject(reason)  ' R2: причина
+    note right of Service
+      При отказе бронь НЕ создается.
+      Request помечается REJECTED, Booking отсутствует.
+    end note
+    Service --> Client : отказ с причиной
+  else пересечений нет
+    Service -> Booking ** : create(client, camera, start, end, CONFIRMED)
+    Service -> Repo : save(booking)
+    Service --> Client : подтвержденная бронь  ' R2
+  end
+
+end
+
+deactivate Service
+
+note over Client, Repo
+  Соседние интервалы не считаются пересечением:
+  booking.end == request.start допустимо (R7).
+end note
+@enduml
+```
+
+## 4. Диаграмма состояний брони
+
+```plantuml
+@startuml State
+[*] --> CONFIRMED : создание подтвержденной брони\n(нет пересечения с CONFIRMED той же камеры)  ' R2
+CONFIRMED : блокирует интервал камеры  ' R2, R8
+CONFIRMED : доступна для отмены владельцем  ' R3
+
+CONFIRMED --> CANCELLED : cancel() владельцем  ' R3, R8
+CANCELLED : запись сохраняется  ' R8
+CANCELLED : НЕ блокирует интервал  ' R8
+CANCELLED : [*]
+
+note right of CONFIRMED
+  R7: если start >= end — бронь не создается,
+  состояние CONFIRMED не достигается.
+end note
+
+note bottom of CANCELLED
+  Отмена возможна только из CONFIRMED
+  и только владельцем (R3).
+  Из CANCELLED переходов нет (R8).
+end note
+@enduml
+```
+
+---
+
+## Допущения (вне R1–R8 не вводятся новые бизнес-правила)
+
+1. Идентификаторы, типы (`DateTime`, `UUID`) и имена методов — соглашения об отображении, не бизнес-правила.
+2. `Request` (заявка) — технический носитель входа; правила R1–R8 описаны без него, поэтому он введен как объект передачи данных, а не как самостоятельная сущность с правилами.
+3. Отказ в диаграмме последовательности трактуется как возврат причины без записи брони; R2 прямо говорит «отказывает с причиной».
+4. Проверка корректности интервала (R7) выполняется до проверки пересечений, поскольку некорректный интервал не имеет смысла для сравнения.
+5. «Причина» отказа при пересечении — факт пересечения с подтвержденной бронью той же камеры.
+
+---
+
+## Сопоставление R1–R8 с элементами диаграмм
+
+| Правило | Где отражено |
+|---|---|
+| R1 | UC `Подать заявку на бронь (камера, начало, конец)`; Sequence: `submitRequest(camera, start, end)` → `create(camera, start, end)`; Class: `Client.submitRequest`, `Request{camera,start,end}` |
+| R2 | UC `Проверить пересечение` + extend-ветки `Получить отказ` / `Создать подтвержденную бронь`; Sequence alt «найдено пересечение» → отказ с причиной, иначе `Booking create(..., CONFIRMED)`; State: переход `[*] → CONFIRMED` при отсутствии пересечения; Class: `BookingService.checkOverlap/confirmBooking/rejectRequest`, статус `CONFIRMED` |
+| R3 | UC `Просмотреть свои брони`, `Отменить свою подтвержденную бронь`; State: `CONFIRMED → CANCELLED : cancel() владельцем`; Class: `Client.cancelBooking`, `Booking.cancel()` |
+| R4 | UC `Просмотреть все брони`, актор `Сотрудник проката` |
+| R5 | Class: `Camera.serialNumber`, `Camera.model`, `Client.fullName`, `Client.email` |
+| R6 | Class: ассоциации `Client "1" -- "0..*" Booking`, `Camera "1" -- "0..*" Booking` с кратностями на обоих концах |
+| R7 | UC note (start < end, соседние интервалы могут соприкасаться); Sequence: `validateInterval` + note про `end == start` |
+| R8 | State: `CANCELLED` сохраняется и не блокирует интервал; Class: enum `CANCELLED`, note у `BookingStatus`; UC note у `Отменить бронь` |
+
+Проверка ключевого требования: в Sequence-диаграмме ветка отказа (`reject(reason)`) не содержит вызова `Booking create(...)` и не вызывает `Repo.save(booking)` — бронь при отказе не создается.

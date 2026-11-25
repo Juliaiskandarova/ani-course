@@ -1,0 +1,26 @@
+{
+  "dbml_core": "13.0.0",
+  "plantuml": "1.2025.10",
+  "versions": {
+    "initial": {
+      "tables": 7,
+      "refs": 5,
+      "syntax": "ok"
+    },
+    "revision": {
+      "tables": 8,
+      "refs": 10,
+      "syntax": "ok"
+    },
+    "final": {
+      "tables": 10,
+      "refs": 13,
+      "syntax": "ok"
+    },
+    "checked": {
+      "tables": 10,
+      "refs": 11,
+      "syntax": "ok"
+    }
+  }
+}

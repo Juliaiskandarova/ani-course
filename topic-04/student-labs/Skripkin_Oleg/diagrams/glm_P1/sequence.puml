@@ -1,0 +1,61 @@
+@startuml
+actor "Клиент" as C
+participant ":RentalSystem" as Sys
+participant ":Request" as Req
+participant "b: Booking" as Book
+participant "cam: Camera" as Cam
+
+C -> Sys : submitRequest(camera, start, end)
+activate Sys
+
+Sys -> Req : create(camera, start, end)
+activate Req
+Req --> Sys : created
+deactivate Req
+
+Sys -> Sys : isIntervalValid(start, end)
+note right
+  R7: start < end
+end note
+
+alt Начало раньше конца (Корректно)
+  Sys -> Cam : getActiveBookings()
+  activate Cam
+  Cam --> Sys : List<Booking>
+  deactivate Cam
+
+  Sys -> Sys : checkOverlap(existingBookings, start, end)
+  note right
+    R7: Соседние интервалы могут 
+    соприкасаться.
+  end note
+
+  alt Найдено пересечение
+    Sys -> Req : setStatus(REJECTED)
+    Sys -> Req : setRejectionReason("Интервал занят")
+    Sys --> C : Отказ с причиной
+    note over C, Sys
+      R2: Система отказывает.
+      Бронь (Book) НЕ создается.
+    end note
+  else Пересечения нет
+    Sys -> Book : create(client, camera, start, end)
+    activate Book
+    Book --> Sys : bookingInstance
+    deactivate Book
+    
+    Sys -> Book : setStatus(CONFIRMED)
+    Sys --> C : Успех (Подтвержденная бронь)
+  end
+
+else Начало позже или равно концу (Некорректно)
+  Sys -> Req : setStatus(REJECTED)
+  Sys -> Req : setRejectionReason("Некорректный интервал")
+  Sys --> C : Отказ с причиной
+  note over C, Sys
+    Бронь (Book) НЕ создается.
+  end note
+end
+
+deactivate Sys
+@enduml

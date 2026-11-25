@@ -1,0 +1,152 @@
+class BowlingGame:
+    def __init__(self):
+        self.rolls = []
+
+    def roll(self, pins: int) -> None:
+        if not isinstance(pins, int):
+            raise TypeError("Pins must be an integer")
+        if pins < 0 or pins > 10:
+            raise ValueError("Pins must be between 0 and 10")
+
+        # Validate against the current frame's state
+        if len(self.rolls) > 0:
+            # Determine how many rolls have been used in the current frame
+            # by simulating frame progression
+            pass
+
+        # Validate based on frame logic
+        self._validate_roll(pins)
+        self.rolls.append(pins)
+
+    def _validate_roll(self, pins: int) -> None:
+        # Replay the game frame by frame to determine current state
+        idx = 0
+        for frame in range(10):
+            if idx >= len(self.rolls):
+                # We're about to add a roll to this frame
+                if frame < 9:
+                    # Normal frame: check if this is the first or second roll
+                    if idx == len(self.rolls):
+                        # First roll of frame - any value 0-10 ok
+                        return
+                else:
+                    # 10th frame logic
+                    return
+                return
+
+            if frame < 9:
+                first = self.rolls[idx]
+                if first == 10:
+                    # Strike
+                    idx += 1
+                else:
+                    if idx + 1 >= len(self.rolls):
+                        # Only first roll done; adding second roll
+                        if first + pins > 10:
+                            raise ValueError(
+                                "Two rolls in a frame cannot exceed 10 pins"
+                            )
+                        return
+                    second = self.rolls[idx + 1]
+                    if first + second > 10:
+                        raise ValueError(
+                            "Two rolls in a frame cannot exceed 10 pins"
+                        )
+                    idx += 2
+            else:
+                # 10th frame
+                first = self.rolls[idx]
+                if first == 10:
+                    # Strike: two fill balls
+                    if idx + 1 >= len(self.rolls):
+                        return  # adding first fill ball
+                    second = self.rolls[idx + 1]
+                    if second == 10:
+                        if idx + 2 >= len(self.rolls):
+                            return  # adding second fill ball
+                        # Already have two fill balls; no more rolls allowed
+                        raise ValueError("No more rolls allowed after game end")
+                    else:
+                        if idx + 2 >= len(self.rolls):
+                            # Adding second fill ball; must not exceed 10 with second
+                            if second + pins > 10:
+                                raise ValueError(
+                                    "Fill balls cannot exceed 10 pins combined "
+                                    "when first fill ball is not a strike"
+                                )
+                            return
+                        raise ValueError("No more rolls allowed after game end")
+                else:
+                    if idx + 1 >= len(self.rolls):
+                        # Adding second roll of 10th frame
+                        if first + pins > 10:
+                            raise ValueError(
+                                "Two rolls in a frame cannot exceed 10 pins"
+                            )
+                        return
+                    second = self.rolls[idx + 1]
+                    if first + second == 10:
+                        # Spare: one fill ball
+                        if idx + 2 >= len(self.rolls):
+                            return  # adding fill ball
+                        raise ValueError("No more rolls allowed after game end")
+                    else:
+                        # Open frame: game over
+                        raise ValueError("No more rolls allowed after game end")
+
+    def score(self) -> int:
+        # Validate that the game is complete
+        self._validate_game_complete()
+
+        total = 0
+        idx = 0
+        for frame in range(10):
+            if frame < 9:
+                if self.rolls[idx] == 10:
+                    # Strike
+                    total += 10 + self.rolls[idx + 1] + self.rolls[idx + 2]
+                    idx += 1
+                elif self.rolls[idx] + self.rolls[idx + 1] == 10:
+                    # Spare
+                    total += 10 + self.rolls[idx + 2]
+                    idx += 2
+                else:
+                    total += self.rolls[idx] + self.rolls[idx + 1]
+                    idx += 2
+            else:
+                # 10th frame: sum all remaining rolls
+                total += sum(self.rolls[idx:])
+        return total
+
+    def _validate_game_complete(self) -> None:
+        idx = 0
+        for frame in range(10):
+            if idx >= len(self.rolls):
+                raise ValueError("Game is not complete")
+            if frame < 9:
+                if self.rolls[idx] == 10:
+                    idx += 1
+                else:
+                    if idx + 1 >= len(self.rolls):
+                        raise ValueError("Game is not complete")
+                    if self.rolls[idx] + self.rolls[idx + 1] > 10:
+                        raise ValueError(
+                            "Two rolls in a frame cannot exceed 10 pins"
+                        )
+                    idx += 2
+            else:
+                first = self.rolls[idx]
+                if first == 10:
+                    if idx + 2 >= len(self.rolls):
+                        raise ValueError("Game is not complete")
+                else:
+                    if idx + 1 >= len(self.rolls):
+                        raise ValueError("Game is not complete")
+                    second = self.rolls[idx + 1]
+                    if first + second > 10:
+                        raise ValueError(
+                            "Two rolls in a frame cannot exceed 10 pins"
+                        )
+                    if first + second == 10:
+                        if idx + 2 >= len(self.rolls):
+                            raise ValueError("Game is not complete")

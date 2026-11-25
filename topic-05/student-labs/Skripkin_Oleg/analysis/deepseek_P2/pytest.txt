@@ -1,0 +1,17 @@
+.............FF................                                          [100%]
+================================== FAILURES ===================================
+___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ___________
+..\..\tests\bowling_test.py:202: in test_cannot_roll_after_bonus_roll_for_spare
+    with self.assertRaisesWithMessage(Exception):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Exception not raised
+__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike __________
+..\..\tests\bowling_test.py:208: in test_cannot_roll_after_bonus_rolls_for_strike
+    with self.assertRaisesWithMessage(Exception):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Exception not raised
+- generated xml file: .\analysis\deepseek_P2\pytest.xml -
+=========================== short test summary info ===========================
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike
+2 failed, 29 passed in 0.16s

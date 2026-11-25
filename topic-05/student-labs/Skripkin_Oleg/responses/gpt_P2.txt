@@ -1,0 +1,93 @@
+```python
+class BowlingGame:
+    """Track rolls and calculate the score of a ten-frame bowling game."""
+
+    def __init__(self) -> None:
+        """Initialize an empty game."""
+        self._rolls: list[int] = []
+
+    def roll(self, pins: int) -> None:
+        """Record a roll, rejecting invalid pin counts or rolls after the game."""
+        if type(pins) is not int or not 0 <= pins <= 10:
+            raise ValueError("pins must be an integer between 0 and 10")
+
+        rolls = self._rolls
+        index = 0
+
+        for _ in range(9):
+            if index >= len(rolls):
+                break
+            if rolls[index] == 10:
+                index += 1
+            elif index + 1 < len(rolls):
+                index += 2
+            else:
+                break
+        else:
+            tenth = rolls[index:]
+            if len(tenth) >= 2:
+                first, second = tenth[:2]
+                if first == 10:
+                    if len(tenth) == 3:
+                        raise ValueError("cannot roll after the tenth frame is complete")
+                    if second != 10 and pins > 10 - second:
+                        raise ValueError("fill ball exceeds the pins standing")
+                elif first + second == 10:
+                    if len(tenth) == 3:
+                        raise ValueError("cannot roll after the tenth frame is complete")
+                else:
+                    raise ValueError("cannot roll after the tenth frame is complete")
+            elif tenth and tenth[0] != 10 and pins > 10 - tenth[0]:
+                raise ValueError("roll exceeds the pins standing in the tenth frame")
+
+            rolls.append(pins)
+            return
+
+        if index < len(rolls) and pins > 10 - rolls[index]:
+            raise ValueError("roll exceeds the pins standing in the frame")
+
+        rolls.append(pins)
+
+    def score(self) -> int:
+        """Return the final score; a game in progress cannot be scored."""
+        rolls = self._rolls
+        index = 0
+        total = 0
+
+        for frame in range(10):
+            if index >= len(rolls):
+                raise ValueError("cannot score an incomplete game")
+
+            first = rolls[index]
+
+            if frame == 9:
+                if index + 1 >= len(rolls):
+                    raise ValueError("cannot score an incomplete tenth frame")
+
+                second = rolls[index + 1]
+                if first == 10 or first + second == 10:
+                    if index + 2 >= len(rolls):
+                        raise ValueError("cannot score before the fill ball is rolled")
+                    return total + first + second + rolls[index + 2]
+
+                return total + first + second
+
+            if first == 10:
+                if index + 2 >= len(rolls):
+                    raise ValueError("cannot score before strike bonus rolls")
+                total += 10 + rolls[index + 1] + rolls[index + 2]
+                index += 1
+            else:
+                if index + 1 >= len(rolls):
+                    raise ValueError("cannot score an incomplete frame")
+                second = rolls[index + 1]
+                if first + second == 10:
+                    if index + 2 >= len(rolls):
+                        raise ValueError("cannot score before a spare bonus roll")
+                    total += 10 + rolls[index + 2]
+                else:
+                    total += first + second
+                index += 2
+
+        return total
+```

@@ -1,0 +1,48 @@
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку" as Submit
+  usecase "Проверить интервал" as Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as CheckOverlap
+  usecase "Получить подтверждение\nи создать бронь" as Confirm
+  usecase "Получить отказ\nс причиной" as Reject
+  usecase "Просмотреть свои брони" as ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as Cancel
+  usecase "Просмотреть все брони" as ViewAll
+}
+
+Client -- Submit
+Client -- ViewOwn
+Client -- Cancel
+Employee -- ViewAll
+
+Submit ..> Validate : <<include>>
+Submit ..> CheckOverlap : <<include>>
+Confirm ..> Submit : <<extend>>\n[интервал корректен;\nпересечения нет]
+Reject ..> Submit : <<extend>>\n[интервал некорректен\nили есть пересечение]
+
+note right of Submit
+  Данные заявки: камера,
+  начало и конец интервала.
+end note
+
+note right of Cancel
+  Условие: бронь принадлежит клиенту
+  и имеет статус «Подтверждена».
+  Запись сохраняется.
+end note
+
+note bottom of CheckOverlap
+  Учитываются только брони со статусом
+  «Подтверждена». Соприкосновение
+  границ интервалов — не пересечение.
+end note
+
+note bottom of Reject
+  При отказе бронь не создается.
+end note
+@enduml

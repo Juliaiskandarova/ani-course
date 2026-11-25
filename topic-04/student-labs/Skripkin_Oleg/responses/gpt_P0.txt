@@ -1,0 +1,160 @@
+### Диаграмма вариантов использования
+
+```plantuml
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\nна бронирование" as Submit
+  usecase "Проверить корректность\nинтервала" as Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as Check
+  usecase "Подтвердить бронь" as Confirm
+  usecase "Отказать с причиной" as Reject
+  usecase "Посмотреть свои брони" as ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as Cancel
+  usecase "Посмотреть все брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+Employee --> ViewAll
+
+Submit ..> Validate : <<include>>
+Submit ..> Check : <<include>>
+Confirm ..> Submit : <<extend>>\n[интервал корректен,\nпересечений нет]
+Reject ..> Submit : <<extend>>\n[интервал некорректен\nили есть пересечение]
+
+note right of Check
+  Учитываются только подтвержденные
+  брони той же камеры.
+  Соприкасающиеся интервалы не пересекаются.
+end note
+@enduml
+```
+
+### Диаграмма классов
+
+```plantuml
+@startuml
+class Client {
+  +id: UUID
+  +fullName: String
+  +email: String
+}
+
+class Camera {
+  +id: UUID
+  +serialNumber: String
+  +model: String
+}
+
+class Booking {
+  +id: UUID
+  +start: DateTime
+  +end: DateTime
+  +status: BookingStatus
+  +cancel(): void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class BookingService {
+  +submit(client: Client, camera: Camera,
+          start: DateTime, end: DateTime): BookingResult
+  +cancel(client: Client, bookingId: UUID): void
+  +getClientBookings(client: Client): List<Booking>
+  +getAllBookings(): List<Booking>
+}
+
+class BookingResult {
+  +booking: Booking [0..1]
+  +rejectionReason: String [0..1]
+}
+
+class BookingRepository {
+  +findByCamera(camera: Camera): List<Booking>
+  +findByClient(client: Client): List<Booking>
+  +findAll(): List<Booking>
+  +save(booking: Booking): void
+}
+
+Client "1" -- "0..*" Booking : владелец
+Camera "1" -- "0..*" Booking : забронирована в
+BookingService ..> BookingRepository
+BookingService ..> BookingResult
+
+note bottom of Booking
+  start < end.
+  Пересечение с другой бронью:
+  start < other.end и other.start < end.
+  CANCELLED не блокирует интервал;
+  отмена не удаляет запись.
+end note
+@enduml
+```
+
+### Диаграмма последовательности подачи заявки
+
+```plantuml
+@startuml
+actor "Клиент" as Client
+participant "Система бронирования" as System
+database "Хранилище броней" as Repository
+
+Client -> System : податьЗаявку(камера, начало, конец)
+
+alt начало >= конец
+  System --> Client : отказ("Начало должно быть раньше конца")
+else начало < конец
+  System -> Repository : найтиПодтвержденныеБрони(камера)
+  Repository --> System : брони
+
+  note over System
+    Пересечение существует, если
+    начало < бронь.конец
+    и бронь.начало < конец.
+    Равные границы допустимы.
+  end note
+
+  alt найдена пересекающаяся бронь
+    System --> Client : отказ("Камера занята в указанный интервал")
+  else пересечений нет
+    System -> Repository : сохранить(новая бронь, CONFIRMED)
+    Repository --> System : подтвержденная бронь
+    System --> Client : подтверждение(бронь)
+  end
+end
+@enduml
+```
+
+### Диаграмма состояний брони
+
+```plantuml
+@startuml
+[*] --> Проверка : подана заявка
+
+Проверка --> Отказ : интервал некорректен\nили есть пересекающаяся\nподтвержденная бронь
+Проверка --> Подтверждена : интервал корректен\nи пересечений нет
+
+Отказ --> [*] : сообщить причину\n(бронь не создается)
+
+Подтверждена --> Отменена : клиент отменил\nсвою бронь
+Отменена --> [*]
+
+note right of Подтверждена
+  Блокирует интервал камеры.
+end note
+
+note right of Отменена
+  Запись сохраняется,
+  но интервал не блокируется.
+end note
+@enduml
+```

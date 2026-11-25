@@ -1,0 +1,249 @@
+class BowlingGame:
+    """
+    A class to keep track of the score of a game of bowling.
+
+    The game consists of 10 frames. Each frame has up to 2 rolls,
+    except the 10th frame which can have up to 3 rolls (fill balls
+    after a strike or spare). Scoring follows standard ten-pin
+    bowling rules including spares and strikes.
+    """
+
+    MAX_PINS: int = 10
+    TOTAL_FRAMES: int = 10
+
+    def __init__(self) -> None:
+        """
+        Initialize a new bowling game with no rolls recorded.
+        """
+        self._rolls: list[int] = []
+
+    def roll(self, pins: int) -> None:
+        """
+        Record a roll with the given number of pins knocked down.
+
+        Args:
+            pins: Number of pins knocked down in this roll (0-10).
+
+        Raises:
+            TypeError: If pins is not an int.
+            ValueError: If pins is not between 0 and 10 inclusive.
+            ValueError: If the roll cannot be made in the current state
+                (e.g., pins exceed remaining pins in a frame, or game
+                is already complete).
+        """
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise TypeError(
+                f"roll() argument 'pins' must be an int, got {type(pins).__name__}"
+            )
+        if pins < 0 or pins > self.MAX_PINS:
+            raise ValueError(
+                f"roll() argument 'pins' must be between 0 and {self.MAX_PINS}, got {pins}"
+            )
+
+        frame_index, roll_index = self._current_position()
+
+        if frame_index >= self.TOTAL_FRAMES:
+            raise ValueError(
+                "Cannot roll: the game is already complete"
+            )
+
+        if frame_index < self.TOTAL_FRAMES - 1:
+            # Frames 1 through 9: standard rules.
+            if roll_index == 0:
+                # First roll of the frame: any 0-10 is fine.
+                pass
+            else:
+                # Second roll: pins must not exceed remaining pins.
+                first = self._rolls[-1]
+                if first == self.MAX_PINS:
+                    raise ValueError(
+                        "Cannot roll: previous roll was a strike, frame is complete"
+                    )
+                if first + pins > self.MAX_PINS:
+                    raise ValueError(
+                        f"Cannot roll {pins} pins: only {self.MAX_PINS - first} pins remain in frame"
+                    )
+        else:
+            # Tenth frame: special rules.
+            self._validate_tenth_frame_roll(roll_index, pins)
+
+        self._rolls.append(pins)
+
+    def score(self) -> int:
+        """
+        Compute and return the total score of the game.
+
+        Returns:
+            The total score for the completed game.
+
+        Raises:
+            ValueError: If the game is not yet complete.
+        """
+        if not self._is_complete():
+            raise ValueError(
+                "Cannot score: the game is not yet complete"
+            )
+
+        total: int = 0
+        roll_index: int = 0
+
+        for _ in range(self.TOTAL_FRAMES - 1):
+            if self._rolls[roll_index] == self.MAX_PINS:
+                # Strike: 10 + next two rolls.
+                total += self.MAX_PINS + self._rolls[roll_index + 1] + self._rolls[roll_index + 2]
+                roll_index += 1
+            elif self._rolls[roll_index] + self._rolls[roll_index + 1] == self.MAX_PINS:
+                # Spare: 10 + next roll.
+                total += self.MAX_PINS + self._rolls[roll_index + 2]
+                roll_index += 2
+            else:
+                # Open frame.
+                total += self._rolls[roll_index] + self._rolls[roll_index + 1]
+                roll_index += 2
+
+        # Tenth frame: sum of all its rolls (including fill balls).
+        total += sum(self._rolls[roll_index:])
+        return total
+
+    def _current_position(self) -> tuple[int, int]:
+        """
+        Determine the frame index (0-based) and roll index within the frame
+        where the next roll would be applied.
+
+        Returns:
+            Tuple of (frame_index, roll_index_within_frame).
+        """
+        frame_index: int = 0
+        roll_index: int = 0
+        i: int = 0
+
+        while frame_index < self.TOTAL_FRAMES - 1 and i < len(self._rolls):
+            if self._rolls[i] == self.MAX_PINS:
+                frame_index += 1
+                i += 1
+                roll_index = 0
+            else:
+                if roll_index == 0:
+                    roll_index = 1
+                    i += 1
+                else:
+                    frame_index += 1
+                    roll_index = 0
+                    i += 1
+
+        # Now handle the tenth frame if we've reached it.
+        if frame_index == self.TOTAL_FRAMES - 1:
+            # Count how many rolls have been placed into the tenth frame.
+            tenth_rolls: int = len(self._rolls) - i
+            roll_index = tenth_rolls
+
+        return frame_index, roll_index
+
+    def _validate_tenth_frame_roll(self, roll_index: int, pins: int) -> None:
+        """
+        Validate a roll in the tenth frame according to special rules.
+
+        Args:
+            roll_index: Zero-based index of the roll within the tenth frame.
+            pins: Number of pins to knock down.
+
+        Raises:
+            ValueError: If the roll violates tenth-frame rules.
+        """
+        tenth_rolls: list[int] = self._rolls[self._tenth_frame_start():]
+
+        if roll_index == 0:
+            return  # Any 0-10 allowed.
+
+        if roll_index == 1:
+            first: int = tenth_rolls[0]
+            if first == self.MAX_PINS:
+                # After a strike, second ball is a fresh rack.
+                return
+            if first + pins > self.MAX_PINS:
+                raise ValueError(
+                    f"Cannot roll {pins} pins: only {self.MAX_PINS - first} pins remain in tenth frame"
+                )
+            return
+
+        # roll_index == 2 (fill ball).
+        first: int = tenth_rolls[0]
+        second: int = tenth_rolls[1]
+
+        if first == self.MAX_PINS:
+            if second == self.MAX_PINS:
+                # Two strikes: third ball is a fresh rack.
+                return
+            if second + pins > self.MAX_PINS:
+                raise ValueError(
+                    f"Cannot roll {pins} pins: only {self.MAX_PINS - second} pins remain for the fill ball"
+                )
+            return
+
+        if first + second == self.MAX_PINS:
+            # Spare: third ball is a fresh rack.
+            return
+
+        raise ValueError(
+            "Cannot roll: no fill ball is available in the tenth frame"
+        )
+
+    def _tenth_frame_start(self) -> int:
+        """
+        Return the roll index at which the tenth frame begins.
+
+        Returns:
+            Index into self._rolls for the first roll of the tenth frame.
+        """
+        frame_index: int = 0
+        roll_index: int = 0
+        i: int = 0
+
+        while frame_index < self.TOTAL_FRAMES - 1 and i < len(self._rolls):
+            if self._rolls[i] == self.MAX_PINS:
+                frame_index += 1
+                i += 1
+                roll_index = 0
+            else:
+                if roll_index == 0:
+                    roll_index = 1
+                    i += 1
+                else:
+                    frame_index += 1
+                    roll_index = 0
+                    i += 1
+
+        return i
+
+    def _is_complete(self) -> bool:
+        """
+        Determine whether the game is complete.
+
+        Returns:
+            True if all rolls for a valid complete game have been recorded.
+        """
+        frame_index, _ = self._current_position()
+
+        if frame_index < self.TOTAL_FRAMES - 1:
+            return False
+
+        if frame_index > self.TOTAL_FRAMES - 1:
+            return True
+
+        # In the tenth frame: determine completion.
+        tenth_start: int = self._tenth_frame_start()
+        tenth_rolls: list[int] = self._rolls[tenth_start:]
+
+        if len(tenth_rolls) == 0:
+            return False
+        if len(tenth_rolls) == 1:
+            return False
+        if len(tenth_rolls) == 2:
+            first, second = tenth_rolls[0], tenth_rolls[1]
+            if first == self.MAX_PINS:
+                return False  # Need two fill balls.
+            if first + second == self.MAX_PINS:
+                return False  # Need one fill ball.
+            return True
+        # len(tenth_rolls) == 3
+        return True

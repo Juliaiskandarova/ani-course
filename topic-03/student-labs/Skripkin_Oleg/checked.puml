@@ -1,0 +1,86 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Times New Roman
+skinparam linetype ortho
+hide circle
+hide empty members
+entity "research_directions" as research_directions {
+  id : integer <<PK>>
+  name : varchar(255)
+}
+entity "leaders" as leaders {
+  id : integer <<PK>>
+  full_name : varchar(255)
+}
+entity "organizations" as organizations {
+  id : integer <<PK>>
+  name : varchar(255)
+  address : varchar(500)
+}
+entity "competitions" as competitions {
+  id : integer <<PK>>
+  year : integer <<UQ>>
+  total_budget : decimal(15, 2)
+  max_grant_percent : decimal(5, 2)
+  deadline_date : date
+}
+entity "grant_requests" as grant_requests {
+  id : integer <<PK>>
+  competition_id : integer <<FK>>
+  leader_id : integer <<FK>>
+  organization_id : integer <<FK>>
+  request_date : date
+  direction_id : integer <<FK>>
+  research_topic : varchar(500)
+  participant_count : integer
+  requested_amount : decimal(15, 2)
+  address : varchar(500)
+  base_amount : decimal(15, 2)
+  is_late : boolean
+}
+entity "decisions" as decisions {
+  request_id : integer <<PK, FK>>
+  is_worthy : boolean
+  status : varchar(50)
+  rejection_reason : varchar(50)
+  failed_grant_id : integer <<FK>>
+}
+entity "allocation_rounds" as allocation_rounds {
+  id : integer <<PK>>
+  competition_id : integer <<FK>>
+  round_number : integer
+  round_date : date
+  is_final : boolean
+}
+entity "request_rounds" as request_rounds {
+  id : integer <<PK>>
+  round_id : integer <<FK>>
+  request_id : integer <<FK>>
+  competition_id : integer <<FK>>
+  initial_amount : decimal(15, 2)
+  reduction_coefficient : decimal(10, 8)
+  final_amount : decimal(15, 2)
+}
+entity "grants" as grants {
+  id : integer <<PK>>
+  request_id : integer <<FK, UQ>>
+  start_date : date
+  end_date : date
+}
+entity "grant_results" as grant_results {
+  grant_id : integer <<PK, FK>>
+  is_successful : boolean
+  result_notes : text
+}
+competitions ||--o{ grant_requests
+leaders ||--o{ grant_requests
+organizations ||--o{ grant_requests
+research_directions ||--o{ grant_requests
+grant_requests ||--o| decisions
+grants |o--o{ decisions
+competitions ||--o{ allocation_rounds
+grant_requests ||--o| grants
+grants ||--o| grant_results
+allocation_rounds ||--o{ request_rounds
+grant_requests ||--o{ request_rounds
+@enduml

@@ -1,0 +1,42 @@
+@startuml ClassDiagram
+
+class Camera {
+  - serialNumber: String
+  - model: String
+}
+
+class Client {
+  - fullName: String
+  - email: String
+}
+
+class Booking {
+  - startTime: DateTime
+  - endTime: DateTime
+  - status: BookingStatus
+  - rejectionReason: String
+  + submitRequest()
+  + cancel()
+}
+
+enum BookingStatus {
+  CONFIRMED
+  REJECTED
+  CANCELED
+}
+
+Client "1" -- "0..*" Booking : "создает >"
+Camera "1" -- "0..*" Booking : "бронируется в >"
+
+note right of Booking::status
+  R8: Отмененная бронь не блокирует интервал.
+  Статус CANCELED сохраняется в БД.
+end note
+
+note left of Booking
+  R7: Интервал корректен, если 
+  startTime < endTime.
+  Соседние могут соприкасаться.
+end note
+
+@enduml

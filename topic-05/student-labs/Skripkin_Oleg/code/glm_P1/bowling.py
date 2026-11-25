@@ -1,0 +1,110 @@
+class BowlingGame:
+    """
+    A class to keep track of the score of a game of bowling.
+    """
+    def __init__(self) -> None:
+        """
+        Initialize a new BowlingGame instance.
+        """
+        self._rolls: list[int] = []
+        self._current_frame: int = 1
+        self._frame_rolls_count: int = 0
+        self._frame_pins: int = 0
+        self._extra_rolls_needed: int = 0
+        self._game_over: bool = False
+
+    def roll(self, pins: int) -> None:
+        """
+        Records a roll in the bowling game.
+
+        Args:
+            pins: The number of pins knocked down in the roll.
+
+        Raises:
+            ValueError: If the game is already over, the pins value is invalid,
+                        or if the roll exceeds the remaining pins in the frame.
+        """
+        if self._game_over:
+            raise ValueError("Cannot roll: the game is already over.")
+        if not isinstance(pins, int) or pins < 0 or pins > 10:
+            raise ValueError("Pins knocked down must be an integer between 0 and 10.")
+        
+        if self._current_frame < 10:
+            self._frame_pins += pins
+            self._frame_rolls_count += 1
+            
+            if self._frame_pins > 10:
+                raise ValueError("A frame's total cannot exceed 10 pins.")
+            
+            if self._frame_rolls_count == 1 and pins == 10:
+                self._current_frame += 1
+                self._frame_pins = 0
+                self._frame_rolls_count = 0
+            elif self._frame_rolls_count == 2:
+                self._current_frame += 1
+                self._frame_pins = 0
+                self._frame_rolls_count = 0
+        else:
+            self._frame_rolls_count += 1
+            
+            if self._frame_rolls_count == 1:
+                if pins == 10:
+                    self._extra_rolls_needed = 2
+                else:
+                    self._frame_pins = pins
+            elif self._frame_rolls_count == 2:
+                if self._frame_rolls_count <= self._extra_rolls_needed or self._extra_rolls_needed > 0:
+                    pass
+                else:
+                    if self._frame_pins + pins > 10:
+                        raise ValueError("A frame's total cannot exceed 10 pins.")
+                    if self._frame_pins + pins == 10:
+                        self._extra_rolls_needed = 1
+                    self._frame_pins = 0
+            elif self._frame_rolls_count == 3:
+                if self._frame_rolls_count > self._extra_rolls_needed:
+                    raise ValueError("Cannot roll: the 10th frame is already complete.")
+                
+                if pins > 10:
+                    raise ValueError("A single roll cannot knock down more than 10 pins.")
+                if self._extra_rolls_needed == 1 and self._rolls[-1] != 10 and self._rolls[-1] + pins > 10:
+                    raise ValueError("A frame's total cannot exceed 10 pins.")
+                if self._extra_rolls_needed == 2 and self._rolls[-1] != 10 and self._rolls[-2] != 10 and self._rolls[-1] + pins > 10:
+                    raise ValueError("A frame's total cannot exceed 10 pins.")
+            
+            self._rolls.append(pins)
+            if self._frame_rolls_count == 3 or (self._frame_rolls_count == 2 and self._extra_rolls_needed == 0):
+                self._game_over = True
+            return
+
+        self._rolls.append(pins)
+
+    def score(self) -> int:
+        """
+        Calculates the total score for the bowling game.
+
+        Returns:
+            The total score as an integer.
+
+        Raises:
+            ValueError: If the game is not yet complete.
+        """
+        if not self._game_over:
+            raise ValueError("Score cannot be calculated until the game is complete.")
+        
+        total_score = 0
+        roll_index = 0
+        
+        for _ in range(10):
+            if self._rolls[roll_index] == 10:
+                total_score += 10 + self._rolls[roll_index + 1] + self._rolls[roll_index + 2]
+                roll_index += 1
+            else:
+                frame_score = self._rolls[roll_index] + self._rolls[roll_index + 1]
+                if frame_score == 10:
+                    total_score += 10 + self._rolls[roll_index + 2]
+                else:
+                    total_score += frame_score
+                roll_index += 2
+                
+        return total_score

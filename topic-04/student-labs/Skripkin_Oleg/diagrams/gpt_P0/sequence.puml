@@ -1,0 +1,29 @@
+@startuml
+actor "Клиент" as Client
+participant "Система бронирования" as System
+database "Хранилище броней" as Repository
+
+Client -> System : податьЗаявку(камера, начало, конец)
+
+alt начало >= конец
+  System --> Client : отказ("Начало должно быть раньше конца")
+else начало < конец
+  System -> Repository : найтиПодтвержденныеБрони(камера)
+  Repository --> System : брони
+
+  note over System
+    Пересечение существует, если
+    начало < бронь.конец
+    и бронь.начало < конец.
+    Равные границы допустимы.
+  end note
+
+  alt найдена пересекающаяся бронь
+    System --> Client : отказ("Камера занята в указанный интервал")
+  else пересечений нет
+    System -> Repository : сохранить(новая бронь, CONFIRMED)
+    Repository --> System : подтвержденная бронь
+    System --> Client : подтверждение(бронь)
+  end
+end
+@enduml

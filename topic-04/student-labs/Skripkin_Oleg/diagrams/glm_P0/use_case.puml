@@ -1,0 +1,29 @@
+@startuml UseCaseDiagram
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку" as UC1
+  usecase "Просмотреть свои брони" as UC2
+  usecase "Отменить свою бронь" as UC3
+  usecase "Просмотреть все брони" as UC4
+  usecase "Проверить интервал" as UC5
+  usecase "Создать подтвержденную бронь" as UC6
+  usecase "Отказать в брони" as UC7
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+Staff --> UC4
+
+UC1 ..> UC5 : <<include>>
+UC5 ..> UC6 : <<extend>> \n(нет пересечений,\nинтервал корректен)
+UC5 ..> UC7 : <<extend>> \n(есть пересечения\nили интервал некорректен)
+UC3 ..> UC5 : <<include>> \n(проверка, что бронь\nне блокирует интервал)
+
+@enduml

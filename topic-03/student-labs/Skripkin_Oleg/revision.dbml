@@ -1,0 +1,88 @@
+// Допущения и комментарий к проектированию:
+// 1. ФИО не является идентификатором. История невыполненного гранта ищется по идентификатору руководителя (leaders.id).
+// 2. Лимит "один грант на руководителя" проверяется по ВЫДЕЛЕННЫМ грантам (grants), а не по всем поданным заявкам.
+// 3. Заявка, поданная в день дедлайна, своевременна (сравнение request_date <= deadline_date). 
+//    Поздняя заявка хранится, но не оценивается на "достойно/недостойно" (is_worthy остается null).
+// 4. Для пропорционального уменьшения (втискивания) сохраняется первоначальная база суммы min(запрошено, 10%_бюджета) в grant_requests.base_amount. 
+//    Итоговая сумма (final_amount) в таблице decisions — единый источник истины для писем и отчетов, второго поля суммы нет.
+//    Округление при пропорциональном уменьшении должно детерминированно распределять копейки, чтобы сохранять общий лимит.
+// 5. Финальное решение (decisions), назначенная сумма (decisions.final_amount) и итог исполнения (grant_results) разделены.
+// 6. Годовой финансовый отчет собирается из annual_budgets (бюджет) и SUM(decisions.final_amount) WHERE status='approved' (распределение).
+// 7. Списки принятых и отклоненных заявок с группировкой по причинам собираются из таблицы decisions (статусы и причины).
+
+Table research_directions {
+  id integer [primary key]
+  name varchar(255) [not null]
+}
+
+Table leaders {
+  id integer [primary key]
+  full_name varchar(255) [not null]
+  Note: 'Идентификатор руководителя для исключения путаницы однофамильцев'
+}
+
+Table organizations {
+  id integer [primary key]
+  name varchar(255) [not null]
+  address varchar(500)
+}
+
+Table competitions {
+  id integer [primary key]
+  year integer [not null, note: 'Год проведения конкурса']
+  total_budget decimal(15, 2) [not null]
+  max_grant_percent decimal(5, 2) [not null, default: 10.0, note: 'Максимальный процент от бюджета на одну заявку']
+  deadline_date date [not null]
+  Note: 'Конкурс задает дедлайн и бюджет'
+}
+
+Table grant_requests {
+  id integer [primary key]
+  competition_id integer [not null, ref: > competitions.id]
+  leader_id integer [not null, ref: > leaders.id]
+  organization_id integer [not null, ref: > organizations.id]
+  request_date date [not null]
+  direction_id integer [not null, ref: > research_directions.id]
+  research_topic varchar(500) [not null]
+  participant_count integer [not null]
+  requested_amount decimal(15, 2) [not null]
+  address varchar(500) [not null, note: 'Адрес из заявки (может отличаться от справочника)']
+  base_amount decimal(15, 2) [not null, note: 'База для расчета: min(requested_amount, 10% от бюджета)']
+  is_late boolean [not null, note: 'true если request_date > deadline_date. Поздние заявки не оцениваются.']
+  
+  Note: 'Проверка транзакции/БД: base_amount = LEAST(requested_amount, competitions.total_budget * competitions.max_grant_percent / 100)'
+}
+
+Table decisions {
+  request_id integer [primary key, ref: - grant_requests.id]
+  is_worthy boolean [note: 'true - достойно, false - фуфло. NULL для поздних заявок']
+  status varchar(50) [not null, note: 'approved (принята), rejected (отклонена)']
+  rejection_reason varchar(50) [note: 'late, bad_topic, past_failure, no_money']
+  failed_grant_id integer [ref: > grants.id, note: 'Связь с конкретным невыполненным грантом для причины past_failure']
+  final_amount decimal(15, 2) [not null, default: 0, note: 'Итоговая сумма. Единый источник для писем и отчетов. 0 если отказ']
+  
+  Note: 'Проверка транзакции/БД: is_worthy может быть null только если is_late = true.
+  Если status = rejected, final_amount = 0.
+  Если rejection_reason = past_failure, failed_grant_id не должен быть null.'
+}
+
+Table grants {
+  id integer [primary key]
+  request_id integer [not null, ref: - grant_requests.id, unique]
+  leader_id integer [not null, ref: > leaders.id]
+  start_date date [not null]
+  end_date date [not null, note: 'Дата окончания годового гранта']
+  competition_id integer [not null, ref: > competitions.id]
+  
+  Note: 'Проверка транзакции/БД: Защита от одновременных грантов. 
+  При добавлении гранта проверяется отсутствие пересечений по датам:
+  NOT EXISTS (SELECT 1 FROM grants g2 WHERE g2.leader_id = grants.leader_id 
+  AND g2.id != grants.id AND grants.start_date < g2.end_date AND g2.start_date < grants.end_date).
+  Ограничение "один грант в год" проверяется здесь, а не в заявках.'
+}
+
+Table grant_results {
+  grant_id integer [primary key, ref: - grants.id]
+  is_successful boolean [not null, note: 'true - успех, false - неуспех']
+  result_notes text
+}

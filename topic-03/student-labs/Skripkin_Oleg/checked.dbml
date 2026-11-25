@@ -1,0 +1,129 @@
+// Допущения и комментарии к проектированию:
+// 1. Идентификация: ФИО не является идентификатором. История невыполненного гранта ищется по leaders.id. Однофамильцы не отклоняются.
+// 2. Лимит "один грант на руководителя в год" и защита от пересечения сроков проверяется по таблице grants (выделенным грантам). 
+//    Требуется транзакционная блокировка по leader_id (SELECT ... FOR UPDATE) или эквивалентное ограничение БД при вставке гранта.
+// 3. Конкурс задает дедлайн и бюджет. Заявка, поданная в день дедлайна, своевременна (request_date <= deadline_date). 
+//    Поздняя заявка хранится, но не оценивается (is_worthy = null) и не участвует в раундах.
+// 4. Причина past_failure ссылается только на конкретный завершенный неуспешно грант того же руководителя.
+// 5. Раунды расчёта: Добавлены таблицы allocation_rounds (раунды конкурса) и request_rounds (строки раунда по заявкам).
+//    Хранится база, коэффициент и суммы до/после перерасчёта. Выделяется один финальный раунд (is_final = true).
+//    Округление пропорционального расчёта выполняется в копейках: округление вниз, оставшиеся копейки распределяются 
+//    по убыванию дробного остатка с разрешением равенства по id заявки. Сумма по раунду не превышает бюджет.
+//    Итоговая сумма для отчёта и письма берётся ТОЛЬКО из строки финального раунда (request_rounds.final_amount).
+// 6. Отчёты и списки:
+//    - Бюджет, объём распределения и остаток: competitions.total_budget и SUM(request_rounds.final_amount WHERE rounds.is_final = true).
+//    - Список принятых заявок: decisions WHERE status = 'approved' + request_rounds финального раунда.
+//    - Список отклонённых заявок с группировкой по причинам: decisions WHERE status = 'rejected' GROUP BY rejection_reason.
+//    - Сведения для письма: берутся из join decisions, request_rounds (для суммы) и grant_requests.
+// 7. В grants руководитель и конкурс определяются по связанной заявке.
+
+Table research_directions {
+  id integer [primary key]
+  name varchar(255) [not null]
+}
+
+Table leaders {
+  id integer [primary key]
+  full_name varchar(255) [not null]
+}
+
+Table organizations {
+  id integer [primary key]
+  name varchar(255) [not null]
+  address varchar(500)
+}
+
+Table competitions {
+  id integer [primary key]
+  year integer [not null, unique, note: 'Уникальность года конкурса (один бюджет на год)']
+  total_budget decimal(15, 2) [not null]
+  max_grant_percent decimal(5, 2) [not null, default: 10.0, note: 'Максимальный процент от бюджета на одну заявку']
+  deadline_date date [not null]
+}
+
+Table grant_requests {
+  id integer [primary key]
+  competition_id integer [not null, ref: > competitions.id]
+  leader_id integer [not null, ref: > leaders.id]
+  organization_id integer [not null, ref: > organizations.id]
+  request_date date [not null]
+  direction_id integer [not null, ref: > research_directions.id]
+  research_topic varchar(500) [not null]
+  participant_count integer [not null]
+  requested_amount decimal(15, 2) [not null]
+  address varchar(500) [not null]
+  base_amount decimal(15, 2) [not null, note: 'База для расчета: min(requested_amount, 10% от бюджета конкурса)']
+  is_late boolean [not null, note: 'true если request_date > deadline_date.']
+  indexes {
+    (id, competition_id) [unique]
+  }
+
+  Note: 'Проверка транзакции/БД: base_amount = LEAST(requested_amount, competitions.total_budget * competitions.max_grant_percent / 100).
+  Проверка транзакции/БД: Если is_late = true, заявка не оценивается и не участвует в раундах распределения.'
+}
+
+Table decisions {
+  request_id integer [primary key, ref: - grant_requests.id]
+  is_worthy boolean [note: 'true - достойно, false - фуфло. NULL для поздних заявок (is_late=true)']
+  status varchar(50) [not null, note: 'approved (принята), rejected (отклонена)']
+  rejection_reason varchar(50) [note: 'late, bad_topic, past_failure, no_money']
+  failed_grant_id integer [ref: > grants.id, note: 'Связь с конкретным невыполненным грантом того же руководителя для причины past_failure']
+  
+  Note: 'Проверка транзакции/БД: is_worthy может быть null только если is_late = true.
+  Если rejection_reason = past_failure, failed_grant_id не должен быть null, и грант по failed_grant_id должен принадлежать тому же руководителю через его заявку, завершиться до новой заявки и иметь результат is_successful = false.
+  Согласованность итогового решения с грантом: Если status = approved, должна существовать запись в grants для этого request_id.'
+}
+
+Table allocation_rounds {
+  id integer [primary key]
+  competition_id integer [not null, ref: > competitions.id]
+  round_number integer [not null]
+  round_date date [not null]
+  is_final boolean [not null, default: false, note: 'Выделяет один финальный раунд']
+  indexes {
+    (competition_id, round_number) [unique]
+    (id, competition_id) [unique]
+  }
+  
+  Note: 'Проверка транзакции/БД: Для каждого competition_id может быть только одна строка с is_final = true.
+  Проверка транзакции: сумма final_amount по строкам раунда не превышает competitions.total_budget.'
+}
+
+Table request_rounds {
+  id integer [primary key]
+  round_id integer [not null]
+  request_id integer [not null]
+  competition_id integer [not null]
+  initial_amount decimal(15, 2) [not null, note: 'Сумма до перерасчёта в данном раунде']
+  reduction_coefficient decimal(10, 8) [note: 'Коэффициент пропорционального уменьшения']
+  final_amount decimal(15, 2) [not null, note: 'Итоговая сумма после перерасчёта. Единый источник для отчёта и писем']
+  
+  indexes {
+    (round_id, request_id) [unique]
+  }
+
+  Note: 'Общий competition_id в двух составных внешних ключах фиксирует конкурс заявки и раунда.
+  Проверка БД: Допуск только достойных заявок (decisions.is_worthy = true) и не поздних (grant_requests.is_late = false) в request_rounds.
+  Детерминированное округление: final_amount округляется вниз, оставшиеся копейки распределяются по убыванию дробного остатка с разрешением равенства по id заявки.'
+}
+
+Table grants {
+  id integer [primary key]
+  request_id integer [not null, ref: - grant_requests.id, unique]
+  start_date date [not null]
+  end_date date [not null, note: 'Конец годового гранта, граница не включается']
+
+  Note: 'В транзакции создания гранта блокируется запись руководителя. Руководитель и конкурс извлекаются из заявки.
+  За один конкурс у руководителя только один выделенный грант. Одновременные интервалы грантов одного руководителя запрещены.
+  Грант длится один год, интервал включает дату начала. approved связан с грантом и строкой финального раунда.'
+}
+
+Table grant_results {
+  grant_id integer [primary key, ref: - grants.id]
+  is_successful boolean [not null, note: 'true - успех, false - неуспех']
+  result_notes text
+  Note: 'Разделяет финальное решение (decisions), назначенную сумму (request_rounds финального раунда) и итог исполнения.'
+}
+
+Ref: request_rounds.(round_id, competition_id) > allocation_rounds.(id, competition_id)
+Ref: request_rounds.(request_id, competition_id) > grant_requests.(id, competition_id)

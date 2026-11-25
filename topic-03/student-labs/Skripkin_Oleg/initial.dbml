@@ -1,0 +1,61 @@
+// Допущения:
+// 1. Бюджет распределяется в рамках конкретного года (конкурса). 
+// 2. Для проверки "не выполнил прошлый грант" хранится история. В схеме есть заявка (request), решение (decision), факт выделения (grant) и итог (grant_result).
+// 3. Статусы заявки фиксируются в таблице Decision для генерации писем и отчетов (поздно, фуфло, прошлый провал, нет денег).
+// 4. "Втискивание" пропорционально уменьшает сумму для всех уже одобренных (статус 'approved_reduced').
+
+Table research_directions {
+  id integer [primary key]
+  name varchar(255) [not null]
+}
+
+Table organizations {
+  id integer [primary key]
+  name varchar(255) [not null]
+  address varchar(500)
+}
+
+Table grant_requests {
+  id integer [primary key]
+  year integer [not null, note: 'Год проведения конкурса']
+  request_date date [not null, note: 'Дата подачи заявки']
+  deadline_date date [not null, note: 'Дедлайн для данного конкурса, для отсева']
+  direction_id integer [not null, ref: > research_directions.id]
+  research_topic varchar(500) [not null]
+  leader_name varchar(255) [not null]
+  participant_count integer [not null]
+  requested_amount decimal(15, 2) [not null]
+  organization_id integer [not null, ref: > organizations.id]
+  address varchar(500) [note: 'Адрес из заявки (может отличаться от справочника организаций)']
+  
+  Note: 'Человек не м.б. руководителем более чем одного гранта в год. 
+  Проверяется логикой: SELECT leader_name, year FROM grant_requests GROUP BY leader_name, year HAVING COUNT(*) > 1'
+}
+
+Table decisions {
+  request_id integer [primary key, ref: > grant_requests.id]
+  is_worthy boolean [not null, note: 'true - достойно, false - фуфло']
+  rejection_reason varchar(100) [note: 'late (поздно), bad_topic (фуфло), past_failure (прошлый провал), no_money (нет денег)']
+  final_status varchar(50) [not null, note: 'rejected, approved_full, approved_reduced, no_money']
+  approved_amount decimal(15, 2) [note: 'Итоговая выделенная сумма. NULL если отказ']
+}
+
+Table grants {
+  id integer [primary key]
+  request_id integer [not null, ref: > grant_requests.id, unique]
+  year integer [not null, note: 'Год выдачи гранта (сроком на 1 год)']
+  initial_allocated_amount decimal(15, 2) [not null]
+  final_allocated_amount decimal(15, 2) [not null, note: 'Сумма после возможного пропорционального урезания при втискивании']
+}
+
+Table grant_results {
+  grant_id integer [primary key, ref: > grants.id]
+  is_successful boolean [not null, note: 'true - успех, false - неуспех']
+  result_notes text
+}
+
+Table annual_budgets {
+  year integer [primary key, note: 'Год конкурса/выдачи грантов']
+  total_budget decimal(15, 2) [not null]
+  max_grant_percent decimal(5, 2) [not null, default: 10.0, note: 'Максимальный процент от бюджета на одну заявку']
+}

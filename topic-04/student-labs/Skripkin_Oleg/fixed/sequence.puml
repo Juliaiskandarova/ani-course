@@ -1,0 +1,34 @@
+@startuml
+actor "Клиент" as Client
+boundary "Система бронирования камер" as System
+database "Брони" as Store
+
+Client -> System : податьЗаявку(камера, начало, конец)
+activate System
+
+alt начало >= конец
+  System --> Client : отказ(причина: некорректный интервал)
+else начало < конец
+  System -> Store : найти подтвержденные брони\nтой же камеры, пересекающие интервал
+  Store --> System : найденные брони
+
+  alt есть пересечение
+    System --> Client : отказ(причина: пересечение\nс подтвержденной бронью)
+  else пересечения нет
+    create "Бронь" as Booking
+    System -> Booking : создать(клиент, камера,\nначало, конец, Подтверждена)
+    System -> Store : сохранить(Booking)
+    Store --> System : сохранено
+    System --> Client : подтверждение(Booking)
+  end
+end
+
+deactivate System
+
+note over System, Store
+  Пересечение: начало < конец существующей брони
+  и начало существующей брони < конец.
+  Отмененные брони не учитываются.
+  В обеих ветках отказа бронь не создается.
+end note
+@enduml

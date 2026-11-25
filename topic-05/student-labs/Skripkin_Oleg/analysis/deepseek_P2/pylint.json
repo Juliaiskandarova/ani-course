@@ -1,0 +1,91 @@
+{
+    "messages": [
+        {
+            "type": "convention",
+            "symbol": "line-too-long",
+            "message": "Line too long (101/100)",
+            "messageId": "C0301",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 64,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\\u042f\\AppData\\Local\\Temp\\ani-course-submission-af1bd9d3ef00408a8412abe7c8bdf2f6\\topic-05\\student-labs\\Skripkin_Oleg\\code\\deepseek_P2\\bowling.py"
+        },
+        {
+            "type": "convention",
+            "symbol": "line-too-long",
+            "message": "Line too long (103/100)",
+            "messageId": "C0301",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 165,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\\u042f\\AppData\\Local\\Temp\\ani-course-submission-af1bd9d3ef00408a8412abe7c8bdf2f6\\topic-05\\student-labs\\Skripkin_Oleg\\code\\deepseek_P2\\bowling.py"
+        },
+        {
+            "type": "convention",
+            "symbol": "line-too-long",
+            "message": "Line too long (107/100)",
+            "messageId": "C0301",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "",
+            "line": 179,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\\u042f\\AppData\\Local\\Temp\\ani-course-submission-af1bd9d3ef00408a8412abe7c8bdf2f6\\topic-05\\student-labs\\Skripkin_Oleg\\code\\deepseek_P2\\bowling.py"
+        },
+        {
+            "type": "convention",
+            "symbol": "missing-module-docstring",
+            "message": "Missing module docstring",
+            "messageId": "C0114",
+            "confidence": "HIGH",
+            "module": "bowling",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": null,
+            "endColumn": null,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\\u042f\\AppData\\Local\\Temp\\ani-course-submission-af1bd9d3ef00408a8412abe7c8bdf2f6\\topic-05\\student-labs\\Skripkin_Oleg\\code\\deepseek_P2\\bowling.py"
+        },
+        {
+            "type": "refactor",
+            "symbol": "too-many-return-statements",
+            "message": "Too many return statements (8/6)",
+            "messageId": "R0911",
+            "confidence": "UNDEFINED",
+            "module": "bowling",
+            "obj": "BowlingGame._is_complete",
+            "line": 218,
+            "column": 4,
+            "endLine": 218,
+            "endColumn": 20,
+            "path": "bowling.py",
+            "absolutePath": "C:\\Users\\\u042f\\AppData\\Local\\Temp\\ani-course-submission-af1bd9d3ef00408a8412abe7c8bdf2f6\\topic-05\\student-labs\\Skripkin_Oleg\\code\\deepseek_P2\\bowling.py"
+        }
+    ],
+    "statistics": {
+        "messageTypeCount": {
+            "fatal": 0,
+            "error": 0,
+            "warning": 0,
+            "refactor": 1,
+            "convention": 4,
+            "info": 0
+        },
+        "modulesLinted": 3,
+        "score": 9.57
+    }
+}

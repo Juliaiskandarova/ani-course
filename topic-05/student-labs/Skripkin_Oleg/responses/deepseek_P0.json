@@ -1,0 +1,15 @@
+{
+  "requested_model": "deepseek-v4.1-flash",
+  "response_model": "deepseek-v4.1-flash",
+  "prompt": "P0",
+  "time_utc": "2026-11-25T22:49:27.4301524+00:00",
+  "id": "chat-0353xPMkpVCukUnUREc8xB",
+  "finish_reason": "stop",
+  "tokens_input": 409,
+  "tokens_output": 1257,
+  "tokens_reasoning": 0,
+  "cost_rub": 0.18,
+  "max_tokens": 4200,
+  "reasoning_effort": "none",
+  "messages": 1
+}

@@ -1,0 +1,66 @@
+class BowlingGame:
+    def __init__(self):
+        self.rolls = []
+        self.frame = 0
+        self.frame_rolls = []
+
+    def roll(self, pins: int) -> None:
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise ValueError("Количество сбитых кеглей должно быть целым числом")
+        if not 0 <= pins <= 10:
+            raise ValueError("За бросок можно сбить от 0 до 10 кеглей")
+        if self.frame == 10:
+            raise ValueError("Игра уже завершена")
+
+        current = self.frame_rolls
+
+        if self.frame < 9:
+            if current and current[0] + pins > 10:
+                raise ValueError("За фрейм нельзя сбить больше 10 кеглей")
+
+            self.rolls.append(pins)
+            current.append(pins)
+
+            if pins == 10 or len(current) == 2:
+                self.frame += 1
+                self.frame_rolls = []
+            return
+
+        # Десятый фрейм.
+        if len(current) == 1 and current[0] != 10:
+            if current[0] + pins > 10:
+                raise ValueError("За два броска нельзя сбить больше 10 кеглей")
+
+        if len(current) == 2 and current[0] == 10 and current[1] != 10:
+            if current[1] + pins > 10:
+                raise ValueError("После второго броска кегли не были выставлены заново")
+
+        self.rolls.append(pins)
+        current.append(pins)
+
+        if len(current) == 2 and sum(current) < 10:
+            self.frame = 10
+        elif len(current) == 3:
+            self.frame = 10
+
+    def score(self) -> int:
+        if self.frame != 10:
+            raise ValueError("Игра ещё не завершена")
+
+        total = 0
+        index = 0
+
+        for _ in range(9):
+            first = self.rolls[index]
+
+            if first == 10:
+                total += 10 + self.rolls[index + 1] + self.rolls[index + 2]
+                index += 1
+            elif first + self.rolls[index + 1] == 10:
+                total += 10 + self.rolls[index + 2]
+                index += 2
+            else:
+                total += first + self.rolls[index + 1]
+                index += 2
+
+        return total + sum(self.rolls[index:])

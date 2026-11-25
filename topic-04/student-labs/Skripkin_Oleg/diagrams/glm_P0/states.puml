@@ -1,0 +1,25 @@
+@startuml StateDiagram
+
+[*] --> Submitted : R1: Клиент подает заявку
+
+state Submitted {
+  state "Проверка интервала (R7) \nи пересечений (R2)" as Validation
+}
+
+Submitted --> Confirmed : R2: Нет пересечений \n(Создана подтвержденная бронь)
+Submitted --> Rejected : R2: Есть пересечение \n(Отказ с причиной)
+
+state Confirmed {
+  state "Бронь активна и \nблокирует интервал" as Active
+}
+
+Confirmed --> Canceled : R3: Клиент отменяет бронь
+
+state Canceled {
+  state "Запись сохранена (R8) \nИнтервал разблокирован" as Inactive
+}
+
+Rejected --> [*]
+Canceled --> [*]
+
+@enduml

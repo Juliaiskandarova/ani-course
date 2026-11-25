@@ -1,0 +1,161 @@
+.FFFFFF......FF.FFFFFF..FFF.F..                                          [100%]
+================================== FAILURES ===================================
+_______ BowlingTest.test_a_spare_followed_by_zeros_is_worth_ten_points ________
+..\..\tests\bowling_test.py:32: in test_a_spare_followed_by_zeros_is_worth_ten_points
+    self.assertEqual(game.score(), 10)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once _
+..\..\tests\bowling_test.py:46: in test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:109: in roll
+    raise ValueError("Invalid roll: cannot knock down more than 10 pins in a frame.")
+E   ValueError: Invalid roll: cannot knock down more than 10 pins in a frame.
+__ BowlingTest.test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll ___
+..\..\tests\bowling_test.py:52: in test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll
+    self.assertEqual(game.score(), 10)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once _
+..\..\tests\bowling_test.py:70: in test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:112: in roll
+    raise ValueError("Cannot roll after the game is over.")
+E   ValueError: Cannot roll after the game is over.
+_ BowlingTest.test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus _
+..\..\tests\bowling_test.py:92: in test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:109: in roll
+    raise ValueError("Invalid roll: cannot knock down more than 10 pins in a frame.")
+E   ValueError: Invalid roll: cannot knock down more than 10 pins in a frame.
+_______________ BowlingTest.test_all_strikes_is_a_perfect_game ________________
+..\..\tests\bowling_test.py:98: in test_all_strikes_is_a_perfect_game
+    self.assertEqual(game.score(), 300)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+___________ BowlingTest.test_cannot_roll_after_bonus_roll_for_spare ___________
+..\..\tests\bowling_test.py:201: in test_cannot_roll_after_bonus_roll_for_spare
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:109: in roll
+    raise ValueError("Invalid roll: cannot knock down more than 10 pins in a frame.")
+E   ValueError: Invalid roll: cannot knock down more than 10 pins in a frame.
+__________ BowlingTest.test_cannot_roll_after_bonus_rolls_for_strike __________
+..\..\tests\bowling_test.py:207: in test_cannot_roll_after_bonus_rolls_for_strike
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:112: in roll
+    raise ValueError("Cannot roll after the game is over.")
+E   ValueError: Cannot roll after the game is over.
+________ BowlingTest.test_consecutive_spares_each_get_a_one_roll_bonus ________
+..\..\tests\bowling_test.py:42: in test_consecutive_spares_each_get_a_one_roll_bonus
+    self.assertEqual(game.score(), 31)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+______ BowlingTest.test_consecutive_strikes_each_get_the_two_roll_bonus _______
+..\..\tests\bowling_test.py:64: in test_consecutive_strikes_each_get_the_two_roll_bonus
+    self.assertEqual(game.score(), 81)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points _
+..\..\tests\bowling_test.py:86: in test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points
+    self.assertEqual(game.score(), 31)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_points_scored_in_the_roll_after_a_spare_are_counted_twice __
+..\..\tests\bowling_test.py:37: in test_points_scored_in_the_roll_after_a_spare_are_counted_twice
+    self.assertEqual(game.score(), 16)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus _
+..\..\tests\bowling_test.py:59: in test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus
+    self.assertEqual(game.score(), 26)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll _
+..\..\tests\bowling_test.py:75: in test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll
+    game = self.roll_new_game(rolls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\tests\bowling_test.py:16: in roll_new_game
+    game.roll(roll)
+bowling.py:112: in roll
+    raise ValueError("Cannot roll after the game is over.")
+E   ValueError: Cannot roll after the game is over.
+_______ BowlingTest.test_should_be_able_to_score_a_game_with_all_zeros ________
+..\..\tests\bowling_test.py:22: in test_should_be_able_to_score_a_game_with_all_zeros
+    self.assertEqual(game.score(), 0)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+__ BowlingTest.test_should_be_able_to_score_a_game_with_no_strikes_or_spares __
+..\..\tests\bowling_test.py:27: in test_should_be_able_to_score_a_game_with_no_strikes_or_spares
+    self.assertEqual(game.score(), 90)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+___ BowlingTest.test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls ___
+..\..\tests\bowling_test.py:81: in test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls
+    self.assertEqual(game.score(), 30)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+_ BowlingTest.test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike _
+..\..\tests\bowling_test.py:139: in test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike
+    self.assertEqual(game.score(), 26)
+                     ^^^^^^^^^^^^
+bowling.py:188: in score
+    raise ValueError("Game is not complete.")
+E   ValueError: Game is not complete.
+- generated xml file: .\analysis\glm_P2\pytest.xml -
+=========================== short test summary info ===========================
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_a_spare_followed_by_zeros_is_worth_ten_points
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_a_spare_in_the_last_frame_gets_a_one_roll_bonus_that_is_counted_once
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_a_strike_earns_ten_points_in_a_frame_with_a_single_roll
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_a_strike_in_the_last_frame_gets_a_two_roll_bonus_that_is_counted_once
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_a_strike_with_the_one_roll_bonus_after_a_spare_in_the_last_frame_does_not_get_a_bonus
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_all_strikes_is_a_perfect_game
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_roll_for_spare
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_cannot_roll_after_bonus_rolls_for_strike
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_consecutive_spares_each_get_a_one_roll_bonus
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_consecutive_strikes_each_get_the_two_roll_bonus
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_last_two_strikes_followed_by_only_last_bonus_with_non_strike_points
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_points_scored_in_the_roll_after_a_spare_are_counted_twice
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_rolling_a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_all_zeros
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_should_be_able_to_score_a_game_with_no_strikes_or_spares
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_strikes_with_the_two_roll_bonus_do_not_get_bonus_rolls
+FAILED ..\..\tests\bowling_test.py::BowlingTest::test_two_bonus_rolls_after_a_strike_in_the_last_frame_can_score_more_than_10_points_if_one_is_a_strike
+18 failed, 13 passed in 0.31s

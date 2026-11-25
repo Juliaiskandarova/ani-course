@@ -1,0 +1,252 @@
+Ниже представлены четыре диаграммы на языке PlantUML, разработанные строго по предоставленным требованиям R1–R8. 
+
+### Допущения
+Для полноты картин и реализации логики были сделаны следующие допущения, не противоречащие исходным правилам:
+1. Интервал задается двумя атрибутами: `start` и `end` (тип DateTime).
+2. Поля `CameraID` и `ClientID` являются уникальными идентификаторами (первичными ключами) в системе. Кратности на концах связей в диаграмме классов опираются на эти идентификаторы.
+3. Процесс подачи заявки и валидации реализован через сущность-контроллер `RentalSystem`, которая описывает границу системы.
+4. В методе проверки пересечения интервалов используется логика R7: условие `[start >= existing.start AND start < existing.end]` точно описывает запрет на пересечение и при этом разрешает соприкосновение (когда новое `start` равно существующему `end`).
+
+---
+
+### 1. Диаграмма вариантов использования (Use Case Diagram)
+Показывает границу системы, внешних акторов и ветки подтверждения/отказа.
+
+```plantuml
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система проката камер" as SystemBoundary {
+  usecase "Подать заявку" as UC1
+  usecase "Проверить пересечение интервалов" as UC2
+  usecase "Создать подтвержденную бронь" as UC3
+  usecase "Отказать с причиной" as UC4
+  usecase "Просмотреть свои брони" as UC5
+  usecase "Отменить свою подтвержденную бронь" as UC6
+  usecase "Просмотреть все брони" as UC7
+}
+
+Client --> UC1
+Client --> UC5
+Client --> UC6
+
+UC1 ..> UC2 : <<include>>
+UC2 ..> UC3 : <<extend>>\n[Интервал свободен и корректен]
+UC2 ..> UC4 : <<extend>>\n[Интервал занят или некорректен]
+
+Staff --> UC7
+
+note right of UC6
+  Условие отмены:
+  Отменять можно только
+  подтвержденную бронь.
+  Запись сохраняется.
+end note
+
+note right of UC4
+  При отказе заявка
+  завершается, бронь
+  НЕ создается.
+end note
+@enduml
+```
+
+---
+
+### 2. Диаграмма классов (Class Diagram)
+Показывает атрибуты, кратности на обоих концах связей и статусы брони.
+
+```plantuml
+@startuml
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELED
+}
+
+class Client {
+  - clientID: UUID
+  - fullName: String
+  - email: String
+}
+
+class Camera {
+  - cameraID: UUID
+  - serialNumber: String
+  - model: String
+}
+
+class Booking {
+  - bookingID: UUID
+  - start: DateTime
+  - end: DateTime
+  - status: BookingStatus
+  - cancelReason: String
+  + checkIntervalOverlap(): boolean
+}
+
+class Request {
+  - requestID: UUID
+  - start: DateTime
+  - end: DateTime
+  - rejectionReason: String
+  - status: BookingStatus
+}
+
+class RentalSystem {
+  + submitRequest(client, camera, start, end)
+  + viewAllBookings(): List<Booking>
+  + viewClientBookings(client): List<Booking>
+  + cancelBooking(booking)
+}
+
+Client "1" -- "0..*" Booking : "создает >"
+Camera "1" -- "0..*" Booking : "охватывает >"
+Request "1" o-- "0..1" Booking : "генерирует >"
+Client "1" -- "0..*" Request : "подает >"
+Camera "1" -- "0..*" Request : "указывается в >"
+
+RentalSystem --> "1" Client : manages
+RentalSystem --> "1" Camera : manages
+RentalSystem --> "1" Booking : manages
+RentalSystem --> "1" Request : processes
+
+note right of Booking
+  R8: При отмене статус = CANCELED.
+  Запись остается в БД, но не
+  блокирует интервал для новых заявок.
+end note
+@enduml
+```
+
+---
+
+### 3. Диаграмма последовательности (Sequence Diagram)
+Описывает процесс подачи заявки с ветками подтверждения и отказа (проверка, что бронь не создается при отказе).
+
+```plantuml
+@startuml
+actor "Клиент" as C
+participant ":RentalSystem" as Sys
+participant ":Request" as Req
+participant "b: Booking" as Book
+participant "cam: Camera" as Cam
+
+C -> Sys : submitRequest(camera, start, end)
+activate Sys
+
+Sys -> Req : create(camera, start, end)
+activate Req
+Req --> Sys : created
+deactivate Req
+
+Sys -> Sys : isIntervalValid(start, end)
+note right
+  R7: start < end
+end note
+
+alt Начало раньше конца (Корректно)
+  Sys -> Cam : getActiveBookings()
+  activate Cam
+  Cam --> Sys : List<Booking>
+  deactivate Cam
+
+  Sys -> Sys : checkOverlap(existingBookings, start, end)
+  note right
+    R7: Соседние интервалы могут 
+    соприкасаться.
+  end note
+
+  alt Найдено пересечение
+    Sys -> Req : setStatus(REJECTED)
+    Sys -> Req : setRejectionReason("Интервал занят")
+    Sys --> C : Отказ с причиной
+    note over C, Sys
+      R2: Система отказывает.
+      Бронь (Book) НЕ создается.
+    end note
+  else Пересечения нет
+    Sys -> Book : create(client, camera, start, end)
+    activate Book
+    Book --> Sys : bookingInstance
+    deactivate Book
+    
+    Sys -> Book : setStatus(CONFIRMED)
+    Sys --> C : Успех (Подтвержденная бронь)
+  end
+
+else Начало позже или равно концу (Некорректно)
+  Sys -> Req : setStatus(REJECTED)
+  Sys -> Req : setRejectionReason("Некорректный интервал")
+  Sys --> C : Отказ с причиной
+  note over C, Sys
+    Бронь (Book) НЕ создается.
+  end note
+end
+
+deactivate Sys
+@enduml
+```
+
+---
+
+### 4. Диаграмма состояний (State Machine Diagram)
+Описывает жизненный цикл брони с условием отмены.
+
+```plantuml
+@startuml
+[*] --> PENDING : Создана при подаче заявки
+
+PENDING --> CONFIRMED : Интервал свободен и корректен\n(Система подтверждает)
+PENDING --> REJECTED : Интервал занят или некорректен\n(Система отказывает)
+
+CONFIRMED --> CANCELED : Клиент инициирует отмену
+note on transition
+  R3: Условие отмены -
+  отмена доступна только
+  для подтвержденной брони.
+end note
+
+CANCELED --> [*] : Запись сохраняется
+REJECTED --> [*] : Заявка отклонена
+
+state CANCELED {
+  note left
+    R8: Отмененная бронь не 
+    блокирует интервал.
+  end note
+}
+@enduml
+```
+
+---
+
+### Сопоставление требований (R1–R8) с элементами диаграмм
+
+*   **R1 (Клиент подает заявку с камерой, началом и концом интервала):**
+    *   *Use Case:* Связь актора "Клиент" с вариантом использования "Подать заявку".
+    *   *Sequence:* Вызов метода `submitRequest(camera, start, end)` от Клиента к RentalSystem.
+    *   *Class:* Класс `Request` содержит атрибуты `start` и `end`, а также имеет связь с классом `Camera`.
+*   **R2 (Логика пересечения, подтверждения и отказа):**
+    *   *Sequence:* Альтернативные блоки `alt`. Вызовы `setStatus(CONFIRMED)` при отсутствии пересечения и `setStatus(REJECTED)` с `setRejectionReason()` при наличии. В ветке отказа объект `Booking` не инициализируется (не создается).
+    *   *Class:* Метод `checkIntervalOverlap()` в классе `Booking`. Статусы `CONFIRMED` и `REJECTED` в перечислении `BookingStatus`.
+*   **R3 (Просмотр своих броней и отмена подтвержденной):**
+    *   *Use Case:* Варианты "Просмотреть свои брони" и "Отменить свою подтвержденную бронь", привязанные к актору "Клиент".
+    *   *Class:* Методы `viewClientBookings(client)` и `cancelBooking(booking)` в классе `RentalSystem`.
+    *   *State:* Переход из состояния `CONFIRMED` в `CANCELED` с примечанием условия перехода.
+*   **R4 (Сотрудник видит все брони):**
+    *   *Use Case:* Связь актора "Сотрудник проката" с вариантом использования "Просмотреть все брони".
+    *   *Class:* Метод `viewAllBookings()` в интерфейсе `RentalSystem`.
+*   **R5 (Атрибуты камеры и клиента):**
+    *   *Class:* Атрибуты `serialNumber, model` в классе `Camera`; атрибуты `fullName, email` в классе `Client`.
+*   **R6 (Один к одному по камере/клиенту, один ко многим по броням):**
+    *   *Class:* Связи с кратностями `Client "1" -- "0..*" Booking` и `Camera "1" -- "0..*" Booking` (на обоих концах указаны кратности, гарантирующие, что бронь относится ровно к 1 клиенту и 1 камере).
+*   **R7 (Корректность интервала и соприкосновение):**
+    *   *Sequence:* Вызов `isIntervalValid(start, end)` и проверка `start < end`. Примечание о том, что соседние интервалы могут соприкасаться, добавленное к методу `checkOverlap`.
+*   **R8 (Отмена сохраняет запись и снимает блокировку):**
+    *   *State:* Переход в состояние `CANCELED` и примечание, что запись не удаляется. Статус `CANCELED` в `BookingStatus`.
+    *   *Class:* Метод `checkIntervalOverlap()` подразумевает фильтрацию активных броней: отмененная бронь игнорируется системой при поиске пересечений, снимая блокировку интервала.

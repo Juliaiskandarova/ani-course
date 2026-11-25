@@ -1,0 +1,58 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Times New Roman
+skinparam linetype ortho
+hide circle
+hide empty members
+entity "research_directions" as research_directions {
+  id : integer <<PK>>
+  name : varchar(255)
+}
+entity "organizations" as organizations {
+  id : integer <<PK>>
+  name : varchar(255)
+  address : varchar(500)
+}
+entity "grant_requests" as grant_requests {
+  id : integer <<PK>>
+  year : integer
+  request_date : date
+  deadline_date : date
+  direction_id : integer <<FK>>
+  research_topic : varchar(500)
+  leader_name : varchar(255)
+  participant_count : integer
+  requested_amount : decimal(15, 2)
+  organization_id : integer <<FK>>
+  address : varchar(500)
+}
+entity "decisions" as decisions {
+  request_id : integer <<PK, FK>>
+  is_worthy : boolean
+  rejection_reason : varchar(100)
+  final_status : varchar(50)
+  approved_amount : decimal(15, 2)
+}
+entity "grants" as grants {
+  id : integer <<PK>>
+  request_id : integer <<FK, UQ>>
+  year : integer
+  initial_allocated_amount : decimal(15, 2)
+  final_allocated_amount : decimal(15, 2)
+}
+entity "grant_results" as grant_results {
+  grant_id : integer <<PK, FK>>
+  is_successful : boolean
+  result_notes : text
+}
+entity "annual_budgets" as annual_budgets {
+  year : integer <<PK>>
+  total_budget : decimal(15, 2)
+  max_grant_percent : decimal(5, 2)
+}
+research_directions ||--o{ grant_requests
+organizations ||--o{ grant_requests
+grant_requests ||--o| decisions
+grant_requests ||--o| grants
+grants ||--o| grant_results
+@enduml

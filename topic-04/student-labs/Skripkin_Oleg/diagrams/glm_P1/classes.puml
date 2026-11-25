@@ -1,0 +1,61 @@
+@startuml
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELED
+}
+
+class Client {
+  - clientID: UUID
+  - fullName: String
+  - email: String
+}
+
+class Camera {
+  - cameraID: UUID
+  - serialNumber: String
+  - model: String
+}
+
+class Booking {
+  - bookingID: UUID
+  - start: DateTime
+  - end: DateTime
+  - status: BookingStatus
+  - cancelReason: String
+  + checkIntervalOverlap(): boolean
+}
+
+class Request {
+  - requestID: UUID
+  - start: DateTime
+  - end: DateTime
+  - rejectionReason: String
+  - status: BookingStatus
+}
+
+class RentalSystem {
+  + submitRequest(client, camera, start, end)
+  + viewAllBookings(): List<Booking>
+  + viewClientBookings(client): List<Booking>
+  + cancelBooking(booking)
+}
+
+Client "1" -- "0..*" Booking : "создает >"
+Camera "1" -- "0..*" Booking : "охватывает >"
+Request "1" o-- "0..1" Booking : "генерирует >"
+Client "1" -- "0..*" Request : "подает >"
+Camera "1" -- "0..*" Request : "указывается в >"
+
+RentalSystem --> "1" Client : manages
+RentalSystem --> "1" Camera : manages
+RentalSystem --> "1" Booking : manages
+RentalSystem --> "1" Request : processes
+
+note right of Booking
+  R8: При отмене статус = CANCELED.
+  Запись остается в БД, но не
+  блокирует интервал для новых заявок.
+end note
+@enduml

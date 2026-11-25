@@ -1,0 +1,8 @@
+{
+  "python": "3.12.14",
+  "pytest": "8.4.2",
+  "radon": "6.0.1",
+  "pylint": "3.3.8",
+  "test_sha256": "6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20",
+  "suite_size": 31
+}

@@ -1,0 +1,59 @@
+@startuml
+class Client {
+  +id: UUID
+  +fullName: String
+  +email: String
+}
+
+class Camera {
+  +id: UUID
+  +serialNumber: String
+  +model: String
+}
+
+class Booking {
+  +id: UUID
+  +start: DateTime
+  +end: DateTime
+  +status: BookingStatus
+  +cancel(): void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class BookingService {
+  +submit(client: Client, camera: Camera,
+          start: DateTime, end: DateTime): BookingResult
+  +cancel(client: Client, bookingId: UUID): void
+  +getClientBookings(client: Client): List<Booking>
+  +getAllBookings(): List<Booking>
+}
+
+class BookingResult {
+  +booking: Booking [0..1]
+  +rejectionReason: String [0..1]
+}
+
+class BookingRepository {
+  +findByCamera(camera: Camera): List<Booking>
+  +findByClient(client: Client): List<Booking>
+  +findAll(): List<Booking>
+  +save(booking: Booking): void
+}
+
+Client "1" -- "0..*" Booking : владелец
+Camera "1" -- "0..*" Booking : забронирована в
+BookingService ..> BookingRepository
+BookingService ..> BookingResult
+
+note bottom of Booking
+  start < end.
+  Пересечение с другой бронью:
+  start < other.end и other.start < end.
+  CANCELLED не блокирует интервал;
+  отмена не удаляет запись.
+end note
+@enduml

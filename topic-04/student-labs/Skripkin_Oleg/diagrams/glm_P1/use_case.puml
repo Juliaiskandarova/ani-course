@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система проката камер" as SystemBoundary {
+  usecase "Подать заявку" as UC1
+  usecase "Проверить пересечение интервалов" as UC2
+  usecase "Создать подтвержденную бронь" as UC3
+  usecase "Отказать с причиной" as UC4
+  usecase "Просмотреть свои брони" as UC5
+  usecase "Отменить свою подтвержденную бронь" as UC6
+  usecase "Просмотреть все брони" as UC7
+}
+
+Client --> UC1
+Client --> UC5
+Client --> UC6
+
+UC1 ..> UC2 : <<include>>
+UC2 ..> UC3 : <<extend>>\n[Интервал свободен и корректен]
+UC2 ..> UC4 : <<extend>>\n[Интервал занят или некорректен]
+
+Staff --> UC7
+
+note right of UC6
+  Условие отмены:
+  Отменять можно только
+  подтвержденную бронь.
+  Запись сохраняется.
+end note
+
+note right of UC4
+  При отказе заявка
+  завершается, бронь
+  НЕ создается.
+end note
+@enduml

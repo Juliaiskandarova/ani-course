@@ -1,0 +1,155 @@
+Ниже представлены 4 диаграммы на языке PlantUML, каждая в отдельном блоке. Каждая диаграмма полностью соответствует приведенным требованиям (R1–R8).
+
+### 1. Диаграмма вариантов использования (Use Case Diagram)
+
+```plantuml
+@startuml UseCaseDiagram
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Staff
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку" as UC1
+  usecase "Просмотреть свои брони" as UC2
+  usecase "Отменить свою бронь" as UC3
+  usecase "Просмотреть все брони" as UC4
+  usecase "Проверить интервал" as UC5
+  usecase "Создать подтвержденную бронь" as UC6
+  usecase "Отказать в брони" as UC7
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+Staff --> UC4
+
+UC1 ..> UC5 : <<include>>
+UC5 ..> UC6 : <<extend>> \n(нет пересечений,\nинтервал корректен)
+UC5 ..> UC7 : <<extend>> \n(есть пересечения\nили интервал некорректен)
+UC3 ..> UC5 : <<include>> \n(проверка, что бронь\nне блокирует интервал)
+
+@enduml
+```
+
+### 2. Диаграмма классов (Class Diagram)
+
+```plantuml
+@startuml ClassDiagram
+
+class Camera {
+  - serialNumber: String
+  - model: String
+}
+
+class Client {
+  - fullName: String
+  - email: String
+}
+
+class Booking {
+  - startTime: DateTime
+  - endTime: DateTime
+  - status: BookingStatus
+  - rejectionReason: String
+  + submitRequest()
+  + cancel()
+}
+
+enum BookingStatus {
+  CONFIRMED
+  REJECTED
+  CANCELED
+}
+
+Client "1" -- "0..*" Booking : "создает >"
+Camera "1" -- "0..*" Booking : "бронируется в >"
+
+note right of Booking::status
+  R8: Отмененная бронь не блокирует интервал.
+  Статус CANCELED сохраняется в БД.
+end note
+
+note left of Booking
+  R7: Интервал корректен, если 
+  startTime < endTime.
+  Соседние могут соприкасаться.
+end note
+
+@enduml
+```
+
+### 3. Диаграмма последовательности (Sequence Diagram) — Подача заявки
+
+```plantuml
+@startuml SequenceDiagram
+
+actor "Клиент" as C
+participant "Система" as S
+participant "База данных" as DB
+entity "Камера" as Cam
+
+C -> S : Подать заявку (ID камеры, время начала, время конца)
+activate S
+
+S -> S : R7: Проверка корректности интервала (начало < конец)
+alt Интервал некорректен
+  S --> C : Отказ (Причина: некорректный интервал)
+else Интервал корректен
+  S -> DB : Запрос подтвержденных броней для выбранной камеры
+  activate DB
+  DB --> S : Список подтвержденных броней
+  deactivate DB
+  
+  S -> S : R2: Проверка пересечений (с учетом соприкосновения)
+  alt Есть пересечение
+    S -> DB : Сохранить бронь со статусом REJECTED и причиной
+    activate DB
+    DB --> S : Подтверждение сохранения
+    deactivate DB
+    S --> C : Отказ с причиной (R2)
+  else Нет пересечений
+    S -> DB : Сохранить бронь со статусом CONFIRMED
+    activate DB
+    DB --> S : Подтверждение сохранения
+    deactivate DB
+    S --> C : Успех: подтвержденная бронь создана (R2)
+  end
+end
+
+deactivate S
+
+@enduml
+```
+
+### 4. Диаграмма состояний (State Diagram) — Состояния брони
+
+```plantuml
+@startuml StateDiagram
+
+[*] --> Submitted : R1: Клиент подает заявку
+
+state Submitted {
+  state "Проверка интервала (R7) \nи пересечений (R2)" as Validation
+}
+
+Submitted --> Confirmed : R2: Нет пересечений \n(Создана подтвержденная бронь)
+Submitted --> Rejected : R2: Есть пересечение \n(Отказ с причиной)
+
+state Confirmed {
+  state "Бронь активна и \nблокирует интервал" as Active
+}
+
+Confirmed --> Canceled : R3: Клиент отменяет бронь
+
+state Canceled {
+  state "Запись сохранена (R8) \nИнтервал разблокирован" as Inactive
+}
+
+Rejected --> [*]
+Canceled --> [*]
+
+@enduml
+```

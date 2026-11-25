@@ -1,0 +1,15 @@
+{
+  "requested_model": "glm-5.2",
+  "response_model": "glm-5.2",
+  "prompt": "final",
+  "time_utc": "2026-11-25T22:59:18.0184866+00:00",
+  "id": "chat-0353xeE0WNfBeqo72xdfoT",
+  "finish_reason": "stop",
+  "tokens_input": 3786,
+  "tokens_output": 2034,
+  "tokens_reasoning": 0,
+  "cost_rub": 2.78,
+  "max_tokens": 4200,
+  "reasoning_effort": "none",
+  "messages": 5
+}

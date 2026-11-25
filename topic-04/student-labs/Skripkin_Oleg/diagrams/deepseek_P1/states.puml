@@ -1,0 +1,21 @@
+@startuml State
+[*] --> CONFIRMED : создание подтвержденной брони\n(нет пересечения с CONFIRMED той же камеры)  ' R2
+CONFIRMED : блокирует интервал камеры  ' R2, R8
+CONFIRMED : доступна для отмены владельцем  ' R3
+
+CONFIRMED --> CANCELLED : cancel() владельцем  ' R3, R8
+CANCELLED : запись сохраняется  ' R8
+CANCELLED : НЕ блокирует интервал  ' R8
+CANCELLED : [*]
+
+note right of CONFIRMED
+  R7: если start >= end — бронь не создается,
+  состояние CONFIRMED не достигается.
+end note
+
+note bottom of CANCELLED
+  Отмена возможна только из CONFIRMED
+  и только владельцем (R3).
+  Из CANCELLED переходов нет (R8).
+end note
+@enduml

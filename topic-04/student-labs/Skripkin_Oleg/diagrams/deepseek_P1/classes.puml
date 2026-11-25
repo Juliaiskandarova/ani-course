@@ -1,0 +1,67 @@
+@startuml Class
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id : UUID
+  - fullName : String   <<R5>>
+  - email : String      <<R5>>
+  + submitRequest(camera, start, end) : Request
+  + cancelBooking(booking) : void
+}
+
+class Camera {
+  - id : UUID
+  - serialNumber : String <<R5>>
+  - model : String        <<R5>>
+}
+
+class Booking {
+  - id : UUID
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  + overlaps(other : Booking) : Boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+class Request {
+  - id : UUID
+  - camera : Camera
+  - start : DateTime
+  - end : DateTime
+  + validateInterval() : Boolean
+}
+
+class BookingService {
+  + submitRequest(client, camera, start, end) : Request
+  + checkOverlap(camera, start, end) : Boolean
+  + confirmBooking(request) : Booking
+  + rejectRequest(request, reason) : void
+}
+
+Client "1" -- "0..*" Booking : владеет >
+Camera "1" -- "0..*" Booking : относится к >
+Booking "1" --> "1" BookingStatus : имеет >
+Client "1" -- "0..*" Request : подает >
+Camera "1" -- "0..*" Request : указывает >
+BookingService ..> Request : создает >
+BookingService ..> Booking : создает >
+BookingService ..> Camera : проверяет >
+
+note top of Booking
+  R6: каждая бронь относится ровно к одной
+  камере и ровно к одному клиенту.
+  У камеры и у клиента может быть много броней.
+end note
+
+note right of BookingStatus
+  R2: CONFIRMED создается только если
+  нет пересечения с другой CONFIRMED.
+  R8: CANCELLED сохраняется, но не блокирует интервал.
+end note
+@enduml

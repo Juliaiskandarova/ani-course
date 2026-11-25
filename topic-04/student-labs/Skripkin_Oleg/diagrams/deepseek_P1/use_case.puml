@@ -1,0 +1,41 @@
+@startuml UC
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система проката камер" {
+  usecase "Подать заявку на бронь\n(камера, начало, конец)" as UC_Submit
+  usecase "Получить отказ с причиной" as UC_Reject
+  usecase "Создать подтвержденную бронь" as UC_Confirm
+  usecase "Проверить пересечение\nс подтвержденными бронями" as UC_CheckOverlap
+  usecase "Просмотреть свои брони" as UC_ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as UC_Cancel
+  usecase "Просмотреть все брони" as UC_ViewAll
+}
+
+Client --> UC_Submit
+Client --> UC_ViewOwn
+Client --> UC_Cancel
+
+Employee --> UC_ViewAll
+
+UC_Submit ..> UC_CheckOverlap : <<include>>
+UC_CheckOverlap ..> UC_Reject : <<extend>>\n[интервал пересекается]
+UC_CheckOverlap ..> UC_Confirm : <<extend>>\n[интервал свободен]
+
+note right of UC_Cancel
+  R3, R8: отмена доступна только
+  для своей подтвержденной брони.
+  Отмена сохраняет запись (статус CANCELLED),
+  отмененная бронь не блокирует интервал.
+end note
+
+note bottom of UC_CheckOverlap
+  R2, R7: проверяются только подтвержденные
+  брони той же камеры; интервал корректен,
+  если начало < конца; соседние интервалы
+  могут соприкасаться (конец == начало).
+end note
+@enduml

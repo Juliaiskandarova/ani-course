@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник проката" as Employee
+
+rectangle "Система бронирования камер" {
+  usecase "Подать заявку\nна бронирование" as Submit
+  usecase "Проверить корректность\nинтервала" as Validate
+  usecase "Проверить пересечение\nс подтвержденными бронями" as Check
+  usecase "Подтвердить бронь" as Confirm
+  usecase "Отказать с причиной" as Reject
+  usecase "Посмотреть свои брони" as ViewOwn
+  usecase "Отменить свою\nподтвержденную бронь" as Cancel
+  usecase "Посмотреть все брони" as ViewAll
+}
+
+Client --> Submit
+Client --> ViewOwn
+Client --> Cancel
+Employee --> ViewAll
+
+Submit ..> Validate : <<include>>
+Submit ..> Check : <<include>>
+Confirm ..> Submit : <<extend>>\n[интервал корректен,\nпересечений нет]
+Reject ..> Submit : <<extend>>\n[интервал некорректен\nили есть пересечение]
+
+note right of Check
+  Учитываются только подтвержденные
+  брони той же камеры.
+  Соприкасающиеся интервалы не пересекаются.
+end note
+@enduml

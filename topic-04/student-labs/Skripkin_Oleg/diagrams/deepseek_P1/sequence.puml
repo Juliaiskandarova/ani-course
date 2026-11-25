@@ -1,0 +1,44 @@
+@startuml Sequence
+autonumber
+actor "Клиент" as Client
+participant "BookingService" as Service
+participant "Camera" as Camera
+participant "Request" as Request
+participant "Booking" as Booking
+database "Хранилище броней" as Repo
+
+Client -> Service : submitRequest(camera, start, end)
+activate Service
+Service -> Service : validateInterval(start, end)  ' R7: start < end
+
+alt interval некорректен (start >= end)
+  Service --> Client : отказ с причиной "некорректный интервал"
+else интервал корректен
+  Service -> Request ** : create(camera, start, end)  ' R1
+  Service -> Repo : findConfirmedByCamera(camera)     ' R2
+  activate Repo
+  Repo --> Service : confirmedBookings
+  deactivate Repo
+
+  alt найдено пересечение с подтвержденной бронью  ' R2
+    Service -> Request : reject(reason)  ' R2: причина
+    note right of Service
+      При отказе бронь НЕ создается.
+      Request помечается REJECTED, Booking отсутствует.
+    end note
+    Service --> Client : отказ с причиной
+  else пересечений нет
+    Service -> Booking ** : create(client, camera, start, end, CONFIRMED)
+    Service -> Repo : save(booking)
+    Service --> Client : подтвержденная бронь  ' R2
+  end
+
+end
+
+deactivate Service
+
+note over Client, Repo
+  Соседние интервалы не считаются пересечением:
+  booking.end == request.start допустимо (R7).
+end note
+@enduml

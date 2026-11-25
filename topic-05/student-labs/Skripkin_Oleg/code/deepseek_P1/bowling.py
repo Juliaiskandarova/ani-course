@@ -1,0 +1,156 @@
+class BowlingGame:
+    """Keeps track of the score of a single game of bowling.
+
+    Supports 10 frames with strike/spare bonuses and tenth-frame fill balls.
+    Raises on invalid rolls (out of range, too many pins in a frame, rolls
+    after the game is finished) and on score() before the game is complete.
+    """
+
+    _MAX_FRAMES: int = 10
+    _MAX_PINS: int = 10
+
+    def __init__(self) -> None:
+        # Flat list of all pin counts rolled, in order.
+        self._rolls: list[int] = []
+        # Current frame number (1-based). Equals _MAX_FRAMES+1 once game over.
+        self._frame: int = 1
+        # Pins standing at the start of the current frame's next roll.
+        self._pins_standing: int = self._MAX_PINS
+        # Rolls already made in the current frame.
+        self._rolls_in_frame: int = 0
+        # Number of fill balls still allowed in the 10th frame.
+        self._fill_balls_remaining: int = 0
+        # True once the tenth frame has been fully resolved.
+        self._finished: bool = False
+
+    def roll(self, pins: int) -> None:
+        """Record a single ball throw.
+
+        Args:
+            pins: Number of pins knocked down by this roll.
+
+        Raises:
+            TypeError: If ``pins`` is not an ``int``.
+            ValueError: If ``pins`` is negative, greater than 10, or exceeds
+                the number of pins still standing.
+            RuntimeError: If the game is already finished.
+        """
+        if not isinstance(pins, int) or isinstance(pins, bool):
+            raise TypeError(
+                f"roll(pins): pins must be an int, got {type(pins).__name__}"
+            )
+        if self._finished:
+            raise RuntimeError(
+                "roll(pins): cannot roll after the game is finished"
+            )
+        if pins < 0:
+            raise ValueError(
+                f"roll(pins): pins must be non-negative, got {pins}"
+            )
+        if pins > self._MAX_PINS:
+            raise ValueError(
+                f"roll(pins): pins cannot exceed {self._MAX_PINS}, got {pins}"
+            )
+        if pins > self._pins_standing:
+            raise ValueError(
+                f"roll(pins): cannot knock down {pins} pins with only "
+                f"{self._pins_standing} standing"
+            )
+
+        self._rolls.append(pins)
+
+        if self._frame < self._MAX_FRAMES:
+            self._advance_regular_frame(pins)
+        else:
+            self._advance_tenth_frame(pins)
+
+    def score(self) -> int:
+        """Return the total score for the completed game.
+
+        Raises:
+            RuntimeError: If the game has not been completed yet.
+        """
+        if not self._finished:
+            raise RuntimeError(
+                "score(): game is not finished yet"
+            )
+
+        total = 0
+        roll_index = 0
+        for _ in range(self._MAX_FRAMES):
+            if self._rolls[roll_index] == self._MAX_PINS:
+                # Strike: 10 + next two rolls.
+                total += self._MAX_PINS + self._rolls[roll_index + 1] + self._rolls[roll_index + 2]
+                roll_index += 1
+            elif self._rolls[roll_index] + self._rolls[roll_index + 1] == self._MAX_PINS:
+                # Spare: 10 + next roll.
+                total += self._MAX_PINS + self._rolls[roll_index + 2]
+                roll_index += 2
+            else:
+                total += self._rolls[roll_index] + self._rolls[roll_index + 1]
+                roll_index += 2
+        return total
+
+    def _advance_regular_frame(self, pins: int) -> None:
+        """Update frame state after a roll in frames 1..9.
+
+        Args:
+            pins: Pins knocked down by the just-recorded roll.
+        """
+        if self._rolls_in_frame == 0:
+            if pins == self._MAX_PINS:
+                # Strike: frame ends immediately.
+                self._finish_frame()
+            else:
+                self._pins_standing = self._MAX_PINS - pins
+                self._rolls_in_frame = 1
+        else:
+            # Second roll of the frame (open frame or spare).
+            self._finish_frame()
+
+    def _advance_tenth_frame(self, pins: int) -> None:
+        """Update state after a roll in the tenth frame.
+
+        Handles strikes, spares, and the fill balls that follow them.
+
+        Args:
+            pins: Pins knocked down by the just-recorded roll.
+        """
+        if self._rolls_in_frame == 0:
+            # First roll of the tenth frame.
+            if pins == self._MAX_PINS:
+                # Strike: two fill balls granted.
+                self._pins_standing = self._MAX_PINS
+                self._rolls_in_frame = 1
+                self._fill_balls_remaining = 2
+            else:
+                self._pins_standing = self._MAX_PINS - pins
+                self._rolls_in_frame = 1
+        elif self._rolls_in_frame == 1:
+            # Second roll of the tenth frame.
+            if self._fill_balls_remaining > 0:
+                # Previous roll was a strike.
+                if pins == self._MAX_PINS:
+                    # Another strike: refill to two standing pins.
+                    self._pins_standing = self._MAX_PINS
+                else:
+                    self._pins_standing = self._MAX_PINS - pins
+                self._rolls_in_frame = 2
+                self._fill_balls_remaining -= 1
+            elif self._pins_standing - pins == 0:
+                # Spare on the second roll: one fill ball granted.
+                self._pins_standing = self._MAX_PINS
+                self._rolls_in_frame = 2
+                self._fill_balls_remaining = 1
+            else:
+                # Open frame: game over.
+                self._finished = True
+        else:
+            # Third roll of the tenth frame (fill ball after strike or spare).
+            self._finished = True
+
+    def _finish_frame(self) -> None:
+        """Close the current regular frame and move to the next one."""
+        self._rolls_in_frame = 0
+        self._pins_standing = self._MAX_PINS
+        self._frame += 1
